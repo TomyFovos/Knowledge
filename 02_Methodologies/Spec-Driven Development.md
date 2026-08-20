@@ -117,6 +117,7 @@ Spec-Kitは生成される文書が大きくなりやすく、人間の認知負
 ## 参考資料
 
 - 渡邉 洋平, 「仕様駆動開発の消費期限」
+- [[仕様駆動開発の消費期限.pdf]]
 - Kiro, `Kiro and the future of AI spec-driven software development`
 - https://kiro.dev/blog/kiro-and-the-future-of-software-development/
 - GitHub Blog, `Spec-driven development with AI: Get started with a new open source toolkit`
