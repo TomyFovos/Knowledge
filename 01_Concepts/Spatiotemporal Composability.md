@@ -76,4 +76,4 @@ Spatiotemporal Composability は、後ろ二つに formal foundation を与え�
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF: [[09_References/Spatiotemporal Composability/paper.pdf]]
