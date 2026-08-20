@@ -1,0 +1,1 @@
+https://aoostar.com/ja/collections/nas-series/products/aoostar-wtr-max-amd-r7-pro-8845hs-11-bays-mini-pc
