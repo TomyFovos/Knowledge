@@ -1,114 +1,107 @@
-# Knowledge Graph for LLM
+# 大規模言語モデルとナレッジグラフ
 
-## 概要
+大規模言語モデル（LLM）を業務で使うと、文章は自然でも、事実としてそのまま信用できない場面が出てくる。
+この問題に対して、すべての知識をモデルへ覚えさせる必要はない。
+モデルの外側に、更新でき、根拠を追跡できる知識構造を置く方法がある。
 
-LLMを業務へ持ち込むと、「文章は自然なのに、事実として信用しきれない」という問題が現れる。
+その候補の一つが **ナレッジグラフ（Knowledge Graph, KG）**である。
+ナレッジグラフは、人物、製品、障害、組織などの実体と、それらの関係を構造として保持する。
 
-Knowledge Graphはその問題を一人で解決する万能技術ではない。RAG、Database、Rule Engine、Agent Toolingなどと役割を分け、**LLMの外側に、更新可能で追跡可能な知識構造を置く**ための一つの基盤である。
+ただし、ナレッジグラフだけですべてを扱うわけではない。
+文書検索、正確な数値の取得、権限判定には、それぞれ別の仕組みが向いている。
 
-本ノートは、DevRev-JPの「LLMをもっと賢くする：ナレッジグラフ実践入門」から分解したナレッジの入口である。
+## 情報の種類ごとに役割を分ける
 
-## 全体像
+LLMを中心にした業務システムでは、情報の性質に合わせて問い合わせ先を分ける方が扱いやすい。
 
 ```text
-                         ┌─ RAG ───────── 文書・背景・手順
-User / Agent ─ Router ──┼─ Knowledge Graph ─ 関係・集合・経路
-                         ├─ SQL / DB ───── 正確な値
-                         └─ Rule Engine ── 権限・Policy
-                                   ↓
-                                  LLM
-                                   ↓
-                          Explanation / Action
+利用者またはAIエージェント
+        ↓
+      振り分け
+        ├─ 検索拡張生成：文書、背景、手順
+        ├─ ナレッジグラフ：関係、集合、経路
+        ├─ データベース：正確な値
+        └─ ルール判定：権限、業務規則
+        ↓
+大規模言語モデル
+        ↓
+説明または操作案
 ```
 
-重要なのは、「LLMに知識を全部覚えさせる」ことではない。
+**検索拡張生成（Retrieval-Augmented Generation, RAG）**は、関連する文書を探してLLMへ渡す方法である。
+文章の背景や手順を扱うときに向く。
 
-- 非構造化文書はRAG
-- Entity間のRelationはKG
-- Transactionalな値はRDB
-- Policy判断はRule Engine
-- 自然言語理解・生成はLLM
+ナレッジグラフは、「誰が何を担当しているか」「どのサービスが何へ依存しているか」のような関係を辿るときに向く。
 
-のように、問題の種類を分ける。
+金額、件数、日付のように正確な値が必要なら、リレーショナルデータベース（RDB）などのデータベースが適する。
+許可と禁止を決める業務規則は、ルールエンジンや専用の認可層で扱う方が検査しやすい。
 
-## ナレッジマップ
+LLMは、これらの結果を自然言語として理解し、説明へまとめる役割に寄せられる。
 
-### 基礎
+## 関連ノートの位置づけ
 
-[[Knowledge Graph]]
+### [[Knowledge Graph]]
 
-Node / Edge、RDF、Property Graph、RDB・Vector DBとの違いを整理する。
+ナレッジグラフの基本構造を扱う。
+ノードと辺、RDF、プロパティグラフ、RDBやベクトルデータベースとの違いを整理している。
 
-### なぜRAGだけでは足りないのか
+### [[RAG Limitations and Knowledge Graph]]
 
-[[RAG Limitations and Knowledge Graph]]
+検索拡張生成だけでは扱いにくい問いを整理している。
+文書をまたぐ推論、存在しない関係の検索、正確な集合や集計などが対象になる。
 
-Chunk boundary、Cross-document reasoning、否定Query、集計など、Vector RAGが構造的に苦手な問いを整理する。
+### [[Hybrid RAG and Knowledge Graph]]
 
-### RAGとKGをどう組み合わせるか
+検索拡張生成とナレッジグラフを併用する方法を扱う。
+質問の性質に応じて文書検索と構造問い合わせを振り分け、必要なら両方の結果を統合する。
 
-[[Hybrid RAG and Knowledge Graph]]
+### [[Knowledge Graph Modeling and Construction]]
 
-質問を `rag / kg / hybrid` にRoutingし、文脈検索と構造Queryを統合するPattern。
+ナレッジグラフをどう設計し、作り始めるかを扱う。
+利用目的を絞り、実体と関係を設計し、代表的な質問でモデルを検証する流れを整理している。
 
-### KGをどう作るか
+### [[Formal Layer Sandwich for Enterprise AI]]
 
-[[Knowledge Graph Modeling and Construction]]
+LLMへ正確な値の取得や権限判定まで任せず、決定論的な処理を前後へ置く設計を扱う。
 
-Use caseの絞り込み、Entity / Property設計、Relation設計、RDF vs Property Graph、データ投入の考え方を整理する。
+### [[Enterprise Knowledge Graph Architecture]]
 
-### LLMを形式レイヤで挟む
+ナレッジグラフを業務基盤として運用するときの課題を扱う。
+スキーマ変更、継続更新、履歴、認可、外部システムとの接続が対象になる。
 
-[[Formal Layer Sandwich for Enterprise AI]]
+### [[Knowledge Graph for AI Agents]]
 
-LLMへ事実取得・権限判断まで任せず、SQL / KG / Rule Engineなどの決定論的Layerを前後に配置するPattern。
+AIエージェントがナレッジグラフを読む、書く、判断材料として使う場合の設計を扱う。
+長期記憶、権限、監査、人間による承認も含む。
 
-### 本番のKG基盤
+### [[Knowledge Graph Adoption and Operations]]
 
-[[Enterprise Knowledge Graph Architecture]]
+小さく導入し、実利用からモデルを育てる方法を扱う。
+データ統合、所有者、更新頻度、本番運用への移行を整理している。
 
-Schema evolution、Event-driven update、履歴、Authorization、MCPとの役割分担など、KGを継続運用するArchitecture。
+## ナレッジグラフを使う判断
 
-### AI AgentとKG
+ナレッジグラフの価値は、グラフデータベース製品を導入すること自体にはない。
+LLMだけでは曖昧になりやすい関係、権限、履歴を、外から検査できる構造へ移すことにある。
 
-[[Knowledge Graph for AI Agents]]
+一方、文章として読んだ方が自然な情報まで細かくグラフ化すると、設計と更新の負担が増える。
+正確な数値を扱う処理も、既存のRDBで十分な場合が多い。
 
-AgentのRead / Write / Reason、Long-term Memory、Permission-aware KG、HITL、Prompt Injection対策を整理する。
+したがって、先に「ナレッジグラフを使うか」を決めるのではなく、情報ごとに次を考える。
 
-### 導入・運用
+> この情報や判断は、どの形式で持てば、後から検査しやすく、更新しやすいか。
 
-[[Knowledge Graph Adoption and Operations]]
+その答えが関係構造なら、ナレッジグラフが候補になる。
 
-Small Start、ETL、Data Ownership、世界のUse Case、LocalからProductionへの段階的移行を整理する。
+## 出典を読むときの注意
 
-## この資料から得られる中心的な考え方
+元資料には、著者が説明のために置いた独自の分類や推奨が含まれる。
+たとえばAIエージェントを段階分けするL1からL5の分類は標準規格ではない。
 
-Knowledge Graphの価値は「グラフDBを使うこと」ではない。
-
-**LLMだけでは曖昧になる知識・関係・権限・履歴を、外から検査可能な構造として持つこと**にある。
-
-しかし、すべてをKGへ入れる必要もない。文章的な背景はRAGの方が自然で、正確な数値やTransactionはRDBの方が適している。
-
-したがって設計の問いは、
-
-> 「KGを使うか？」
-
-ではなく、
-
-> 「この情報・判断は、どの形式で持つと最も検査可能で更新可能か？」
-
-になる。
-
-## 出典上の注意
-
-元資料には著者独自の整理・推奨も含まれる。
-
-たとえばAI AgentのL1〜L5分類は標準規格ではなく、本書が説明のために置いた分類である。また導入効果やCostの数値には、Customer Storyからの引用や著者推測が含まれる。
-
-そのため、本Knowledge Baseでは概念・設計Patternを中心に抽出し、個別の数値を普遍的な事実として一般化しない。
+導入効果や費用の数値にも、企業事例からの引用や著者による見積もりが含まれる。
+このナレッジベースでは、その数値を一般的な効果として扱わず、設計上の考え方を中心に取り出している。
 
 ## 参考資料
 
-- DevRev-JP, 「LLMをもっと賢くする：ナレッジグラフ実践入門」
+- DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
-- 元資料の章構成: Introduction / Knowledge Graph / RAG limitations / Use cases / Build / Beyond RAG / Enterprise / AI Agents / Implementation
