@@ -1,119 +1,96 @@
-# Context Paradigm
+# コンテキストパラダイム
 
-## 概要
+[[Revertible Effects]] は、コンポーネントが環境へ加えた変更を扱う。
+[[Reactive Coeffects]] は、コンポーネントが環境から必要とするものを扱う。
 
-[[Revertible Effects]] と [[Reactive Coeffects]] は、それぞれ「環境へ何をするか」と「環境から何を必要とするか」を扱う。
+論文 *A Programming Paradigm for Spatiotemporal Composability* は、この二つを別々の仕組みにせず、一つの **コンテキスト（Context）**を介して統合する。
+ここでいうコンテキストは、単なる設定値の入れ物ではない。
+コンポーネントと外界のやり取りを仲介し、変更の所有者と依存先を追跡する実行時の境界である。
 
-*A Programming Paradigm for Spatiotemporal Composability* がさらに踏み込むのは、この二つを別々の機構として置かず、**一つの Context を介して統合する**点である。
+## コンテキストに何を持たせるか
 
-論文は、この統合された Context を単なる framework API ではなく、一つの programming paradigm として位置づけている。
-
-## Context にすべての相互作用を通す
-
-概念的な Context は次のような再帰構造を持つ。
+論文の形式モデルでは、コンテキストを概念的に次の再帰構造で表す。
 
 ```text
 Γ∞ = μΓ. Γ × (Γ → Γ) × Σ
 ```
 
-ここには、
+この式には三つの情報が含まれる。
 
-- 現在の Context state
-- そこまでの Effect を戻す accumulator
-- dependency 情報を持つ Coeffect Context `Σ`
+- 現在のコンテキスト状態。
+- これまでの副作用を戻すための逆操作の蓄積。
+- 依存関係を表す共作用の情報 `Σ`。
 
-が同居する。
+コンポーネントが依存先を提供する操作も、コンテキストへの変更として記録される。
+そのコンポーネントを削除すると、提供していた依存先も逆操作によって撤回される。
 
-その結果、Component が外界に対して行う操作を Context に集約できる。
-
-Component が dependency を提供する操作も Context の変更なので Effect として追跡される。Component を unload すれば、その dependency provision も inverse によって撤回される。Consumer は Context を介して dependency を取得し、その binding の変化が lifecycle に反映される。
-
-つまり、
+利用側のコンポーネントは、コンテキストを介して依存先を取得する。
+提供元が消えたり置き換わったりすると、その変化が利用側のライフサイクルへ反映される。
 
 ```text
-何を変えたか  → Effect
-何を必要とするか → Coeffect
-誰の操作か    → Context
+環境へ何を変えたか：副作用
+環境から何を必要とするか：依存要求
+その操作は誰に属するか：コンテキスト
 ```
 
-という三つを同じ境界で結びつける。
+この三つを同じ境界で扱うことが、この考え方の中心になる。
 
-## Functional と imperative の中間に置く
+## 明示的な状態受け渡しと暗黙的な共有状態の中間
 
-論文は Context Paradigm を、二つの既存スタイルの間に位置づける。
+純粋関数型の設計では、状態を引数として明示的に受け渡すため、どの計算が何を使うかを追いやすい。
+しかし、呼び出しの連鎖全体で状態を渡し続ける必要があり、記述量が増える。
 
-純粋関数型の explicit state threading では、状態が明示的に受け渡されるため追跡しやすい一方、あらゆる call chain が state parameter を運ぶ必要があり、記述量が増える。
+命令型やオブジェクト指向の設計では、共有状態やサービス取得機構へ直接アクセスできるため、記述は短くなりやすい。
+その代わり、ある関数が何を変更し、何に依存しているかを知るには、呼び出し先まで追う必要がある。
 
-逆に imperative / OOP では、共有状態や service locator に暗黙にアクセスできるため書きやすい。しかし、ある関数が何を変更し何に依存しているのかを知るには、実装を推移的に追わなければならない。
+コンテキストパラダイムは、この二つの中間を狙う。
+副作用と依存要求をコンテキストへの操作として明示しつつ、コンポーネント側では通常の命令的な操作に近い形で利用できるようにする。
 
-Context Paradigm は、その中間を狙う。
+論文の主張は、関数型の追跡しやすさと、命令型の書きやすさを両立し、その情報をコンポーネントのライフサイクル管理へ使うことである。
 
-Effect と Coeffect を Context への操作として明示することで attribution を保ちながら、Component 作者は各 operation を普通の imperative operation に近い形で扱える。
+## 親子のコンテキストで変更の範囲を分ける
 
-論文の主張は、**Functional の traceability と imperative の ergonomics を両立し、そのうえで lifecycle 単位の自動合成を得る**というものである。
+コンテキストは一枚の共有表ではない。
+親コンテキストから子コンテキストを派生できる。
 
-## 階層的な Context
+子コンポーネントの変更は、その子のライフサイクルに結び付けて追跡される。
+親コンポーネントを削除すれば、親が登録した子コンポーネントも終了対象になる。
 
-Context は一枚の global table ではない。
+この階層を使うと、同じ依存名を使いながら子だけ別の値へ解決したり、子だけアクセス条件を厳しくしたりできる。
+共有状態そのものを書き換えるのではなく、「このコンテキストからどう見えるか」を変えられる。
 
-親 Context から子 Context を派生でき、子 Component の Effect は親側の accumulator に統合される。Component が別の Component を起動した場合も、その登録自体を親の Effect として扱える。
+## 「元に戻った」を観測できる範囲で定義する
 
-この階層構造によって、
+副作用を撤回しても、内部状態が一ビット単位で以前と同じになるとは限らない。
+たとえば、メモリを確保して解放しても、ヒープ内部の配置まで以前と同じになる必要はない。
 
-- 親を unload すると子も retire する
-- 子の Effect は子の lifecycle に閉じる
-- Isolation / Interception を子 Context にだけ適用できる
+そこで論文は、完全な一致ではなく **観測同値（observational equivalence）**を使う。
+コンテキストを通して利用できる操作から区別できなければ、内部表現が違っていても同じ状態として扱う。
 
-という制御が可能になる。
+この定義によって、「回復」が何を意味するかが限定される。
+物理世界を巻き戻すのではなく、コンポーネントから観測できる意味を回復する。
 
-ここでは「plugin」という比喩がかなり文字通りになる。
+## コンテキストを迂回した操作は追跡できない
 
-```text
-load   = Context に Effects を差し込む
-unload = その Effects を回収する
-dependency = Context 上で解決する
-child component = 派生 Context へ差し込む
-```
+この仕組みは、コンポーネントと環境のやり取りがコンテキストを通ることを前提にしている。
+コンポーネントが共有変数や実行環境のオブジェクトを直接変更すれば、その変更は副作用の追跡から外れる。
+宣言していない依存先を直接取得すれば、依存関係の管理からも外れる。
 
-## Observational Equivalence — 何をもって「元に戻った」とするか
+したがって、コンテキストは便利なAPIではなく、保証を成立させるための境界である。
+信頼できないコードがこの境界を迂回できる場合は、プロセス分離、WebAssembly、コンテナなど、別の実行隔離も必要になる。
 
-Revertible Effects が Context を回復するといっても、現実の物理状態を完全に同一に戻せるとは限らない。
+## 設計で見るべき点
 
-`malloc` のあとに `free` しても、heap の内部配置まで以前と同じになるとは限らない。生成した ID を捨てても、次回同じ ID が生成される必要はない。
+この考え方を採用する目的は、「Context」という名前のオブジェクトを導入することではない。
+次のような外界との接点を、どのコンポーネントのライフサイクルに属するか分かる形で仲介層へ集めることに意味がある。
 
-そこで論文は equality ではなく **observational equivalence（観測同値）**を用いる。
+- 状態の変更。
+- 資源の取得。
+- 依存先の提供。
+- 依存先へのアクセス。
+- 子コンポーネントの登録。
 
-二つの状態が、Context を通して利用可能な operations から区別できないなら、内部表現が違っていても同じ状態として扱う。
-
-これは「回復」という言葉の範囲を決める重要な考え方である。
-
-Spatiotemporal Composability が要求するのは物理世界の巻き戻しではなく、**Component が観測できる意味の回復**である。
-
-## Context に通らない操作は保証外になる
-
-Context Paradigm の保証は、Component と環境の相互作用が Context によって mediation されることを前提にしている。
-
-Component が global variable や host runtime の object を直接掴み、Context を迂回して書き換えた場合、その操作は Effect tracker から見えない。宣言していない dependency を直接取得すれば、Coeffect specification からも外れる。
-
-したがって Context は convenience API ではなく、**保証を成立させる system boundary**である。
-
-この点は sandbox とも関係する。信頼できない code に対し「Context だけを使ってください」と規約で要求するだけでは足りない。host object へ直接到達できるなら mediation を迂回できるため、必要に応じて process、Wasm、container などの sandbox が要る。
-
-## Context Paradigm の設計上の意味
-
-この考え方から得られる設計上のメッセージは、Context Object を導入することそのものではない。
-
-重要なのは、
-
-- state mutation
-- resource acquisition
-- dependency provision
-- dependency access
-- child component registration
-
-といった「Component と外界の境界を越える操作」を、**誰の lifecycle に属する操作なのかが分かる形で一つの mediation layer に通す**ことである。
-
-そこまでできて初めて、Effect の回収と Coeffect の再解決を同じ Component lifecycle に結びつけられる。
+この情報がそろうと、副作用の回収と依存関係の再解決を同じライフサイクルへ結び付けられる。
 
 ## 関連
 
@@ -127,4 +104,4 @@ Component が global variable や host runtime の object を直接掴み、Cont
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
