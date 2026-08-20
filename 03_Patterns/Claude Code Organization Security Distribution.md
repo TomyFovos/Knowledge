@@ -147,4 +147,4 @@ AIエージェントを組織に導入するとき、安全性と生産性は単
 ## 参考資料
 
 - 「メルカリのClaude Codeセキュリティ設定の組織配布戦略」Hiroki Akamatsu（株式会社メルカリ AI Security Team）、Claude Code Meetup Tokyo 2026
-- 原本PDF: `09_References/Claude Code/claude-code-organization-settings.pdf`
+- 原本PDF: [[09_References/Claude Code/claude-code-organization-settings.pdf]]
