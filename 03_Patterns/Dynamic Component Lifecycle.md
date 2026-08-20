@@ -1,132 +1,122 @@
-# Dynamic Component Lifecycle
+# 動的コンポーネントのライフサイクル
 
-## 概要
+[[Revertible Effects]] は、副作用と逆操作を扱う。
+[[Reactive Coeffects]] は、コンポーネントが必要とする依存先を扱う。
 
-[[Revertible Effects]] と [[Reactive Coeffects]] が個々の操作を扱うのに対し、実際のシステムでは、それらを **Component の lifecycle** にまとめる必要がある。
+実際のシステムでは、この二つを個別に管理するだけでは足りない。
+「いつ起動し、いつ停止し、依存先が変わったときに何をやり直すか」を、コンポーネントの **ライフサイクル（lifecycle）**としてまとめる必要がある。
 
-*A Programming Paradigm for Spatiotemporal Composability* では、Component を概念的に次の三つ組として扱う。
-
-```text
-Component = (dependencies, provisions, effects)
-```
-
-- `dependencies`：環境から必要とする Coeffect
-- `provisions`：自分が環境へ提供できる Coeffect
-- `effects`：active になったときに実行する Revertible Effects
-
-これを実行中の system に instantiate したものを **fiber** と呼ぶ。fiber は Component 定義だけでなく、現在の lifecycle state、dependency の committed view、Effect の accumulator、親 fiber などを持つ。
-
-## target と committed view
-
-Lifecycle を動かす中心は、現在の dependency resolution と、Component が起動時に commit した resolution の比較である。
-
-`target` は「今この fiber がどうあるべきか」を表す。
-
-- dependency が満たされていない、または retire 済みなら `INACTIVE`
-- dependency が揃っていれば、その provider の集合が target
-
-一方 `committed view` は、その fiber が activation を開始したときに依存していた provider の集合である。
-
-この二つが一致していればそのまま動ける。違えば、provider の消失・置換などが起きているため unload / reload が必要になる。
-
-値そのものではなく **provider identity** を記録することが重要である。新旧 provider が同じ値を返していても、provider が置き換わったことを検出できるからである。
-
-## 単純な Active / Inactive では足りない
-
-現実の Component は、一瞬で load / unload できるわけではない。
-
-初期化の途中で `await` することもあり、複数 Effect を順に適用することもある。teardown の途中で dependent の終了を待つこともある。さらに途中で失敗する可能性もある。
-
-そのため論文は lifecycle を概ね次の状態へ拡張する。
+論文 *A Programming Paradigm for Spatiotemporal Composability* は、コンポーネントを概念的に次の三つで表す。
 
 ```text
-INACTIVE
-   ↓
-RELOADING
-   ↓
-ACTIVE
-   ↓
-UNLOADING
-   ↓
-INACTIVE
+Component = (必要な依存先, 提供する依存先, 実行する副作用)
 ```
 
-`RELOADING` 中に dependency target が変われば、その時点までの Effects を回収して `UNLOADING` に移る。すでに非同期 iteration が走っている場合は、その iteration 自体は着地させ、その後で rollback する。
+この定義を実行中のシステムへ配置した単位を、論文は **ファイバー（fiber）**と呼ぶ。
+ファイバーは、現在の状態、起動時に確定した依存先、副作用の逆操作、親となるファイバーなどを保持する。
 
-この「開始した transition は着地させてから次へ進む」性質を論文は inertia として扱う。
+## 現在の依存先と、起動時の依存先を比べる
 
-## Provider の停止には guard が必要
+ライフサイクルを動かすために、実行基盤は二つの状態を比べる。
 
-Spatial Composability の難所は、provider と consumer の停止順序である。
+一つは、「今の環境なら、このコンポーネントはどうあるべきか」という目標状態である。
+必要な依存先が不足していれば停止状態が目標になり、すべてそろっていれば、その提供元の組み合わせが目標になる。
 
-provider が停止を開始すると、新規 consumer からは利用できない状態にする。しかし既存 consumer は teardown の間、commit 済みの provider を使い続けられる必要がある。
+もう一つは、コンポーネントが起動したときに実際に使っていた依存先である。
+論文はこれを **確定済みの見え方（committed view）**として保持する。
 
-そこで provider の physical withdrawal、つまり inverse の実行は、**その provider に依存している installed consumer がいなくなるまで待つ**。
+二つが一致していれば、そのまま動き続けられる。
+提供元が消えたり別の提供元へ置き換わったりして一致しなくなれば、停止または再起動が必要になる。
 
-この guard によって、
+値だけでなく提供元の識別子を記録するのは、同じ値を返す別の提供元へ置き換わった場合も検出するためである。
+
+## 起動中と停止中の状態が必要になる
+
+コンポーネントの起動や停止は一瞬では終わらない。
+初期化の途中で非同期処理を待つこともあり、終了処理の途中で依存先を使うこともある。
+
+そのため、単純な「起動中」「停止中」の二値だけでは管理できない。
+論文は概念的に、次のような遷移を持たせている。
 
 ```text
-provider が停止を表明
-→ consumer が先に deactivation
-→ consumer teardown 完了
-→ provider の Effect を回収
+停止
+↓
+起動または再起動中
+↓
+稼働
+↓
+停止処理中
+↓
+停止
 ```
 
-という ordering が成立する。
+起動途中で依存先が変わった場合は、そのまま古い前提で稼働状態へ進まない。
+そこまでに行った副作用を回収し、停止側へ切り替える。
 
-単に dependency graph を見て「逆順に stop する」という静的処理ではない。runtime の committed view を使って、**実際にどの provider に commit していた consumer が残っているか**を見て待つ。
+すでに開始した一回分の非同期処理は途中で切らず、着地させてから次の遷移へ進む。
+論文はこの性質を **慣性（inertia）**と呼んでいる。
 
-## Orchestrator は lifecycle state を直接変更しない
+## 提供側は利用側の終了を待つ
 
-論文の calculus では、Orchestrator が行う操作と、Lifecycle runtime が行う操作を分けている。
+依存先を提供するコンポーネントを停止するとき、先にその資源を回収すると、利用側の終了処理が失敗する場合がある。
 
-Orchestrator が直接できるのは、Component の insertion や retirement などの「望ましい構成を変えること」である。`ACTIVE` を直接セットするわけではない。
+そこで、提供側は停止を表明した時点で、新しい利用側からは見えなくなる。
+一方、すでにその提供元を使っている利用側は、自分の終了処理が終わるまで従来の依存先を使い続ける。
 
-その後、runtime が target を比較し、必要な lifecycle transition を進める。
+提供側は、それらの利用側がすべて停止した後で、自分の副作用を回収する。
 
-この分離は declarative orchestration と相性がよい。Orchestrator は「最終的に何が存在してほしいか」を指定し、runtime が dependency と recovery の規則に従ってそこへ収束させる。
+```text
+提供側が停止を表明する
+↓
+新しい利用を止める
+↓
+既存の利用側を停止する
+↓
+利用側の終了処理が完了する
+↓
+提供側の資源を回収する
+```
 
-## 論文が示す4つの全体保証
+静的な依存関係図だけを見て逆順に停止するのではない。
+実行時に、どの利用側がどの提供元へ実際に結び付いているかを見て順序を決める。
 
-この lifecycle calculus について、論文は局所的な仕組みを system 全体の性質へ持ち上げる。
+## 統括役は「起動状態」を直接書き換えない
 
-### Preservation
+論文では、構成を決める側と、ライフサイクルを進める側を分けている。
 
-Lifecycle transition を進めても、registry の構造や dependency resolution の整合性が壊れない。
+統括役は、コンポーネントを追加する、廃止する、といった「最終的にどういう構成にしたいか」を変更する。
+特定のコンポーネントを直接「稼働状態」に設定するわけではない。
 
-### Temporal Composability
+その後、実行基盤が依存関係を確認し、必要な起動や停止を進める。
 
-複数 fiber の Effects が interleave しても、必要な independence 条件を満たしていれば、一つの fiber の accumulator は **その fiber の寄与だけ**を取り除く。
+この分離により、統括役は細かな起動順序をすべて手書きせず、望ましい構成だけを表現できる。
 
-### Spatial Composability
+## 論文が示す全体の性質
 
-Consumer は dependency が提供されている状態でだけ起動し、provider の withdrawal は dependent の deactivation 後まで遅延される。また transition の途中で dependency resolution が変化した場合、そのまま stale な前提で active にならず rollback 側へ進む。
+論文は、このライフサイクル計算が一定の条件の下で持つ性質を示している。
 
-### Progress / Confluence
+**整合性の保存（Preservation）**では、状態遷移を進めても、登録情報や依存先の解決結果が壊れないことを扱う。
 
-Dependency relation が acyclic で、Component 数や iteration 数などに一定の有限性がある場合、system は deadlock せず quiescent state へ進む。
+**時間方向の合成可能性**では、複数コンポーネントの副作用が入り交じっても、独立性の条件を満たせば、一つのコンポーネントの寄与だけを撤回できることを扱う。
 
-さらに failure がなく、independence や provision の条件を満たす場合、最終的な quiescent state は lifecycle の実行順に依存せず、**最終構成を最初から dependency 順に静的に組み上げた状態と同等**になる。
+**空間方向の合成可能性**では、依存先が存在するときだけ利用側が起動し、提供側の完全停止は利用側の終了後まで待つことを扱う。
 
-この Confluence は、動的な system を理解するうえで強い性質である。
+**進行性と合流性（Progress / Confluence）**では、依存関係が循環せず、処理が有限であるなどの条件の下で、システムが停止せず静止状態へ進み、最終的な構成が遷移順に左右されにくいことを扱う。
 
-「途中で何回 reload したか」ではなく、「最終的にどの Component が存在するか」を見て final state を reasoning できるからである。
+この最後の性質が成り立つと、途中で何回再起動したかではなく、最終的にどのコンポーネントが存在するかを基準に状態を考えられる。
 
-## ただし無条件ではない
+## 保証には前提がある
 
-この保証は、任意の Component code に対して自動的に成立するものではない。
+ライフサイクル管理機構を導入しただけで、任意のコンポーネントが安全になるわけではない。
+論文の保証には、少なくとも次の前提がある。
 
-論文では少なくとも、
+- 異なるコンポーネントの副作用が必要な独立性を満たす。
+- 依存関係が循環しない。
+- 宣言した提供内容と実際の提供内容が一致する。
+- 副作用の逆操作が正しい。
+- 合流性を論じる場合は、失敗が起きないなど追加の条件を満たす。
 
-- Component 間の Effects が必要な independence を満たすこと
-- dependency relation が acyclic であること
-- Component の provision declaration と実際の provision が整合すること
-- recovery inverse が正しいこと
-- Confluence では failure が除外されること
-
-などを前提にしている。
-
-したがって lifecycle engine の存在だけで安全になるのではなく、**Component が runtime の composability discipline に従っていること**が重要になる。
+したがって、実行基盤とコンポーネント側の設計規律の両方が必要になる。
 
 ## 関連
 
@@ -140,4 +130,4 @@ Dependency relation が acyclic で、Component 数や iteration 数などに一
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
