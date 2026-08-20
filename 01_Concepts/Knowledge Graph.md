@@ -5,7 +5,7 @@
 
 たとえば、「鈴木さんはProject Alphaを担当している」「Project Alphaの予算承認者は山田さんである」といった事実を、文字列ではなく関係として保持できる。
 
-LLMは自然な文章を生成できる一方、事実や関係を確率的な生成だけに任せると、回答が揺れる可能性がある。
+大規模言語モデル（LLM）は自然な文章を生成できる一方、事実や関係を確率的な生成だけに任せると、回答が揺れる可能性がある。
 ナレッジグラフを併用すると、文章生成と、検査可能な事実関係の管理を分けられる。
 
 ## 二つの代表的な表現方法
@@ -69,10 +69,10 @@ LLMが自然言語を扱い、ナレッジグラフが事実と関係を保持�
 
 ## 関連
 
-- [[Knowledge Graph for LLM]]
-- [[RAG Limitations and Knowledge Graph]]
-- [[Hybrid RAG and Knowledge Graph]]
-- [[Knowledge Graph Modeling and Construction]]
+- [[Knowledge Graph for LLM|大規模言語モデルとナレッジグラフ]]
+- [[RAG Limitations and Knowledge Graph|検索拡張生成の限界とナレッジグラフ]]
+- [[Hybrid RAG and Knowledge Graph|検索拡張生成とナレッジグラフの併用]]
+- [[Knowledge Graph Modeling and Construction|ナレッジグラフのモデリングと構築]]
 
 ## 参考資料
 
