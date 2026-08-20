@@ -1,103 +1,93 @@
-# Reactive Coeffects（リアクティブな依存関係）
+# 依存関係の変化へ反応する共作用
 
-## 概要
+コンポーネントを安全に動かすには、「環境へ何を変更するか」だけでなく、「何が存在するときに動けるか」も管理する必要がある。
 
-コンポーネントが安全に動くためには、「自分が何を変更するか」だけでなく、「何が存在していれば自分が動けるか」も扱う必要がある。
+論文 *A Programming Paradigm for Spatiotemporal Composability* は、計算が環境から必要とするものを **共作用（Coeffect）**という概念で表す。
+副作用（Effect）が「環境へ何をするか」を表すのに対し、共作用は「環境から何を必要とするか」を表す。
 
-*A Programming Paradigm for Spatiotemporal Composability* では、後者を **Coeffect** として捉える。
+論文はこの概念を実行時の依存関係管理へ使い、依存先の追加、削除、置換へコンポーネントのライフサイクルを反応させる。
 
-Effect が「この計算は環境へ何をするか」を表すのに対し、Coeffect は「この計算は環境から何を必要とするか」を表す。論文はこの古典的な概念を runtime の依存関係管理へ持ち上げ、**Reactive Coeffects** として構成する。
+## 必要な依存先がそろったときだけ起動する
 
-## 依存関係を宣言し、満たされたときだけ動かす
+各コンポーネントは、自分が必要とする依存先を宣言する。
+たとえばデータベースとログ出力機能の両方が必要なら、両方が利用可能になったときだけ起動する。
 
-各コンポーネントは、自分が必要とする dependency key の集合を specification として宣言する。
-
-たとえば Database と Logger が必要なら、両方が Context 上で提供されているときだけ、そのコンポーネントは active になれる。どちらかが欠ければ起動しない。
-
-Context が変化するたびに、runtime は specification の充足状態を再評価する。
+実行時のコンテキストが変化するたびに、基盤は依存条件を再評価する。
 
 ```text
-未充足 → 充足    : activating
-充足   → 未充足  : deactivating
-それ以外         : neutral
+不足している → そろった：起動へ進む
+そろっている → 不足した：停止へ進む
+変化なし：現在の状態を保つ
 ```
 
-この分類が lifecycle を駆動する。依存先が出現すれば起動し、消えれば停止する。単に「同じ key があるか」だけでなく、どの provider に解決されているかを committed view として保持するため、provider が別のものへ置き換わった場合も再構成の対象になる。
+ここで見るのは値だけではない。
+どの提供元へ結び付いているかも記録するため、同じ名前の依存先が別の提供元へ置き換わった場合も再構成できる。
 
-通常の Dependency Injection が起動時に一度 wiring して終わるのに対し、Reactive Coeffects は **runtime の dependency topology が変わるたびに再解決する DI** と考えると分かりやすい。
+一般的な依存性注入が起動時に一度だけ接続関係を決めるのに対し、この仕組みは実行中の依存関係が変わるたびに再評価する。
 
-## 「依存先が消えたので止める」だけでは不十分
+## 提供側を先に消すと終了処理が壊れることがある
 
-依存関係を動的に扱うと、停止順序が問題になる。
+依存関係を動的に変えると、停止順序が問題になる。
+データベースを提供するコンポーネントを止める場合、利用側を先に止めればよいように見える。
 
-Database provider を停止したいとして、それに依存する consumer を先に止めればよさそうに見える。しかし consumer の teardown 自体が Database を必要とする場合がある。connection pool を閉じるために、connection を provider へ返す必要がある、といったケースである。
+しかし、利用側の終了処理そのものがデータベースを必要とする場合がある。
+接続を閉じるために、提供側へ接続を返さなければならない、といったケースである。
 
-そのため論文では、provider の停止を二段階に分ける。
+そのため、提供側の停止は二段階で進む。
 
 ```text
-Provider ACTIVE
-      ↓ 停止開始
-新規の依存先としては利用不可
-      ↓
-Dependents が deactivation
-      ↓
-Dependents の teardown 完了
-      ↓
-Provider の inverse を実行
-      ↓
-Provider INACTIVE
+提供側が停止を開始
+↓
+新しい利用側からは見えなくする
+↓
+既存の利用側が終了処理を行う
+↓
+既存の利用側がすべて停止する
+↓
+提供側が自分の資源を回収する
 ```
 
-provider が `UNLOADING` に入った時点で新しい consumer からは見えなくする。しかし、すでにその provider に commit している consumer は、自身の teardown が終わるまで従来の binding を読み続けられる。
+停止開始後も、すでにその提供元を使っていた利用側は、終了処理が終わるまで同じ結び付きを参照できる。
+この順序を守ることで、依存先を失った状態で終了処理だけが残ることを避ける。
 
-さらに provider 側の recovery は、依存していた consumer がすべて deactivation を終えるまで待つ。論文ではこれを withdrawal の guard として形式化している。
+## 同じ依存名をコンテキストごとに別の値へ結び付ける
 
-この構造によって Spatial Composability は、単なる dependency change notification ではなく、**依存関係に沿った lifecycle ordering の保証**になる。
+テスト環境や複数利用者を分離する環境では、同じ依存名でも別の実体へ結び付けたいことがある。
 
-## Coeffect Isolation
-
-同じ dependency key でも、すべてのコンポーネントが同じ値を見るとは限らない。
-
-テスト環境、マルチテナント、サンドボックスなどでは、同じ `database` key を使いながら、Context ごとに別の Database を解決したい。
-
-Coeffect Isolation は、key と実際の binding の間に realm を挟む。
+論文は、この仕組みを **共作用の分離（Coeffect Isolation）**として扱う。
+依存名と実際の値の間に領域を表す識別子を挟み、コンテキストごとに別の領域へ解決する。
 
 ```text
-key → realm → value
+依存名 → 領域 → 実際の値
 ```
 
-Context ごとに key が異なる realm を指せるため、同じ論理 key を別の値へ解決できる。これは runtime 上の ad-hoc polymorphism に近い。
+共有表を書き換えるのではなく、そのコンテキストからどう見えるかを変えるため、親の設定を壊さずに子だけ別の依存先へ向けられる。
 
-重要なのは、shared table 自体を書き換えるのではなく、**その Context からどう解決するかを変える**点である。そのため isolation は、親 Context を壊さず子 Context を派生させる形で実現できる。
+## 同じ依存先でも利用方法を制限する
 
-## Coeffect Interception
+依存先そのものは同じでも、利用できる範囲をコンポーネントごとに変えたい場合がある。
+たとえばファイル操作なら読み書きできる場所を限定し、データベースなら読み取りだけを許可するといった制御である。
 
-Isolation が「何に解決するか」を変えるのに対し、Interception は「どう使えるか」を変える。
+論文は、利用時の付加情報を外側のコンテキストから与える仕組みを **共作用の介入（Coeffect Interception）**として説明している。
+提供側はアクセスのたびにその情報を確認し、利用範囲を制限できる。
 
-たとえば filesystem dependency を提供するとき、component ごとに読み書き可能な path を制限したい場合がある。Database なら read-only 権限だけ渡したい場合もある。
+この考え方は、コンポーネントが必要な権限だけを要求する能力ベースのセキュリティに近い。
+ただし、信頼できないコードが実行環境へ直接アクセスできる場合は、この仲介だけでは防げない。
+その場合はプロセス分離、WebAssembly、コンテナなどの実行隔離も必要になる。
 
-Interception では、Context や component declaration に metadata を付与し、provider が dependency access のたびにその metadata を参照する。
+## この仕組みが保証しようとすること
 
-これにより、provider のコードや consumer のコードを変更せず、外側の Context からアクセス方針を絞れる。
+依存関係を宣言できるだけでは、実行時の安全性は得られない。
+論文が組み合わせているのは、次の動作である。
 
-この仕組みは、論文の Access Control の議論では capability-based security に近いものとして扱われている。component の dependency declaration が capability request、Context が mediator の役割を持つ。
+- 依存先がそろうまで起動しない。
+- 提供元が消えれば利用側を停止する。
+- 提供元が置き換われば必要な利用側だけを再構成する。
+- 終了処理の途中では、起動時に確定した依存先を保持する。
+- 提供元の完全停止を、利用側の終了後まで遅らせる。
+- コンテキストごとに依存先やアクセス条件を変える。
 
-ただし、悪意あるコードが host runtime そのものへ直接アクセスできる場合、言語レベルの mediation だけでは十分ではない。その場合は process、Wasm、container など、別の sandbox 境界が必要になる。
-
-## Reactive Coeffects が解くもの
-
-Reactive Coeffects の価値は、「依存関係を宣言できる」こと自体ではない。
-
-- 依存が揃うまで component を起動しない
-- provider が消えれば consumer を停止する
-- provider が置き換われば必要な consumer だけ再構成する
-- teardown 中は committed dependency を保持する
-- dependency の withdrawal を consumer の停止後まで遅延させる
-- Context ごとに dependency resolution や access policy を変える
-
-こうした lifecycle と dependency の関係を、runtime が同じ規則で管理できることにある。
-
-これが [[Spatiotemporal Composability]] における空間方向の保証である。
+これらを同じライフサイクル規則で扱うことが、[[Spatiotemporal Composability]] の空間方向の性質に対応する。
 
 ## 関連
 
@@ -110,4 +100,4 @@ Reactive Coeffects の価値は、「依存関係を宣言できる」こと自�
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
