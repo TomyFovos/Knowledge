@@ -1,79 +1,90 @@
-# Spatiotemporal Composability（時空間合成可能性）
+# 時空間合成可能性
 
-## 概要
+実行中のシステムから、一つのコンポーネントだけを安全に追加、削除、置換できるだろうか。
+コードを差し替えるだけなら、プラグイン機構やホットモジュール置換でも実現できる。
+しかし、そのコンポーネントが登録したイベント、確保した資源、変更した共有状態まで回収し、依存していたコンポーネントだけを正しい順序で停止して再起動するとなると、別の問題になる。
 
-実行中の system から、一つの Component だけを安全に追加・削除・置換できるだろうか。
+論文 *A Programming Paradigm for Spatiotemporal Composability* は、この問題を二つに分けている。
 
-単に code を差し替えるだけなら plugin system や HMR でもできる。しかし、その Component が登録した event、確保した resource、書き換えた shared state まで回収し、さらに依存していた Component だけを正しい順序で停止・再起動させるとなると、問題は別物になる。
+- **時間方向の合成可能性（Temporal Composability）**：コンポーネントを外したとき、そのコンポーネントが環境へ残した副作用を安全に撤回できる性質。
+- **空間方向の合成可能性（Spatial Composability）**：コンポーネント間の依存関係を宣言し、提供側の追加、削除、置換に合わせてライフサイクルを再調整できる性質。
 
-*A Programming Paradigm for Spatiotemporal Composability* は、この問題を二つの直交する軸へ分ける。
+この二つを合わせた性質が、**時空間合成可能性（Spatiotemporal Composability）**である。
+論文は、副作用と依存要求を実行時に追跡し、同じコンテキストを介して扱うことで、この性質を実現しようとしている。
 
-- **Temporal Composability**：Component を外したとき、その Component が環境に残した Effect を安全に撤回できること
-- **Spatial Composability**：Component 間の dependency を宣言し、provider の追加・削除・置換に応じて lifecycle を再調整できること
+## 時間方向では副作用を撤回する
 
-論文は古典的な Effect / Coeffect の概念を compile-time analysis から runtime mechanism へ持ち上げ、この二つを同じ Context 上に統合する。
+コンポーネントを削除しても、そのコンポーネントが環境へ残した変更が残れば、削除は完了していない。
+イベント購読、タイマー、資源確保、子コンポーネントの登録などを、そのコンポーネントのライフサイクルに結び付けて管理する必要がある。
 
-重要なのは「plugin を unload できる」という個別機能ではない。
+論文は、副作用を起こすときに逆操作も同時に登録する仕組みを使う。
+この考え方は [[Revertible Effects]] に整理している。
 
-**Component が環境に対して何を変えるか、何を必要とするか、そしてその操作が誰の lifecycle に属するかを runtime が追跡できる状態にする**ことが、この paradigm の中心である。
+時間方向の難しさは、複数のコンポーネントの変更が入り交じった後でも、対象のコンポーネントが行った変更だけを撤回しなければならない点にある。
+単純な「元に戻す」機能ではなく、変更の所有者を追跡する必要がある。
 
-## ナレッジ構成
+## 空間方向では依存関係に合わせて動かす
 
-この論文は一枚の要約に押し込まず、再利用できる単位へ分割している。
+コンポーネントは、自分が必要とする機能が存在するときだけ動ければよい。
+必要な機能が消えた場合は停止し、別の提供元へ置き換わった場合は必要な範囲だけ再構成する。
 
-### [[Revertible Effects]]
+論文は、この「環境から何を必要とするか」を **共作用（Coeffect）**という概念で表し、依存関係の変化へ反応する仕組みに拡張している。
+詳しくは [[Reactive Coeffects]] に整理している。
 
-副作用を起こすときに inverse も同時に返し、runtime がそれを追跡・合成する。Component unload 時に、その Component の寄与だけを回収する Temporal Composability の中心概念。
+停止順序も依存関係から決まる。
+提供側を先に完全停止すると、利用側が終了処理の途中で必要な機能を失う場合がある。
+そのため、提供側は新しい利用を止めた後、既存の利用側が終了するまで待ってから自身の資源を回収する。
 
-### [[Reactive Coeffects]]
+## 副作用と依存要求を同じ境界で扱う
 
-Component が必要な dependency を宣言し、Context の変化に応じて activation / deactivation を駆動する。Isolation、Interception、provider withdrawal ordering もここに含む。
+副作用と依存関係を別々の仕組みで管理すると、「誰の変更か」と「誰が何を必要としているか」を対応付けにくい。
+論文は、両方を一つの **コンテキスト（Context）**を介して扱う。
 
-### [[Context Paradigm]]
+コンポーネントが外界へ行う操作も、外界から取得する依存先も、コンテキストを通す。
+そのため、コンポーネントの削除時には、そのコンポーネントが行った変更を回収しつつ、その変更で失われる依存先を利用していたコンポーネントも再調整できる。
 
-Effect と Coeffect を一つの Context に統合する考え方。Functional な traceability と imperative な ergonomics の中間を狙い、Component と外界の相互作用を同じ mediation layer に集約する。
+この統合は [[Context Paradigm]] に整理している。
 
-### [[Dynamic Component Lifecycle]]
+## 実行中のコンポーネントをライフサイクルとして管理する
 
-Component を dependencies / provisions / effects の三つ組として扱い、実行時 instance を fiber として lifecycle 管理する。Transition、withdrawal guard、failure、progress、confluence など system-wide guarantee を扱う。
+実際の初期化や終了処理は一瞬では終わらない。
+非同期処理の途中で依存先が変わったり、初期化に失敗したりすることもある。
 
-### [[System Boundary and Recoverability]]
+論文は、実行中のコンポーネントを状態を持つ単位として管理し、依存関係の現在状態と、起動時に確定した依存先を比較して遷移を進める。
+この仕組みは [[Dynamic Component Lifecycle]] に整理している。
 
-どこまでの Effect を本当に rollback できるのかを決める境界。Resource acquisition と external emission の違い、compensation、sandbox、OS との co-design を整理する。
+論文が狙うのは、「最終的に存在するコンポーネント集合」が同じなら、途中の追加や削除の順序が違っても、一定の条件の下で同等の静止状態へ収束できることである。
+ただし、その保証には副作用の独立性、依存関係が循環しないこと、逆操作が正しいことなどの前提がある。
 
-### [[Cordis]]
+## 回復できる範囲には境界がある
 
-論文の形式モデルを TypeScript で実装した meta-framework。`ctx.effect`、dependency resolution、Component Loader、Koishi の production case study を扱う。
+一度外部へ送った通信や、他のプロセスも変更する共有資源まで完全に巻き戻せるとは限らない。
+論文の回復保証は、実行基盤が追跡し、変更を制御できる範囲に限られる。
 
-### [[Transactional Hot Module Replacement]]
+資源を取得したことは元に戻せても、その資源を通して外部世界へ与えた影響は残る場合がある。
+その境界は [[System Boundary and Recoverability]] に整理している。
 
-Revertible Component lifecycle を利用して HMR を transaction として扱うパターン。変更 module の分類、stale Component の検出、failure 時の rollback を整理する。
+## 実装例としてのCordis
 
-## この論文が self-evolving agent harness に重要な理由
+論文は、この考え方を TypeScript で実装したメタフレームワーク **Cordis** を示している。
+Cordis は、コンポーネントの副作用、依存関係、追加と削除、ホットモジュール置換を同じライフサイクル機構の上で扱う。
 
-論文は plugin system と並んで **self-evolving agent harness** を motivating example に置いている。
+論文では、チャットボット向けフレームワーク Koishi のプラグイン基盤が実運用例として紹介されている。
+一方、自己変更するAIエージェント実行基盤への適用は、将来の検証対象として挙げられている段階である。
 
-Agent harness は tool suite、execution environment、permission / sandbox、session state、memory、subagent orchestration など多くの runtime Component を持つ。将来的に Agent 自身がこれらを生成・差し替えるようになると、変更のたびに process 全体を restart する設計では、process-local state や in-flight task が失われる。
+## ナレッジの分割
 
-さらに dependency topology も頻繁に変わるため、単純な code replacement だけでは dependent Component の整合性を保てない。
+この論文から抽出した内容は、次のノートへ分けている。
 
-この意味で、
-
-```text
-自己変更できること
-        ↓
-変更を安全に撤回できること
-        ＋
-変更後の dependency topology を再構成できること
-```
-
-は別の問題である。
-
-Spatiotemporal Composability は、後ろ二つに formal foundation を与えようとしている。
-
-ただし、self-evolving agent harness への適用は論文中では future validation として位置づけられており、[[Cordis]] / Koishi と同程度に実証された結果ではない。
+- [[Revertible Effects]]：副作用と逆操作の対応。
+- [[Reactive Coeffects]]：依存要求とライフサイクルの連動。
+- [[Context Paradigm]]：副作用と依存要求を同じコンテキストへ集約する考え方。
+- [[Dynamic Component Lifecycle]]：実行中コンポーネントの状態遷移。
+- [[System Boundary and Recoverability]]：回復保証が届く範囲。
+- [[Cordis]]：論文の実装。
+- [[Transactional Hot Module Replacement]]：同じライフサイクル機構を使ったコード置換。
 
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: [[09_References/Spatiotemporal Composability/paper.pdf]]
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
