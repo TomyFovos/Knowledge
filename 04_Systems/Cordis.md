@@ -1,33 +1,34 @@
 # Cordis
 
-## 概要
+**Cordis**は、論文 *A Programming Paradigm for Spatiotemporal Composability* が提案する [[Spatiotemporal Composability]] を、TypeScriptで実装したメタフレームワークである。
 
-Cordis は、*A Programming Paradigm for Spatiotemporal Composability* で提案された [[Spatiotemporal Composability]] を実装する TypeScript 製の meta-framework である。
+Webアプリケーションやデータベース操作の機能を直接提供する製品ではない。
+実行中のコンポーネントを安全に追加、削除、再構成するための共通的なライフサイクル機構を提供する。
 
-Web framework や ORM のように特定 domain の機能を提供するのではなく、**Component を runtime で安全に load / unload / reconfigure するための共通 semantics**を提供することを目的としている。
+設計の中心には、次の二つがある。
 
-理論上の二本柱は、
+- [[Revertible Effects]]：コンポーネントが残した副作用を追跡し、削除時に回収する。
+- [[Reactive Coeffects]]：必要な依存先が増減したとき、影響するコンポーネントだけを起動または停止する。
 
-- [[Revertible Effects]]
-- [[Reactive Coeffects]]
+これらを [[Context Paradigm]] と [[Dynamic Component Lifecycle]] の考え方で一つの実行基盤へまとめている。
 
-であり、それらを [[Context Paradigm]] と [[Dynamic Component Lifecycle]] にまとめて実装する。
+## `ctx.effect`で副作用と片付け処理を対にする
 
-## Core library
-
-Cordis では、Context に対する mutation を `ctx.effect` へ通す。
-
-`ctx.effect` は callback を実行し、その callback が返す inverse を accumulator に積む。複数 Effect が実行されると inverse は LIFO に合成され、Context / Component を dispose したときにまとめて実行される。
+Cordisでは、コンテキストへ変更を加える処理を `ctx.effect` へ通す。
 
 ```text
 ctx.effect(callback)
 ```
 
-これが Effect tracking の中心であり、dependency provision や child Component registration も最終的にはこの仕組みに乗る。
+呼び出した処理が返す片付け関数を、Cordisがそのコンポーネントの逆操作として記録する。
+複数の変更を行った場合は、最後に行った変更から逆順に片付ける。
 
-### Coeffect operations
+依存先の提供や子コンポーネントの登録も、この副作用追跡の上に載る。
+そのため、コンポーネントを削除すると、登録した依存先や子コンポーネントも同じライフサイクルで撤回できる。
 
-Dependency 周りは、主に次の操作へ対応する。
+## 依存先の取得もコンテキストを通す
+
+依存関係については、概念的に次のような操作を提供する。
 
 ```text
 ctx.get(key)
@@ -36,133 +37,103 @@ ctx.isolate(key, realm)
 ctx.intercept(key, metadata)
 ```
 
-`set` による provision 自体が Revertible Effect なので、provider を unload すると binding も自動的に撤回される。
+`set` は依存先を提供する操作である。
+この提供自体が可逆な副作用として記録されるため、提供側を削除すれば、その結び付きも撤回される。
 
-`isolate` は同じ key を Context ごとに別 realm へ解決させる。
+`isolate` は、同じ依存名をコンテキストごとに別の領域へ結び付ける。
+テスト環境や利用者ごとの分離に使える。
 
-`intercept` は dependency の binding 自体ではなく、利用時の metadata を変え、access policy などを外側の Context から付与できる。
+`intercept` は、依存先そのものを変えず、利用時の条件を外側から付ける。
+読み取り専用にする、利用可能なパスを絞る、といったアクセス制御に使える。
 
-## Property access と dependency declaration
+## 宣言していない依存先へのアクセスを止める
 
-Cordis は reflective な `ctx.get(key)` に加えて、Context property として dependency を読む形も提供する。
+Cordisでは、`ctx.get` のような明示的な取得だけでなく、コンテキストのプロパティとして依存先を読む方法も提供する。
+TypeScriptのProxyを使い、プロパティへのアクセスをCordis側で仲介する。
 
-TypeScript では Proxy を利用し、property access を mediation する。
+アクセス時には、現在のコンポーネントがその依存先を宣言しているか、起動時に確定した提供元が存在するかを確認する。
 
-その際、現在の fiber がその dependency を宣言しているか、committed view に binding が存在するかを確認する。未宣言 dependency への access や、まだ active でない dependency への access は reject される。
+このため、依存関係の宣言は説明文だけではない。
+実行時に「このコンポーネントが何へアクセスしてよいか」を制御する情報にもなる。
 
-これにより Component の dependency declaration は documentation だけでなく、**runtime access control の一部**になる。
+## `ctx.use`で子コンポーネントをライフサイクルへ結び付ける
 
-## `ctx.use` と Component instantiation
+コンポーネントの生成には `ctx.use` を使う。
+子コンポーネントは親のコンテキストから派生した子コンテキストを持ち、自分の依存要求と副作用をそこで管理する。
 
-Component の instantiation は `ctx.use` で行われる。
+子コンポーネントの登録そのものも、親コンポーネントの副作用として記録される。
+そのため、親を削除すると、親が作った子も終了対象になる。
 
-新しい fiber は parent Context から child Context を派生し、その Component の dependency specification と Effect function を保持する。
+コンポーネントの親子関係と、回復処理の親子関係が対応する構造になる。
 
-Child registration 自体が parent の tracked Effect になるため、parent が unload されれば、その inverse として child の retirement が走る。
+## 依存先の変化から起動と停止を決める
 
-この仕組みによって、Component tree と recovery tree が対応する。
-
-## Lifecycle engine
-
-Cordis の fiber は概ね、
+Cordisの実行単位は、おおむね次の状態を持つ。
 
 ```text
-INACTIVE
-LOADING
-ACTIVE
-UNLOADING
-FAILED
+停止
+起動中
+稼働中
+停止処理中
+失敗
 ```
 
-の状態を持つ。
+実行基盤は、現在利用できる依存先と、コンポーネントが起動時に使っていた依存先を比較する。
 
-Runtime は dependency resolution から `fiber.target` を再計算し、現在の committed view と比較する。
+- 必要な依存先がそろえば起動する。
+- 依存先が消えれば停止する。
+- 提供元が別のものへ置き換われば再起動する。
+- 起動や停止の途中で条件が変われば、必要に応じて巻き戻す。
 
-- dependency が揃えば reload
-- dependency が消えれば unload
-- provider が置換されれば reload
-- transition 中に target が変われば rollback / chaining
+提供側が停止するときは、新しい利用側から先に見えなくする。
+その後、既存の利用側が終了処理を終えるまで待ち、最後に提供側自身の資源を回収する。
 
-という処理を行う。
+## 構成ファイルを望ましい状態として扱う
 
-Provider が unload に入ると、まず新規 dependency resolution から外す。その後、影響を受けた dependents に通知し、dependents の teardown 完了を待ってから provider 自身の disposer を実行する。
+Cordisの中核機能の上には、コンポーネント構成をデータとして管理するローダーがある。
 
-これは [[Reactive Coeffects]] の withdrawal ordering を実装した部分である。
+各設定には、識別子、読み込むモジュール、依存先の分離、利用条件、設定値、有効か無効かといった情報を持たせる。
+ローダーは、その設定を「最終的にこうなっていてほしい状態」として扱い、現在の実行状態との差分だけを反映する。
 
-## Declarative Component Loader
+設定が一部変わったからといって、すべてのコンポーネントを停止して作り直すわけではない。
+変更内容に応じて、必要なコンポーネントだけを再構成する。
 
-Core library の上には、desired composition を data として記述する Component Loader がある。
+起動順序をローダーが細かく手書きするのではなく、依存先がそろったかどうかをライフサイクル側が判断する。
 
-各 entry は概ね、
+## ホットモジュール置換も同じライフサイクル上に置く
 
-- stable id
-- component module URL
-- isolation
-- interception
-- config
-- disabled flag
+Cordisのホットモジュール置換は、コンポーネントの停止と再起動を利用する。
+変更したモジュールがどのコンポーネントへ影響するかを調べ、対象だけを停止して新しいコードから作り直す。
 
-を持つ。
+新しいモジュールの読み込みに失敗した場合は、以前のモジュールとコンポーネントへ戻す。
+途中まで新しい状態になったまま残さない。
 
-Loader はこの configuration tree を authoritative record とし、変更があれば既存 fiber と差分を reconcile する。
+詳しくは [[Transactional Hot Module Replacement]] に整理している。
 
-重要なのは、configuration 全体を毎回 teardown / rebuild しないことである。
+## Koishiでの実運用
 
-- component identity が変われば rebuild
-- isolation が変われば realm を再割当
-- interception は read-time metadata なので in-place 更新
-- config は component 側に差分処理を委ねる
-- disabled は unload / reload
+論文は、Cordisの実運用例としてチャットボット向けアプリケーションフレームワークKoishiを紹介している。
 
-というように、変更内容ごとに最小限の操作へ落とす。
+Koishiでは、サーバー側の機能をCordisのプラグインとして構成し、Web管理画面側も独立したCordisアプリケーションとして動かしている。
 
-この設計は、最終状態への収束性を lifecycle 側の性質へ委ねる。Orchestrator が厳密な activation 順を手で組むのではなく、dependency satisfaction が activation timing を決める。
+論文執筆時点で、Koishiには4000を超えるコミュニティ製プラグインが存在すると報告されている。
+通信サービスとの接続、データベース、管理画面、利用者向け機能など、異なる種類のコンポーネントが同じ構成モデルへ載っている。
 
-## Hot Module Replacement
+実運用では、プロセス全体を再起動せずにプラグインを無効化したり、開発中にコードを差し替えたり、別コンポーネントの状態を残したまま対象だけを交換したりできる。
 
-Cordis の HMR は、Component lifecycle の上に構築されている。
+この事例は、形式モデルが実際の大規模なプラグイン環境へ適用された例である。
+ただし、別の設計との比較実験や、実行時の負荷、開発生産性の定量比較までは示していない。
 
-変更 module の dependency graph を分類し、影響する entry を特定したうえで stale fiber を dispose し、新 module から fiber を作り直す。
+## 自己変更するAIエージェント実行基盤への適用は未検証である
 
-Import に失敗した場合は module cache と fiber を backup から戻すため、half-reloaded state を残さない。
+論文は、今後の検証対象として、自己変更するAIエージェント実行基盤を挙げている。
 
-詳しくは [[Transactional Hot Module Replacement]]。
+AIエージェントが自分の道具、記憶、サンドボックス、子エージェント構成などを追加、削除、置換するようになると、毎回プロセス全体を再起動する方法では、作業中の状態や実行中の処理が失われる。
 
-## Koishi での実運用
+Cordisのモデルは、変更対象だけを安全に撤回し、依存関係の変化へ必要な部分だけを反応させる候補になる。
 
-論文は Cordis の case study として Koishi を扱う。
-
-Koishi は chatbot application framework で、server-side の機能を Cordis plugin として構成している。さらに browser 上の web console も独立した Cordis application として動く。
-
-論文執筆時点で Koishi には **4000を超える community plugin** が存在し、IM adapter、database driver、管理 UI、end-user feature など多様な Component が同じ composition model 上で動いている。
-
-実運用では、
-
-- console から plugin を disable して process restart なしで Effect を撤回
-- development 中に HMR で plugin を再適用
-- cache や live connection など他 Component の state を残したまま対象 plugin だけ交換
-- provider が再構成されたとき、影響する dependent だけ lifecycle を再評価
-
-といった動作が行われる。
-
-この case study が示すのは、形式モデルが単なる toy calculus ではなく、大規模 plugin ecosystem を支えられる程度の expressiveness を持つという **existence / adoption の証拠**である。
-
-ただし論文自身も限界を明記している。評価対象は一つの ecosystem と一つの host language であり、alternative architecture との controlled comparison ではない。Runtime overhead や developer productivity の定量比較も今後の課題である。
-
-## Self-Evolving Agent Harness との関係
-
-論文は Cordis の次の検証対象として、self-evolving agent harness を明示している。
-
-Agent が tool、memory、sandbox、subagent orchestration など harness 自体の Component を継続的に生成・差し替える場合、full restart では process-local state や in-flight task が失われる。また dependency topology も頻繁に変わる。
-
-Cordis のモデルは、この問題に対して、
-
-- Component replacement 時の完全回復
-- dependency topology 変化への lifecycle coordination
-
-を与えられる可能性がある。
-
-ただしこれは論文中では **将来の検証対象**であり、Koishi と同程度に実証済みという意味ではない。
+ただし、これは論文中では将来の検証対象である。
+Koishiと同じ程度に実証済みだと読むのは適切ではない。
 
 ## 関連
 
@@ -177,4 +148,4 @@ Cordis のモデルは、この問題に対して、
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
