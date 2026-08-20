@@ -1,99 +1,99 @@
-# System Boundary and Recoverability
+# システム境界と回復可能性
 
-## 概要
+「副作用を元に戻せる」と言っても、あらゆる処理を完全に巻き戻せるわけではない。
+論文 *A Programming Paradigm for Spatiotemporal Composability* が回復対象にしているのは、実行基盤が自分で追跡し、変更を制御できる範囲である。
 
-「副作用を元に戻せる」と言うと、あらゆる処理を完全に rollback できるように聞こえる。しかし *A Programming Paradigm for Spatiotemporal Composability* は、そこまで強いことを主張していない。
+この範囲を **システム境界（system boundary）**として考えると、どこまでを [[Revertible Effects]] の保証に含められるかが分かりやすい。
 
-[[Revertible Effects]] が回復できるのは、**system が自分で追跡し、排他的に変更し、以前の状態へ戻せる範囲**である。論文はこれを system boundary として扱う。
+## 境界の内側に置けるもの
 
-## Boundary の内側と外側
+ある状態を境界の内側に置くには、実行基盤がその状態の変更を把握し、必要なら以前の意味へ戻せなければならない。
 
-ある location が boundary の内側にあるとは、system がその location を制御し、変更前の状態へ回復できることを意味する。
+たとえば、あるコンポーネントだけが使うメモリや一時ファイルは、実行基盤が所有関係を追跡しやすい。
+一方、他のプロセスも同じ場所を書き換える共有メモリや共有ファイルは、実行基盤だけでは以前の状態を保証しにくい。
 
-逆に、system 外の actor も同じ場所を書き換えたり、一度外へ出した情報を回収できなかったりする場合、その操作は boundary の外側にある。
+境界を決めるのは媒体の種類ではない。
+その場所を誰が変更でき、どこまで実行基盤が制御できるかで決まる。
 
-たとえば、
+## 資源を取得することと、外部へ影響を出すことを分ける
 
-- private な memory region は内側にできる
-- 他 process と共有する memory は外側になりやすい
-- private scratch file は内側にできる
-- 他 program も読み書きする file は外側になりやすい
+外部資源を使う処理は、二つの段階へ分けて考えられる。
 
-というように、媒体そのものではなく **その location をどこまで control できるか**で境界が決まる。
+### 資源の取得
 
-## Acquisition と Emission を分ける
+ファイルを開く、メモリを確保する、子プロセスを起動するといった操作では、実行基盤の内側に管理用の記録が作られる。
 
-外部 resource へアクセスする操作は、論文では二段階に分けて考えられる。
+```text
+open   → file descriptor
+malloc → allocation record
+fork   → child process record
+```
 
-### Acquisition
+この記録を追跡できれば、`close`、`free`、`kill` のような逆操作を結び付けられる。
+そのため、資源の取得は可逆な副作用として扱いやすい。
 
-Resource へアクセスするための handle を system 内に作る段階。
+### 外部への出力
 
-- `open` が file descriptor を作る
-- `malloc` が allocation record を作る
-- `fork` が child process record を作る
+取得した資源を使って外部へ情報を出すと、事情が変わる。
 
-この record は system が追跡でき、`close`、`free`、`kill` のような inverse を持てる。そのため acquisition は Revertible Effect として扱える。
+```text
+ファイルへ書き込む
+ネットワークへ送信する
+外部APIへ要求を送る
+```
 
-### Emission
+一度外部世界へ出た情報は、実行基盤の内部状態を戻しても消えない場合がある。
+ここはシステム境界の外側になりやすい。
 
-その handle を通して、system 外へ情報を送り出す段階。
+つまり、資源を取得した事実は戻せても、その資源を通して外部へ与えた影響までは戻せないことがある。
 
-- file へ bytes を write する
-- network へ packet を send する
-- 外部 API へ request を送る
+## 外部作用を扱う二つの方法
 
-一度 external world へ出た情報は、system の Context だけを巻き戻しても消えない。ここは boundary の外側になる。
+外部への出力まで安全に扱いたい場合、論文は二つの方向を挙げている。
 
-この区別は、動的 system の「回復」を考えるときに重要である。**Resource を取得したことは戻せても、その resource を通して世界へ与えた影響までは戻せない場合がある。**
+一つは **出力の保留（withholding）**である。
+処理を確定してよいと分かるまで、外部への送信を待つ。
 
-## 外部作用には withholding か compensation が必要
+もう一つは **補償処理（compensation）**である。
+完全な逆操作ではなく、業務上は元に戻ったとみなせる別の操作を行う。
 
-Emission まで回復させたい場合、論文は二つの方向を挙げる。
+たとえば、作成したファイルを削除する、課金を返金する、といった処理がこれに当たる。
 
-一つは **withholding**。結果を確定させてよいと分かるまで external emission を保留する。Rollback recovery における output commit problem に近い。
+ただし、補償処理は完全な巻き戻しではない。
+返金しても、課金が一度発生したという履歴まで消えるわけではない。
+どの状態を「同じ」とみなすかを、業務側で別に定める必要がある。
 
-もう一つは **compensation**。完全な inverse ではなく、application が「意味的には元に戻った」と見なせる別操作を行う。
+## アクセス制御と実行隔離は役割が違う
 
-たとえば、
+[[Context Paradigm]] では、コンポーネントが宣言した依存先だけをコンテキスト経由で渡せる。
+さらに、読み取りだけを許可する、特定のパスだけを見せる、といった利用条件も付けられる。
 
-- 作成した file を削除する
-- charge を refund する
+しかし、信頼できないコードが実行環境のオブジェクトへ直接到達できるなら、コンテキストを迂回できる。
+そのため、アクセス方針を記述する仕組みと、その方針を強制する実行境界は分けて考える必要がある。
 
-といった操作である。
+論文は、必要に応じて次のような隔離を併用する案を挙げている。
 
-ただし compensation は、[[Context Paradigm]] が使う observational equivalence より粗い equivalence を導入しうる。そのため、Revertible Effects の形式保証をそのまま移植できるわけではなく、別途その equivalence 上で性質を確認する必要がある。
+- ソフトウェアによるメモリアクセスの隔離。
+- 別の言語実行環境。
+- サンドボックス化した別プロセス。
+- 仮想化されたコンテナ。
 
-## Access Control と Sandbox
+コンテキストは「何を許すか」を表し、サンドボックスは「許していない経路を使えないようにする」役割を持つ。
 
-Context を通した dependency access は、宣言した capability だけを利用させる仕組みとして使える。
+## 実行基盤とOSを組み合わせる余地
 
-Component が `filesystem` を dependency として要求し、さらに Interception metadata で read-only path だけを許す、といった制御ができる。
+論文は将来像として、オペレーティングシステム（OS）がこの仕組みを支援する可能性も述べている。
 
-しかし、Component が信頼できない code なら、それだけでは足りない。Host runtime の object へ直接到達できれば、Context mediation を迂回できるからである。
+OSはもともと、メモリ、ファイル記述子、プロセスなどの資源を管理している。
+その所有関係をコンポーネント単位で利用できれば、アプリケーション側で同じ資源管理を重複して持たずに済む。
 
-そのため論文は、untrusted component には言語レベルの policy とは別に、
+コピーオンライトやトランザクション型の記憶装置を使えば、通常は外部へ出てしまう永続化処理の一部まで回復対象へ含められる可能性もある。
 
-- software fault isolation
-- separate language runtime
-- sandboxed process
-- virtualized container
+したがって、システム境界は固定ではない。
+実行基盤が何を追跡し、どこまで逆操作を提供できるかによって動く。
 
-などの execution boundary が必要だとする。
-
-ここで Context は access policy を記述する層、sandbox は **その policy を迂回できないようにする実行境界**として役割が分かれる。
-
-## OS と共同設計すると何が変わるか
-
-論文は将来像として、Operating System 自体が Context Paradigm を支援する可能性も述べる。
-
-OS はもともと memory、file descriptor、process などの resource acquisition を記録している。もしそれらを Component ごとの Coeffect として提供できれば、runtime が同じ resource tracking を二重に実装する必要がなくなる。
-
-さらに copy-on-write や transactional storage を利用すれば、通常は boundary の外側に近い persistent operation の一部も rollback 可能にできる。
-
-つまり system boundary は固定ではない。**どこまでを runtime が reify し、追跡し、inverse を提供できるかによって動かせる**。
-
-ただし、境界を内側へ広げるほど、各 access を mediation する cost も増える。この trade-off まで含めて system design の問題になる。
+ただし、境界を広げるほど、すべてのアクセスを仲介する処理量も増える。
+回復可能性と実行コストの両方を見て境界を決める必要がある。
 
 ## 関連
 
@@ -107,4 +107,4 @@ OS はもともと memory、file descriptor、process などの resource acquisi
 ## 参考資料
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
-- 原文PDF: `[[09_References/Spatiotemporal Composability/A Programming Paradigm for Spatiotemporal Composability.pdf]]`
+- 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
