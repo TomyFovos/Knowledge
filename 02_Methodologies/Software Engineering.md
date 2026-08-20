@@ -249,6 +249,7 @@ DevOps型の開発では、エンジニアの責任範囲は実装だけに閉�
 ## 参考資料
 
 - freee「ソフトウェアエンジニアリング入門」FY25Q4、2025-04-07
+- 原本PDF: [[09_References/Software Engineering/_外部公開用_ソフトウェアエンジニアリング入門__FY25Q4.pdf]]
 - Roger S. Pressman / Bruce R. Maxim『実践ソフトウェアエンジニアリング 第9版』
 - IEEE『ソフトウェアエンジニアリング基礎知識体系 - SWEBOK V3.0 -』
 - 『ソフトウェアテスト教科書 JSTQB 2023版』
