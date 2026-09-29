@@ -1,0 +1,10 @@
+/* Shared, export-friendly Vault styling. */
+.markdown-rendered img,
+.markdown-source-view.mod-cm6 .cm-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+.markdown-rendered table { width: 100%; }
+.callout[data-callout="research"] { --callout-icon: lucide-search; }
+.callout[data-callout="decision"] { --callout-icon: lucide-git-branch; }

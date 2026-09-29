@@ -1,0 +1,35 @@
+# Knowledge Properties Schema
+
+Dashboard、Jev、Scanner、Agentが共通で扱うProperties契約です。
+既存ノートへの手入力は前提にせず、Propertiesがないノートも有効です。
+
+基本Properties:
+- type
+- status
+- project
+- topics
+- follow_up
+- follow_up_type
+- jev_recommended
+- jev_score
+- jev_reason
+- cover
+- created
+- updated
+
+type候補:
+Note / Concept / Methodology / Pattern / System / Idea / Experiment / Decision / Lesson / Reference
+
+statusはREADMEで定義済みの値を維持します:
+Idea / Researching / Experimenting / Adopted / Rejected
+
+follow_up は「今後調査」「あとで確認」「要検討」などをScanner/Jevが拾った場合に true にします。
+follow_up_type には research などの種別を入れます。
+
+Jev予約Properties:
+- jev_recommended: 推薦対象ならtrue
+- jev_score: 推薦強度
+- jev_reason: 推薦理由
+
+Dashboardはこれらを読むだけにし、Jev内部実装とは直接結合しません。
+cover は画像カード用で、画像本体は原則 assets/images/ に置きます。

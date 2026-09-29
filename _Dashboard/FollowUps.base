@@ -1,0 +1,12 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'follow_up == true'
+views:
+  - type: table
+    name: Follow Ups
+    order:
+      - file.name
+      - follow_up_type
+      - status
+      - file.mtime

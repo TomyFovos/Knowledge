@@ -1,0 +1,10 @@
+# Obsidian transient state
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.trash/
+
+# Plugin binaries are restored by setup-obsidian.cmd.
+# data.json remains trackable so Hearth layout can be committed later.
+.obsidian/plugins/*/main.js
+.obsidian/plugins/*/styles.css
+.obsidian/plugins/*/manifest.json

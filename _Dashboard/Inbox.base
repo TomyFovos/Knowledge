@@ -1,0 +1,11 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'file.inFolder("00_Inbox")'
+views:
+  - type: table
+    name: Inbox
+    order:
+      - file.name
+      - status
+      - file.mtime

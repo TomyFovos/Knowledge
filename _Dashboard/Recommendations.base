@@ -1,0 +1,12 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'jev_recommended == true'
+views:
+  - type: table
+    name: Jev Recommendations
+    order:
+      - file.name
+      - jev_score
+      - jev_reason
+      - status

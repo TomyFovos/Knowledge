@@ -1,0 +1,14 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - or:
+        - 'status == "Researching"'
+        - 'status == "Experimenting"'
+views:
+  - type: table
+    name: Active
+    order:
+      - file.name
+      - status
+      - project
+      - file.mtime
