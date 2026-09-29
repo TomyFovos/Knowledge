@@ -135,3 +135,4 @@
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson

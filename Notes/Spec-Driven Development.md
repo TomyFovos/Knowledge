@@ -134,3 +134,4 @@ Spec-Kitは生成する文書が大きくなりやすく、人間が読む負担
 - https://www.thoughtworks.com/radar/techniques/codebase-cognitive-debt
 - *Comprehension Debt in GenAI-Assisted Software Engineering Projects*
 - https://arxiv.org/abs/2604.13277
+#lesson

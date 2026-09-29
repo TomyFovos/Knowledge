@@ -105,3 +105,4 @@ LLMだけでは曖昧になりやすい関係、権限、履歴を、外から�
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson

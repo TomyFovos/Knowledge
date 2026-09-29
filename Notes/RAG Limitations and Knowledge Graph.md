@@ -84,3 +84,4 @@ RAGを使っているという事実が、回答への過信につながる点�
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson

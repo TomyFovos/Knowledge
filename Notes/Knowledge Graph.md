@@ -78,3 +78,4 @@ LLMが自然言語を扱い、ナレッジグラフが事実と関係を保持�
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson

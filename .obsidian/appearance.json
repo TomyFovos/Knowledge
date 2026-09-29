@@ -1,3 +1,5 @@
 {
-  "enabledCssSnippets": ["knowledge-base"]
+  "enabledCssSnippets": [
+    "knowledge-base"
+  ]
 }

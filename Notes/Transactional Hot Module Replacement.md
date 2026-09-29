@@ -101,3 +101,4 @@ CordisのHMRは、古いコンポーネント内部の任意の状態を新し�
 
 - Yifan Shi, Wei Zhang, Tianyi Cui, *A Programming Paradigm for Spatiotemporal Composability*, Peking University / DeepSeek-AI.
 - 原文PDF：[[09_References/Spatiotemporal Composability/paper.pdf]]
+#lesson

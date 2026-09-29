@@ -11,10 +11,10 @@
             "id": "4f02eb6cbbef4ef2",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "hearth-home-view",
               "state": {},
-              "icon": "lucide-file",
-              "title": "新規タブ"
+              "icon": "hearth-crystal",
+              "title": "Home"
             }
           }
         ]
@@ -178,11 +178,14 @@
       "daily-notes:今日のデイリーノートを開く": false,
       "templates:テンプレートを挿入": false,
       "command-palette:コマンドパレットを開く": false,
-      "bases:新規ベースを作成": false
+      "bases:新規ベースを作成": false,
+      "hearth:Open Hearth home": false
     }
   },
-  "active": "4f02eb6cbbef4ef2",
+  "active": "7957a94c854125d5",
   "lastOpenFiles": [
+    "Untitled.md",
+    "2026-09-15.md",
     "README.md",
     "ベストなNAS.md",
     "ローカルLLM×クラウドサービス.md"

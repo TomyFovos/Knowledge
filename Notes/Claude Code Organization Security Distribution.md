@@ -108,3 +108,4 @@ Claude Codeは、ファイルの読み書き、Web検索、コマンド実行ま
 
 - Hiroki Akamatsu「メルカリのClaude Codeセキュリティ設定の組織配布戦略」Claude Code Meetup Tokyo 2026
 - 原本PDF：[[09_References/Claude Code/claude-code-organization-settings.pdf]]
+#lesson

@@ -210,3 +210,4 @@ AIエージェント同士で処理を回し続けることを、回復方法に
 - https://www.anthropic.com/engineering/multi-agent-research-system
 - OpenAI, *A practical guide to building agents*
 - https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf
+#lesson

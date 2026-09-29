@@ -246,3 +246,4 @@ AIエージェントの自律性を高めるほど、人間が一件ずつ確認
 
 - 外山英幸「AI駆動開発が変える、大規模開発の前提 Human in the Loop から Human on the Loop へ」株式会社ビズリーチ
 - 原本PDF：[[09_References/AI駆動開発/AI駆動開発が変える、大規模開発の前提.pdf]]
+#lesson

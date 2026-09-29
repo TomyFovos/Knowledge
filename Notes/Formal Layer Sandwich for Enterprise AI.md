@@ -101,3 +101,4 @@ LLMの内部へ隠れていた事実取得や規則判断を、外から検査�
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson

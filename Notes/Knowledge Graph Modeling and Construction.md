@@ -126,3 +126,4 @@ Neo4jとCypherのような開発環境があり、関係を辿る問い合わせ
 
 - DevRev-JP「LLMをもっと賢くする：ナレッジグラフ実践入門」
 - https://github.com/DevRev-JP/tech-blog/tree/main/books/knowledge-graph-llm-guide
+#lesson
