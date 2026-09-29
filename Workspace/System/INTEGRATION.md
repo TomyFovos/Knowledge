@@ -1,0 +1,27 @@
+# Knowledge Integration
+
+## 構造
+
+```text
+Inbox -> Kaku / Agent / Jev -> Notes
+                              |
+                              +-> Properties / Links
+                              |
+                              +-> Obsidian / Hearth
+
+Sources -----------------------> 参照資料
+Assets ------------------------> 画像・添付
+GitHub ------------------------> 履歴・バックアップ
+Obsidian Sync -----------------> PC / Smartphone同期
+```
+
+## 原則
+
+- Markdown + Assets がSSOT。
+- KakuとObsidianは同じRepositoryを開く。
+- Knowledge分類はフォルダではなくPropertiesを主とする。
+- `Notes/` は原則フラットに保つ。
+- JevはHearthのレイアウトを直接操作しない。
+- Jev/Scannerは `Workspace/System/KNOWLEDGE_SCHEMA.md` のPropertiesを更新する。
+- DashboardはPropertiesを読む。
+- HTMLは共有成果物でありSSOTにはしない。

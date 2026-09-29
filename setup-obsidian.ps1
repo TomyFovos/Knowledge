@@ -25,18 +25,14 @@ function Install-Plugin([string]$Id, [string]$Repo) {
   Write-Host "    $Id $($release.tag_name)" -ForegroundColor Green
 }
 
-# Normally no argument is needed: use the directory containing this script.
-# Also tolerate an accidentally quoted path from older setup scripts.
-if ([string]::IsNullOrWhiteSpace($VaultPath)) {
-  $VaultPath = $PSScriptRoot
-}
+if ([string]::IsNullOrWhiteSpace($VaultPath)) { $VaultPath = $PSScriptRoot }
 $VaultPath = $VaultPath.Trim('"')
 $VaultPath = (Resolve-Path -LiteralPath $VaultPath).Path
 
 foreach ($d in @(
   ".obsidian\plugins",".obsidian\snippets",
-  "00_Inbox","06_Experiments","07_Decisions","99_Archive",
-  "_Dashboard","_templates","_system","assets\images","assets\files"
+  "Inbox","Notes","Sources","Assets\Images","Assets\Files",
+  "Workspace\Dashboard","Workspace\Templates","Workspace\System"
 )) { Ensure-Dir (Join-Path $VaultPath $d) }
 
 Install-Plugin "hearth" "ondreu/Hearth"
@@ -45,4 +41,4 @@ Install-Plugin "single-html-export" "DDEOK/Obsidian-Single-HTML-Export"
 
 Write-Host ""
 Write-Host "Obsidian setup complete." -ForegroundColor Green
-Write-Host "Open this repository as a Vault, finish Hearth setup, then configure Obsidian Sync." -ForegroundColor Yellow
+Write-Host "Open this repository as both the Obsidian Vault and Kaku Workspace." -ForegroundColor Yellow
