@@ -2,7 +2,7 @@
 setlocal
 cd /d "%~dp0"
 echo [1/2] Obsidian
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-obsidian.ps1" -VaultPath "%~dp0"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup-obsidian.ps1"
 if errorlevel 1 goto :error
 echo.
 echo [2/2] Kaku
