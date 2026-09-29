@@ -25,7 +25,14 @@ function Install-Plugin([string]$Id, [string]$Repo) {
   Write-Host "    $Id $($release.tag_name)" -ForegroundColor Green
 }
 
+# Normally no argument is needed: use the directory containing this script.
+# Also tolerate an accidentally quoted path from older setup scripts.
+if ([string]::IsNullOrWhiteSpace($VaultPath)) {
+  $VaultPath = $PSScriptRoot
+}
+$VaultPath = $VaultPath.Trim('"')
 $VaultPath = (Resolve-Path -LiteralPath $VaultPath).Path
+
 foreach ($d in @(
   ".obsidian\plugins",".obsidian\snippets",
   "00_Inbox","06_Experiments","07_Decisions","99_Archive",
