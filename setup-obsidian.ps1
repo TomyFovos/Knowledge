@@ -20,8 +20,8 @@ function Install-Plugin([string]$Id, [string]$Repo) {
       Invoke-WebRequest -Headers $headers -Uri $asset.browser_download_url -OutFile (Join-Path $dir $name)
     }
   }
-  if (-not (Test-Path (Join-Path $dir "main.js"))) { throw "$Id: main.js missing" }
-  if (-not (Test-Path (Join-Path $dir "manifest.json"))) { throw "$Id: manifest.json missing" }
+  if (-not (Test-Path (Join-Path $dir "main.js"))) { throw "${Id}: main.js missing" }
+  if (-not (Test-Path (Join-Path $dir "manifest.json"))) { throw "${Id}: manifest.json missing" }
   Write-Host "    $Id $($release.tag_name)" -ForegroundColor Green
 }
 
