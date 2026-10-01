@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Microsoft Copilot、今はこんなことになっている</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#f7f9fc;
+  --surface-2:#eef5ff;
+  --text:#202938;
+  --muted:#657084;
+  --line:#e2e7ef;
+  --blue:#1264d8;
+  --blue-deep:#0d4fae;
+  --green:#207a59;
+  --green-bg:#edf8f3;
+  --amber:#8a5a00;
+  --amber-bg:#fff8e3;
+  --purple:#6c4bd4;
+  --purple-bg:#f4f0ff;
+  --orange:#b95217;
+  --orange-bg:#fff1e8;
+  --max:900px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","YuGothic","Meiryo",sans-serif;
+  font-size:17px;
+  line-height:1.95;
+  letter-spacing:.01em;
+}
+main{
+  width:min(var(--max),calc(100% - 40px));
+  margin:0 auto;
+  padding:62px 0 96px;
+}
+header{
+  margin-bottom:50px;
+}
+.eyebrow{
+  margin-bottom:14px;
+  color:var(--blue);
+  font-size:13px;
+  font-weight:750;
+  letter-spacing:.08em;
+}
+h1,h2,h3{
+  color:#101828;
+  line-height:1.45;
+}
+h1{
+  margin:0 0 24px;
+  font-size:clamp(2.1rem,5vw,3.25rem);
+  letter-spacing:-.015em;
+}
+h2{
+  margin:68px 0 22px;
+  padding-bottom:11px;
+  border-bottom:1px solid var(--line);
+  font-size:1.55rem;
+}
+h3{
+  margin:0 0 8px;
+  font-size:1.08rem;
+}
+p{
+  margin:0 0 1.45em;
+}
+strong{
+  font-weight:750;
+  color:#111827;
+}
+.lead{
+  font-size:1.08rem;
+  color:#374151;
+}
+.shift{
+  margin:30px 0 4px;
+  padding:22px 24px;
+  border-left:5px solid var(--blue);
+  border-radius:0 14px 14px 0;
+  background:var(--surface-2);
+}
+.shift p{
+  margin:0;
+  font-size:1.03rem;
+}
+.feature{
+  margin:28px 0 34px;
+  padding:24px 26px;
+  border:1px solid #d9e6fa;
+  border-radius:18px;
+  background:linear-gradient(145deg,#f8fbff,#eef5ff);
+}
+.feature .label{
+  display:inline-block;
+  margin-bottom:9px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#dceaff;
+  color:var(--blue-deep);
+  font-size:12px;
+  font-weight:750;
+}
+.feature p:last-child{margin-bottom:0}
+.iq-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  margin:28px 0 32px;
+}
+.iq-card{
+  padding:19px 20px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--surface);
+}
+.iq-card:nth-child(1){border-top:4px solid var(--blue)}
+.iq-card:nth-child(2){border-top:4px solid var(--green)}
+.iq-card:nth-child(3){border-top:4px solid var(--purple)}
+.iq-card:nth-child(4){border-top:4px solid #7a879a}
+.iq-card p{
+  margin:0;
+  color:var(--muted);
+  font-size:.94rem;
+}
+.keyline{
+  margin:31px 0;
+  padding:23px 25px;
+  border:1px solid #cfe7da;
+  border-radius:17px;
+  background:var(--green-bg);
+}
+.keyline p{margin:0;color:#315f4d}
+.keyline strong{color:#175b41}
+.caution{
+  margin:28px 0;
+  padding:23px 25px;
+  border:1px solid #eedda5;
+  border-radius:17px;
+  background:var(--amber-bg);
+}
+.caution p{margin:0;color:#604a18}
+.caution strong{color:#694600}
+.bridge{
+  margin:34px 0;
+  padding:26px 28px;
+  border-radius:18px;
+  background:#172033;
+  color:#e7edf7;
+}
+.bridge p{
+  margin:0;
+  color:#e7edf7;
+  font-size:1.02rem;
+}
+.bridge strong{color:#fff}
+.knowledge{
+  margin-top:34px;
+  padding:30px;
+  border:1px solid #f0d5c5;
+  border-radius:20px;
+  background:var(--orange-bg);
+}
+.knowledge h2{
+  margin:0 0 18px;
+  padding:0;
+  border:0;
+}
+.knowledge p:last-child{margin-bottom:0}
+.price{
+  margin-top:30px;
+}
+.price-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;
+  margin:24px 0 28px;
+}
+.price-card{
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+}
+.price-card .name{
+  display:block;
+  margin-bottom:6px;
+  font-weight:750;
+}
+.price-card p{
+  margin:0;
+  color:var(--muted);
+  font-size:.91rem;
+  line-height:1.7;
+}
+.closing{
+  margin-top:30px;
+  font-size:1.04rem;
+}
+.meta{
+  margin-top:48px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  color:var(--muted);
+  font-size:.82rem;
+}
+@media(max-width:700px){
+  main{
+    width:min(100% - 28px,var(--max));
+    padding:42px 0 70px;
+  }
+  body{
+    font-size:16px;
+    line-height:1.9;
+  }
+  h2{margin-top:52px}
+  .iq-grid,.price-grid{grid-template-columns:1fr}
+  .shift,.feature,.keyline,.caution,.bridge,.knowledge{padding:20px}
+}
+</style>
+</head>
+<body>
+<main>
+<article>
+<header>
+<div class="eyebrow">MICROSOFT 365 COPILOT</div>
+<h1>Microsoft Copilot、今はこんなことになっている</h1>
+<p class="lead">Microsoft Copilotと聞くと、WindowsのキーボードにあるCopilotキーから呼び出して質問する、少し精度の低いチャットAIを思い浮かべる人もいると思います。</p>
+<p>少し前に触ったときの印象で止まっているなら、それも不思議ではありません。</p>
+<p>私自身も似た認識を持っていましたが、最近のMicrosoft Copilotを調べてみると、当時とはかなり違うものになっていました。</p>
+</header>
+<div class="shift">
+<p><strong>現在のMicrosoft 365 Copilotは、単にMicrosoft版ChatGPTを作ろうとしているわけではありません。</strong><br/>
+  Microsoft 365に蓄積されたメール、会議、チャット、資料、業務データをAIが利用し、その会社で行われている仕事を踏まえて回答したり、実際の作業を進めたりする方向へ広がっています。</p>
+</div>
+<section>
+<h2>選べるAIモデルも変わっている</h2>
+<p>まず分かりやすく変わったのが、Copilotから利用できるAIモデルです。</p>
+<p>現在はOpenAIのGPT系モデルだけでなく、AnthropicのClaude SonnetやOpusなどもMicrosoft 365 Copilotへ入ってきています。</p>
+<p>2026年時点ではGPT-5.6のような新しいモデルも利用対象になっており、「MicrosoftのAIだからMicrosoft独自のAIモデルを使う」という構成ではありません。</p>
+<p>そのため、以前のCopilotに対して「ChatGPTやClaudeと比べると、使っているAIそのものが弱い」という印象を持っていた場合は、一度認識を更新した方がよさそうです。</p>
+<p>ただし、現在のCopilotで変わっているのはモデルだけではありません。</p>
+<p>むしろ大きいのは、AIが質問に答えるだけではなく、Microsoft 365の中で仕事そのものを扱い始めていることです。</p>
+</section>
+<section>
+<h2>Officeを動かすCowork</h2>
+<div class="feature">
+<span class="label">注目している機能</span>
+<p><strong>Cowork</strong>は、質問に対して文章を返すだけではなく、Microsoft 365にある情報を調べながら複数の作業を進め、成果物まで作るためのAgent機能です。</p>
+</div>
+<p>例えば、関連資料を探して内容を整理し、その情報を使ってExcelを編集したり、Word文書を作ったり、PowerPointの資料へまとめたりする仕事を、一つの依頼として渡せます。</p>
+<p>Cowork自体は2026年6月に一般提供されており、9月に発表された新しいCopilotでは、通常のChatとCoworkをより近い場所から使える構成へ整理されています。</p>
+<p>私が特に気になっているのはPowerPointです。</p>
+<p>ChatGPTやClaudeにも、情報を調べて文章やファイルを生成する能力はありますが、MicrosoftはPowerPointそのものを提供しているため、AIが最終的なOffice成果物へ直接手を入れられます。</p>
+<p>企業では、AIが良い文章を生成できても、最後に人間がPowerPointへコピーし、レイアウトを整え、既存資料へ合わせる作業が残ることがあります。</p>
+<div class="keyline">
+<p><strong>Coworkでこの工程まで任せられるのであれば、単なる文章生成より業務への影響は大きくなります。</strong><br/>
+  WordやExcelにも同じ強みがありますが、最終成果物としてそのまま共有することの多いPowerPointでは、Microsoft製品を直接操作できる利点が特に分かりやすく表れそうです。</p>
+</div>
+</section>
+<section>
+<h2>小さな業務アプリを作るCode</h2>
+<p>2026年9月25日には、<strong>Code</strong>という機能も発表されました。</p>
+<p>名前からGitHub Copilotのような開発者向けコーディングツールを想像しやすいのですが、狙っている利用者は少し違います。</p>
+<p>CodeはGitHub Copilotと共通する技術を利用しながら、自然言語で指示して、自分の仕事に必要な小さなアプリや業務ツールを作れるようにする機能です。</p>
+<p>本格的なソフトウェア開発をする場合はGitHub Copilotなどの開発者向け環境を使い、Codeは「ちょっとした業務アプリを自分で作る」という用途へ寄せて考えた方が分かりやすいと思います。</p>
+<p>いわゆるバイブコーディングを、エンジニア以外にも広げる機能に近いでしょう。</p>
+<p>個人的には、現時点ではCoworkほど注目していません。</p>
+<p>すでに社内で開発手段を持っている場合、Codeでなければ解決できない問題はまだ少なく見えるためです。</p>
+</section>
+<section>
+<h2>Microsoft IQという考え方</h2>
+<p>CoworkやCodeだけを見ると、Microsoftも他社と同じようにAI Agentを増やしているように見えます。</p>
+<p>しかし、Microsoft Copilotの方向性を理解するうえでは、その下にある<strong>Microsoft IQ</strong>の方が興味深いと感じています。</p>
+<p>Microsoft IQは、企業のAIが利用する情報を、その性質に応じて四つの領域として扱う考え方です。</p>
+<div class="iq-grid">
+<div class="iq-card">
+<h3>Work IQ</h3>
+<p>Outlookのメール、Teamsの会議やチャット、SharePointやOneDriveのファイル、人との共同作業などから、その人がどのような仕事をしているのかを理解するための情報を扱います。</p>
+</div>
+<div class="iq-card">
+<h3>Fabric IQ</h3>
+<p>売上、顧客、在庫といった業務データを、その会社にとっての意味や関係とともに扱います。</p>
+</div>
+<div class="iq-card">
+<h3>Foundry IQ</h3>
+<p>社内規程や正式文書、Knowledge Baseなど、組織として管理してAIから再利用したい知識を扱います。</p>
+</div>
+<div class="iq-card">
+<h3>Web IQ</h3>
+<p>社内だけでは得られないニュースやWeb上の最新情報を扱います。</p>
+</div>
+</div>
+<p>細かな機能を一つずつ覚えるより、まずは「AIへ会社のContextを渡す仕組みが、Microsoft製品群の中に作られ始めている」と捉えると理解しやすくなります。</p>
+<div class="bridge">
+<p>一般的な知識を持つAIに毎回会社の事情を説明する使い方から、<strong>その会社で今行われている仕事をある程度理解したAIへ相談する使い方</strong>へ変わっていくからです。</p>
+</div>
+</section>
+<section>
+<h2>Microsoft 365を使ってきた履歴がContextになる</h2>
+<p>この構造では、Microsoft 365を長く使ってきた会社が持つ情報の意味も変わります。</p>
+<p>例えば、会社でOutlookを使ってメールを送り、Teamsで会議やチャットを行い、SharePointへ資料を保存してきたとします。</p>
+<p>これまでは、人間が必要になったときに検索して開くための情報でした。</p>
+<p>Work IQでは、それらがAIに仕事を理解させるためのContextとして利用されます。</p>
+<p>誰が案件に関わっているのか、最近どの資料を使っているのか、どの会議やメールが現在の仕事と関係しているのかといった情報を、人間が毎回すべてプロンプトへ書く必要を減らせます。</p>
+<div class="keyline">
+<p><strong>AI導入後に「自社専用AI用のデータ」を一から用意するだけではなく、これまでMicrosoft 365を使って仕事をしてきた履歴そのものが材料になります。</strong></p>
+</div>
+<p>SharePointに残した資料だけが対象なのではありません。</p>
+<p>OutlookやTeamsまで含めて仕事のContextを作れるところに、Microsoftが企業向けAIを提供する強みがあります。</p>
+<div class="caution">
+<p><strong>ただし、「会社で起きたことを何でも知っている」という意味ではありません。</strong><br/>
+  たばこ休憩中に二人で話して決めたことが、メールにもTeamsにも議事録にも残らなかったのであれば、その判断をWork IQが知るための材料はありません。</p>
+</div>
+<p>AIが利用できるのは、あくまでMicrosoft 365をはじめとした接続先へ残った情報です。</p>
+<p>同じ理由で、「新しい決定が一度記録されれば、過去の決定を必ず無視してくれる」と考えるのも危険です。</p>
+<p>現在の仕事との関連性や情報の新しさを考慮する仕組みはありますが、どの文書を正式な規程として扱うのか、古い決定をいつ無効とみなすのかというKnowledge管理は、Foundry IQなども含めて会社側で設計する必要があります。</p>
+</section>
+<section>
+<h2>既存の権限をCopilotでも使う</h2>
+<p>会社の情報をここまでAIへ渡すのであれば、次に気になるのは「他人の資料までAIが勝手に読んでしまわないのか」という点です。</p>
+<p>Microsoft 365 Copilotは、Microsoft 365にすでに設定されているユーザーのアクセス権を基礎に情報を利用します。</p>
+<p>例えば、ある社員には閲覧できるSharePoint資料があり、別の社員にはその権限がない場合、後者のCopilotがWork IQを通じて勝手にその資料を利用できるようになるわけではありません。</p>
+<div class="keyline">
+<p><strong>AI専用に別の権限管理を一から作るより、既存のMicrosoft 365側の権限を正しく整備することの方が先になります。</strong></p>
+</div>
+<p>社内では現在Entra IDの無料版を使っていると聞いているため、Conditional Accessなどを含め、今後どこまでアクセス条件を細かく管理する必要があるかは情シスと確認したいところです。</p>
+<p>より高度な制御が必要になれば、Entra IDの有料プランを検討する余地があります。</p>
+<p>ただし、「ユーザーが見られる情報の範囲でCopilotも情報を利用する」という基本動作と、「Entra IDを有料版へ変更する」という話は別です。</p>
+<p>有料版への変更は、Copilotを動かすためではなく、Microsoft 365全体のアクセス制御やセキュリティをどこまで強化するかという判断になります。</p>
+</section>
+<section class="knowledge">
+<h2>会社の経験を知識へ変える部分は残る</h2>
+<p>
+    Work IQによって現在の仕事を理解し、Foundry IQによって管理されたKnowledgeをAIへ渡せるようになっても、
+    仕事で起きた成功、失敗、判断変更そのものが、自動的に次の仕事で使える組織知へ変わるわけではありません。
+  </p>
+<p>
+    そこで現在作っているのが <strong>DevLore</strong> です。
+    DevLoreはMicrosoft Copilot専用の拡張機能ではなく、レビュー記録や成果物などから仕事の経験を整理し、
+    次の仕事で再利用できるKnowledgeへ変える独立した仕組みとして設計しています。
+  </p>
+<p>
+    Microsoft Copilotを利用する場合は、Microsoft側が得意な検索、現在の仕事のContext、権限管理を任せ、
+    DevLoreはそこから先の知識循環を補う構成にできます。
+    Microsoftを利用しない場合でも、別の情報源やAIと接続して同じ役割を持たせる前提です。
+  </p>
+<p class="closing">
+    Copilotが「会社のことを知る」ところまで進んだあと、会社が「仕事から学ぶ」には何が必要なのか。
+    その話を次のページで考えます。
+  </p>
+</section>
+<section class="price">
+<h2>料金は機能ごとに考える必要がある</h2>
+<p>現在のMicrosoft Copilotは、「Copilotを契約すれば、紹介した機能をすべて無制限に利用できる」という構成ではありません。</p>
+<div class="price-grid">
+<div class="price-card">
+<span class="name">Microsoft 365 Copilot</span>
+<p>Copilot Chatや、Word、Excel、PowerPoint、Outlook、Teamsなどから使う日常的なCopilotの基礎になります。</p>
+</div>
+<div class="price-card">
+<span class="name">Copilot Credits</span>
+<p>Coworkなど、AIが複数工程をAgentとして実行する処理では従量課金を意識する必要があります。</p>
+</div>
+<div class="price-card">
+<span class="name">Entra ID</span>
+<p>Copilotそのものとは別に、アクセス制御やセキュリティをどこまで強化するかで有料プランを検討します。</p>
+</div>
+</div>
+<p>Codeについても、高度なAgent処理を利用するため、通常のチャットとは料金の考え方を分けて確認する必要があります。</p>
+<p>特にCoworkは、今回見た機能の中でも業務への影響が大きそうなので、実際の作業でどの程度Creditsを消費するのかは確認しておきたいところです。</p>
+<p>自社で現在契約しているMicrosoft 365 Businessのプランと、Microsoft 365 Copilotをどの契約形態で追加することになるのかについても、情シスへの確認が必要です。</p>
+<p>Coworkを一部の実験用途ではなく、日常業務の中で広く利用するのであれば、従量課金額だけを見るのではなく、それによって削減できる作業まで含めてプランを検討することになります。</p>
+<p>Entra IDについては別の費用です。</p>
+<p>現在の無料版から有料版へ変更するとすれば、Coworkを使うためではなく、Conditional Accessをはじめとしたアクセス制御やセキュリティを強化するための判断になります。</p>
+<p>したがって、導入時にはMicrosoft 365 Copilotのユーザーライセンス、Coworkなどの従量課金、Entra IDを含む管理基盤の三つを分けて確認した方が、実際に何へ費用がかかるのかを整理しやすくなります。</p>
+</section>
+<footer class="meta">
+  2026年9月時点の整理です。Microsoft 365 Copilotの機能、提供条件、料金体系は変更される可能性があります。
+</footer>
+</article>
+</main>
+</body>
+</html>

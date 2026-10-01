@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI開発における理解負債</title>
+<style>
+:root {
+  color-scheme: light;
+  --text: #172033;
+  --muted: #586174;
+  --line: #dbe4f0;
+  --accent: #1558d6;
+  --quote: #0d8c89;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Yu Gothic UI",
+               "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  line-height: 1.9;
+  color: var(--text);
+  background: #f6f8fb;
+}
+main {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 56px 28px 80px;
+}
+article {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 52px 58px;
+  box-shadow: 0 12px 36px rgba(25, 45, 80, 0.06);
+}
+header {
+  margin-bottom: 46px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+h1 {
+  margin: 0 0 12px;
+  font-size: 2.2rem;
+  line-height: 1.35;
+  letter-spacing: .02em;
+}
+.lead {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+section {
+  margin-top: 44px;
+}
+h2 {
+  margin: 0 0 18px;
+  font-size: 1.45rem;
+  line-height: 1.5;
+  color: #0d2f68;
+}
+p {
+  margin: 0 0 16px;
+}
+.methods {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+.methods li {
+  margin: 0 0 16px;
+  padding-left: .35rem;
+}
+blockquote {
+  margin: 28px 0;
+  padding: 18px 22px;
+  border-left: 4px solid var(--quote);
+  background: #f1fbfa;
+  border-radius: 8px;
+}
+strong {
+  color: #0f3f91;
+}
+footer {
+  margin-top: 46px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .92rem;
+}
+@media (max-width: 700px) {
+  main { padding: 20px 12px 44px; }
+  article { padding: 30px 22px; border-radius: 12px; }
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<main>
+<article>
+<header>
+  <h1>AI開発における理解負債</h1>
+  <p class="lead">AIの生成速度と、人間が責任を持てる理解の範囲をどう両立するか。</p>
+</header>
+<section><h2>理解負債とは</h2><p>AIで開発していると、その成果物の多さには驚かされる。人間なら長い時間をかける量のコードやドキュメントが、短時間で生成されることもある。もちろん、保守性まで含めれば単純比較はできないが、量の面でAIが人間を大きく上回ることは珍しくない。</p><p>一方で、人間の理解速度まで同じように上がったわけではない。動作は確認したがコードはほとんど読んでいない、AIが作ったので中身を詳しく説明できない。こうして成果物の増加に人間の理解が追いつかなくなる状態が、AI開発で語られる「理解負債」である。</p><p>問題は、コードが動かないことではない。なぜその構造になっているのか、変更するとどこへ影響するのか、何を根拠に正しいと判断したのかを人間が説明できない状態が積み上がることにある。</p></section><section><h2>理解負債にはメリットがある</h2><p>理解負債を許容すると、完成品までの速度は大きく上がる。AIに要求を伝え、実装させ、動作を確認し、問題があれば修正させる。このサイクルを繰り返せば、ソースコードを細かく確認しなくても完成品へかなり速く到達できる。</p><p>個人開発や試作品なら、それでも十分な場合は多い。しかし業務システムでは、障害や仕様変更が起きたときに、なぜその実装なのか、どこへ影響するのかを説明できなければ責任を持てない。</p><p>かといって、AIが生成したコードをすべて人間が理解しようとすれば、人間の理解速度が開発全体のボトルネックになる。AI開発では、この矛盾をどこで解くかが問題になる。</p></section><section><h2>従来の開発に当てはめてみる</h2><p>会社の開発では、PLやPMがすべてのソースコードを書いているわけではない。それでも、設計やレビュー、テスト結果を通じてシステムへ責任を持っている。</p><p>AI開発へ当てはめると、主に三つの方法が考えられる。</p></section><section><h2>3つの方法</h2><ol class='methods'><li><strong>① 人間が実装する：</strong>責任は持ちやすいが、人間が製造へ戻ればAIによる速度向上を自分で捨てることになる。</li><li><strong>② 人間がレビューする：</strong>Git差分を読み、AIに説明させながら確認すれば理解は深まる。ただし、AIが大量に生成するほどレビュー待ちが積み上がり、製造工程のボトルネックがレビュー工程へ移る。</li><li><strong>③ 設計とテストで確認する：</strong>人間が仕様を把握し、製造をAIへ任せ、テストで一致を確認する。すべてのコードを読む必要はないが、テストに通ったことは欠陥が存在しないことの証明ではない。</li></ol></section><section><h2>AIを複数工程に置けば安全になるわけではない</h2><p>AIが実装し、AIがレビューし、AIがテストまで作る場合、同じ見落としが工程をまたいで残る可能性がある。開発時に漏れた条件をレビューでも拾えず、その条件のテストも作られなければ、実際にバグとして現れるまで分からない。</p><p>実装、レビュー、テストを別々に実行しただけでは、検証が独立したとは言えない。同じ仕様解釈や似た推論に依存していれば、同じ前提の誤りを共有することがある。</p></section><section><h2>AIの仕事を減らす</h2><p>AI開発を通して実感したのは、AIにできるだけ多くの仕事をさせることより、AIがやらなくてもよい仕事を極限まで減らすことのほうが大事だということだ。</p><p>型チェック、入力値の検証、製造規約、禁止API、循環依存、依存レイヤー、命名規則など、機械的に判定できるものはプログラムへ移したほうがよい。AIに毎回考えさせるより、ルールとして固定して自動検査したほうが速く、判定も安定する。</p></section><section><h2>AIには思考が必要なレビューだけを残す</h2><p>機械で判定できるものを取り除いたあと、AIには単純なルールに落とし込みにくい部分だけを残す。読みやすさ、責務の分け方、過剰な複雑さ、抽象化の妥当性、仕様の意図とのズレなどは、周辺の設計や文脈を踏まえて考える必要がある。</p><p>AIレビューの範囲を広げるのではなく、AIでなければ扱いにくい部分だけを残す。そうすればAIが判断する範囲そのものが小さくなり、見落としが入り込める場所も減らせる。</p></section><section><h2>人間が理解する対象を変える</h2><p>人間も、すべてのコードを一行ずつ理解する必要はないと思う。人間が把握すべきなのは、何を作るのか、何を守るのか、どこまでが各部品の責任なのか、何を失敗とし、どの証拠がそろえば受け入れるのかという上位の判断である。</p><p>その下の実装については機械的な検査を増やし、機械では扱いにくい部分だけAIにレビューさせる。人間は実装の詳細ではなく、仕様、制約、責任境界、失敗条件、受け入れ条件を握る。</p></section><section><h2>一度判断したことを、毎回考え直さない</h2><p>レビューで「この依存は禁止する」と判断したなら、次回も人間やAIに同じことを指摘させる必要はない。ルールへ落とし込み、自動検査へ変えればよい。外部入力の検証や必要なテストの存在も、条件として表現できるならCIで確認できる。</p><p>一度判断したことを、二度目も思考によって判定し直さない。この積み重ねによって、人間とAIの両方から単純な仕事を減らし、本当に判断が必要な部分へ注意を集中できるようになる。</p></section><section><h2>理解負債をどこに残すか</h2><p>理解負債を完全になくそうとすれば、人間がAIの成果物をすべて理解しなければならない。それではAIの生成速度を生かせない。だから、理解負債はゼロにするものではなく、どこに残してよいかを決めるものだと思う。</p><p>関数内部の細かな実装方法を知らなくても、責務、入力、出力、失敗条件、依存先が分かっていれば、必要になったときに調べられる。一方で、なぜこの設計なのか、何を絶対に守るのか、変更するとどこへ影響するのかまで分からなければ危険である。</p><blockquote><strong>人間にしか決められないこと、AIに考えさせること、プログラムで確実に判定することを分ける。</strong></blockquote><p>AIが100倍コードを書けるようになったからといって、人間が100倍コードを読む必要はない。AIがレビューできるからといって、すべてのレビューをAIへ渡す必要もない。AIが考えなくてよいことを一つずつ減らした先に、安定したAI開発がある。</p></section>
+<footer>
+  <p>Knowledge note: AI開発における理解負債、レビュー、自動検査、人間・AI・プログラムの役割分担について整理したもの。</p>
+</footer>
+</article>
+</main>
+</body>
+</html>

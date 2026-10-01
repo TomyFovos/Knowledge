@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AIエージェントのオーケストレーション入門</title>
+<style>
+:root{
+  --bg:#f4f7fb;--paper:#fff;--text:#172033;--muted:#647084;--line:#dbe3ee;
+  --blue:#2f6fca;--blue2:#eaf2ff;--green:#2d8a55;--green2:#edf8f0;
+  --orange:#d97706;--orange2:#fff4e8;--purple:#7357b6;--purple2:#f4efff;
+  --red:#c94a4a;--red2:#fff0f0
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;line-height:1.85}
+main{width:min(1120px,calc(100% - 28px));margin:28px auto 72px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:clamp(24px,5vw,64px);box-shadow:0 14px 40px rgba(22,42,74,.07)}
+h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.25;margin:0 0 18px}
+h2{font-size:clamp(1.45rem,2.8vw,2.05rem);line-height:1.4;margin:64px 0 18px;padding-left:14px;border-left:6px solid var(--blue)}
+h3{font-size:1.12rem;margin:.2em 0 .5em}
+p{margin:0 0 1.15em}
+.lead{font-size:1.12rem;color:#29364a}
+.meta{color:var(--muted);font-size:.92rem;margin:12px 0 26px}
+figure{margin:28px 0 46px}
+figcaption{color:var(--muted);font-size:.9rem;margin-top:10px}
+svg{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--line);border-radius:14px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:22px 0 28px}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+.green{background:var(--green2)} .orange{background:var(--orange2)} .purple{background:var(--purple2)}
+.note{background:var(--blue2);border-radius:14px;padding:20px;margin:24px 0}
+.summary{background:var(--blue2);border-radius:16px;padding:24px;margin-top:54px}
+ul{padding-left:1.35em}
+small{color:var(--muted)}
+@media(max-width:760px){
+  main{width:min(100% - 12px,1120px);margin:6px auto 26px;padding:22px 16px 34px;border-radius:12px}
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>AIエージェントのオーケストレーション入門</h1>
+<p class="lead">AIエージェントを使った開発では、一つのAIにすべての仕事を任せるだけでなく、複数のAIに役割を分けて仕事を進める方法があります。調査を担当するAI、実装を担当するAI、レビューを担当するAIのように仕事を分け、その間の受け渡しまで設計する考え方です。</p>
+<p class="meta">テーマ：サブエージェント / オーケストレーション / モデル選択 / エスカレーション / AI組織設計</p>
+
+<figure>
+<svg viewBox="0 0 1000 420" role="img" aria-label="AIエージェントの全体像">
+<rect x="0" y="0" width="1000" height="420" fill="#fbfdff"/>
+<text x="40" y="55" font-size="30" font-weight="700" fill="#172033">AIエージェントの全体像</text>
+<rect x="400" y="90" width="200" height="90" rx="18" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<text x="500" y="128" text-anchor="middle" font-size="22" font-weight="700">メインエージェント</text>
+<text x="500" y="158" text-anchor="middle" font-size="17" fill="#647084">仕事を分解・指示</text>
+<line x1="500" y1="180" x2="215" y2="255" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="180" x2="500" y2="255" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="180" x2="785" y2="255" stroke="#2f6fca" stroke-width="4"/>
+<rect x="110" y="255" width="210" height="95" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="395" y="255" width="210" height="95" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="680" y="255" width="210" height="95" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="215" y="296" text-anchor="middle" font-size="22" font-weight="700">調査</text>
+<text x="215" y="326" text-anchor="middle" font-size="17">サブエージェント</text>
+<text x="500" y="296" text-anchor="middle" font-size="22" font-weight="700">実装</text>
+<text x="500" y="326" text-anchor="middle" font-size="17">サブエージェント</text>
+<text x="785" y="296" text-anchor="middle" font-size="22" font-weight="700">レビュー</text>
+<text x="785" y="326" text-anchor="middle" font-size="17">サブエージェント</text>
+</svg>
+<figcaption>図1：メインエージェントが仕事を分解し、役割ごとのサブエージェントへ渡す。</figcaption>
+</figure>
+
+<h2>サブエージェントとは何か</h2>
+<p>中心となるAIエージェントから仕事を受け取り、特定の役割を担当するAIエージェントを<strong>サブエージェント（Sub-agent）</strong>と呼びます。サブエージェントは、それぞれの担当作業に集中し、必要な情報や結果をメインエージェントへ返します。</p>
+<p>たとえば、調査担当はリポジトリやドキュメントを調べ、実装担当はコードを変更し、レビュー担当は変更内容に問題がないか確認します。一つのAIがすべてを抱えるのではなく、役割を分けることで、仕事の境界をはっきりさせやすくなります。</p>
+
+<div class="grid">
+<section class="card green"><h3>調査サブエージェント</h3><p>コード、ドキュメント、ログなどを調べ、問題の原因や必要な情報を集めます。</p></section>
+<section class="card orange"><h3>実装サブエージェント</h3><p>調査結果や指示を受け取り、コードの修正や新しい実装を担当します。</p></section>
+<section class="card purple"><h3>レビューサブエージェント</h3><p>変更内容を確認し、問題がないか、追加修正が必要かを判断します。</p></section>
+</div>
+
+<figure>
+<svg viewBox="0 0 1000 340" role="img" aria-label="サブエージェントの役割分担">
+<rect width="1000" height="340" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">サブエージェントは、特定の役割に集中する</text>
+<rect x="70" y="110" width="250" height="155" rx="18" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="375" y="110" width="250" height="155" rx="18" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="680" y="110" width="250" height="155" rx="18" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="195" y="155" text-anchor="middle" font-size="24" font-weight="700">調査担当</text>
+<text x="195" y="195" text-anchor="middle" font-size="18">情報収集</text><text x="195" y="225" text-anchor="middle" font-size="18">検索・要点整理</text>
+<text x="500" y="155" text-anchor="middle" font-size="24" font-weight="700">実装担当</text>
+<text x="500" y="195" text-anchor="middle" font-size="18">コード作成</text><text x="500" y="225" text-anchor="middle" font-size="18">修正・テスト</text>
+<text x="805" y="155" text-anchor="middle" font-size="24" font-weight="700">レビュー担当</text>
+<text x="805" y="195" text-anchor="middle" font-size="18">設計レビュー</text><text x="805" y="225" text-anchor="middle" font-size="18">品質確認</text>
+</svg>
+<figcaption>図2：サブエージェントは、それぞれ違う役割を持つ担当者として考えられる。</figcaption>
+</figure>
+
+<h2>オーケストレーションとは何か</h2>
+<p>サブエージェントを用意しただけでは、仕事全体はうまく進みません。調査が終われば、その結果を実装担当へ渡す必要があります。レビューで問題が見つかれば実装へ戻し、原因の見立てが違っていれば調査からやり直すこともあります。</p>
+<p>そこで必要になるのが<strong>オーケストレーション（Orchestration）</strong>です。オーケストレーションとは、複数のエージェントやツールを組み合わせ、「誰に何を任せるか」「次に何を実行するか」「結果をどこへ渡すか」といった仕事全体の流れを制御する仕組みです。</p>
+<div class="note"><strong>サブエージェントが「担当者」なら、オーケストレーションは「担当者たちの仕事をどう回すか」です。</strong></div>
+
+<figure>
+<svg viewBox="0 0 1000 410" role="img" aria-label="オーケストレーションの役割">
+<rect width="1000" height="410" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">オーケストレーションは仕事全体の流れを制御する</text>
+<rect x="395" y="90" width="210" height="80" rx="18" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<text x="500" y="125" text-anchor="middle" font-size="22" font-weight="700">Orchestrator</text>
+<text x="500" y="151" text-anchor="middle" font-size="16">メインエージェント</text>
+<rect x="80" y="235" width="220" height="90" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="390" y="235" width="220" height="90" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="700" y="235" width="220" height="90" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="190" y="287" text-anchor="middle" font-size="21" font-weight="700">調査</text>
+<text x="500" y="287" text-anchor="middle" font-size="21" font-weight="700">実装</text>
+<text x="810" y="287" text-anchor="middle" font-size="21" font-weight="700">レビュー</text>
+<line x1="500" y1="170" x2="190" y2="235" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="170" x2="500" y2="235" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="170" x2="810" y2="235" stroke="#2f6fca" stroke-width="4"/>
+<path d="M810 325 C810 380,500 380,500 325" fill="none" stroke="#c94a4a" stroke-width="4" stroke-dasharray="10 8"/>
+<text x="655" y="390" text-anchor="middle" font-size="16" fill="#c94a4a">問題があれば戻す</text>
+</svg>
+<figcaption>図3：オーケストレーターは、次に誰を動かすかと結果の受け渡しを管理する。</figcaption>
+</figure>
+
+<h2>仕事は、いつも一本道ではない</h2>
+<p>単純な処理なら、調査、実装、テストの順に流せば終わります。しかし、AIエージェントが扱う仕事では、途中の結果によって次の行動が変わります。原因が分からなければ追加調査が必要になり、レビューで問題が見つかれば修正へ戻ります。</p>
+<p>オーケストレーションは、サブエージェントを順番に呼び出すだけではありません。途中の状態を見ながら、次に進む先を変えるところに特徴があります。</p>
+
+<figure>
+<svg viewBox="0 0 1000 320" role="img" aria-label="WorkflowとOrchestrationの違い">
+<rect width="1000" height="320" fill="#fbfdff"/>
+<text x="40" y="50" font-size="28" font-weight="700">一本道のWorkflowと、分岐するOrchestration</text>
+<text x="250" y="95" text-anchor="middle" font-size="22" font-weight="700">Workflow</text>
+<rect x="70" y="135" width="110" height="60" rx="12" fill="#eaf2ff" stroke="#2f6fca" stroke-width="2"/>
+<rect x="220" y="135" width="110" height="60" rx="12" fill="#eaf2ff" stroke="#2f6fca" stroke-width="2"/>
+<rect x="370" y="135" width="110" height="60" rx="12" fill="#eaf2ff" stroke="#2f6fca" stroke-width="2"/>
+<text x="125" y="172" text-anchor="middle">調査</text><text x="275" y="172" text-anchor="middle">実装</text><text x="425" y="172" text-anchor="middle">テスト</text>
+<line x1="180" y1="165" x2="220" y2="165" stroke="#2f6fca" stroke-width="4"/><line x1="330" y1="165" x2="370" y2="165" stroke="#2f6fca" stroke-width="4"/>
+<text x="750" y="95" text-anchor="middle" font-size="22" font-weight="700">Orchestration</text>
+<rect x="665" y="125" width="170" height="70" rx="12" fill="#fff4e8" stroke="#d97706" stroke-width="2"/>
+<text x="750" y="155" text-anchor="middle">結果を判定</text><text x="750" y="180" text-anchor="middle">次を選ぶ</text>
+<rect x="555" y="225" width="140" height="55" rx="12" fill="#edf8f0" stroke="#2d8a55" stroke-width="2"/>
+<rect x="805" y="225" width="140" height="55" rx="12" fill="#f4efff" stroke="#7357b6" stroke-width="2"/>
+<text x="625" y="260" text-anchor="middle">追加調査</text><text x="875" y="260" text-anchor="middle">実装へ</text>
+<line x1="710" y1="195" x2="650" y2="225" stroke="#2f6fca" stroke-width="3"/><line x1="790" y1="195" x2="850" y2="225" stroke="#2f6fca" stroke-width="3"/>
+</svg>
+<figcaption>図4：Workflowは流れそのもの、Orchestrationは途中の状態に応じて流れを制御する。</figcaption>
+</figure>
+
+<h2>サブエージェントは、全員同じAIでなくてもいい</h2>
+<p>サブエージェントを使うメリットは、単に仕事を分担できることだけではありません。役割ごとに異なるモデルを割り当てられるため、仕事の難しさに応じて、速度やコスト、能力のバランスを変えられます。</p>
+<p>ファイルを探したり、集めた情報を分類したり、決められた形式に整理したりする仕事であれば、必ずしも最高性能のモデルを使う必要はありません。こうした比較的単純な処理は、高速で安価なモデルへ任せることで、システム全体のコストを抑えながら素早く処理できます。</p>
+<p>一方で、「複数の修正案からどれを選ぶべきか」「原因がはっきりしない問題をどう調査するか」「この設計変更がシステム全体にどんな影響を与えるか」といった判断には、より高い推論能力が求められます。そのような仕事だけを、能力の高いモデルへ任せることもできます。</p>
+
+<figure>
+<svg viewBox="0 0 1000 360" role="img" aria-label="役割ごとのモデル使い分け">
+<rect width="1000" height="360" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">仕事に合わせて、使うモデルを変えられる</text>
+<rect x="65" y="110" width="250" height="170" rx="18" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="375" y="110" width="250" height="170" rx="18" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<rect x="685" y="110" width="250" height="170" rx="18" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="190" y="150" text-anchor="middle" font-size="22" font-weight="700">情報整理</text><text x="190" y="192" text-anchor="middle">高速・低コスト</text><text x="190" y="225" text-anchor="middle" fill="#647084">分類 / 整形 / 要約</text>
+<text x="500" y="150" text-anchor="middle" font-size="22" font-weight="700">コード調査</text><text x="500" y="192" text-anchor="middle">高速モデル</text><text x="500" y="225" text-anchor="middle" fill="#647084">検索 / 候補抽出</text>
+<text x="810" y="150" text-anchor="middle" font-size="22" font-weight="700">設計判断</text><text x="810" y="192" text-anchor="middle">高性能モデル</text><text x="810" y="225" text-anchor="middle" fill="#647084">複雑な推論</text>
+</svg>
+<figcaption>図5：すべてを高性能モデルへ任せず、役割に応じて能力とコストを使い分ける。</figcaption>
+</figure>
+
+<h2>難しい仕事だけ、上位のモデルへ渡す</h2>
+<p>この仕組みは、会社の仕事の進め方に少し似ています。会社でも、すべての案件を最初から最も経験のある専門家が担当するわけではありません。まず担当者が内容を確認し、自分で処理できるものはそのまま進め、判断が難しい場合にだけ上司や専門部署へ相談します。</p>
+<p>AIエージェントでも、これに近い流れを作れます。最初は高速で安価なモデルに仕事を任せ、そのモデルでは判断が難しい場合だけ、より能力の高いモデルへ引き継ぎます。簡単な仕事まで高性能なモデルで処理する必要がなくなり、本当に難しい場面にだけ計算資源を使えるようになります。</p>
+<p>こうした「自分では処理できないので、より高い能力を持つ相手へ仕事を渡す」という動きは、組織でいう<strong>エスカレーション</strong>に近いものです。</p>
+
+<figure>
+<svg viewBox="0 0 1000 390" role="img" aria-label="エスカレーションの流れ">
+<rect width="1000" height="390" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">難しい仕事だけ、上位モデルへエスカレーション</text>
+<rect x="80" y="150" width="220" height="90" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<text x="190" y="187" text-anchor="middle" font-size="21" font-weight="700">高速・安価なモデル</text><text x="190" y="218" text-anchor="middle">まずここで処理</text>
+<polygon points="440,135 525,195 440,255 355,195" fill="#fff9df" stroke="#d5a400" stroke-width="3"/>
+<text x="440" y="190" text-anchor="middle">判断できる？</text>
+<text x="440" y="215" text-anchor="middle">難しい？</text>
+<rect x="635" y="150" width="270" height="90" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="770" y="187" text-anchor="middle" font-size="21" font-weight="700">高性能モデル</text><text x="770" y="218" text-anchor="middle">必要なときだけ使用</text>
+<line x1="300" y1="195" x2="355" y2="195" stroke="#2f6fca" stroke-width="4"/>
+<line x1="525" y1="195" x2="635" y2="195" stroke="#c94a4a" stroke-width="4"/>
+<text x="580" y="176" text-anchor="middle" fill="#c94a4a">難しい</text>
+<path d="M440 255 L440 310 L190 310 L190 240" fill="none" stroke="#2d8a55" stroke-width="4"/>
+<text x="325" y="334" text-anchor="middle" fill="#2d8a55">処理できるなら、そのまま完了</text>
+</svg>
+<figcaption>図6：軽いモデルで始め、必要なときだけ高性能モデルへ上げる。</figcaption>
+</figure>
+
+<figure>
+<svg viewBox="0 0 1000 330" role="img" aria-label="会社のエスカレーションとの対応">
+<rect width="1000" height="330" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">会社の仕事の流れと似ている</text>
+<rect x="90" y="125" width="210" height="90" rx="16" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<rect x="395" y="125" width="210" height="90" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="700" y="125" width="210" height="90" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="195" y="160" text-anchor="middle" font-size="21" font-weight="700">担当者</text><text x="195" y="193" text-anchor="middle">まず自分で対応</text>
+<text x="500" y="160" text-anchor="middle" font-size="21" font-weight="700">判断が難しい</text><text x="500" y="193" text-anchor="middle">相談・エスカレーション</text>
+<text x="805" y="160" text-anchor="middle" font-size="21" font-weight="700">専門家・上司</text><text x="805" y="193" text-anchor="middle">高い能力で対応</text>
+<line x1="300" y1="170" x2="395" y2="170" stroke="#2f6fca" stroke-width="4"/><line x1="605" y1="170" x2="700" y2="170" stroke="#2f6fca" stroke-width="4"/>
+<text x="500" y="270" text-anchor="middle" font-size="18" fill="#647084">AIエージェントでも、同じような段階構造を作れる</text>
+</svg>
+<figcaption>図7：組織での相談やエスカレーションに近い構造をAIでも設計できる。</figcaption>
+</figure>
+
+<h2>AIの中に「組織」を作れる</h2>
+<p>ここまで考えると、サブエージェントを使ったAIシステムは、少し会社の組織図に似てきます。AIエージェントが本当に会社員になるわけではありませんが、人によって担当や権限を分けるのと同じように、AIにも役割と責任範囲を持たせられます。</p>
+<p>たとえば、調査を担当するサブエージェント、コードを書くサブエージェント、レビューを担当するサブエージェントを用意し、その上に仕事全体を管理するメインエージェントを置くことができます。さらに、それぞれの役割に適したモデルを割り当てれば、情報収集には高速で安価なモデルを使い、複雑な設計判断には高性能なモデルを使う、といった構成も可能になります。</p>
+<p>現実の会社にある「担当者」「専門部署」「マネージャー」「上位者へのエスカレーション」といった構造を、AIシステムの設計にも持ち込めるわけです。</p>
+
+<figure>
+<svg viewBox="0 0 1000 470" role="img" aria-label="AIの組織図">
+<rect width="1000" height="470" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">AIの中に「組織」を作る</text>
+<rect x="375" y="85" width="250" height="75" rx="16" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<text x="500" y="118" text-anchor="middle" font-size="22" font-weight="700">Manager Agent</text><text x="500" y="145" text-anchor="middle">全体を管理</text>
+<rect x="65" y="220" width="250" height="70" rx="14" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="375" y="220" width="250" height="70" rx="14" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="685" y="220" width="250" height="70" rx="14" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="190" y="262" text-anchor="middle" font-size="20" font-weight="700">調査チーム</text><text x="500" y="262" text-anchor="middle" font-size="20" font-weight="700">開発チーム</text><text x="810" y="262" text-anchor="middle" font-size="20" font-weight="700">レビューチーム</text>
+<line x1="500" y1="160" x2="190" y2="220" stroke="#2f6fca" stroke-width="3"/><line x1="500" y1="160" x2="500" y2="220" stroke="#2f6fca" stroke-width="3"/><line x1="500" y1="160" x2="810" y2="220" stroke="#2f6fca" stroke-width="3"/>
+<rect x="70" y="345" width="110" height="55" rx="12" fill="#fff" stroke="#2d8a55"/><rect x="200" y="345" width="110" height="55" rx="12" fill="#fff" stroke="#2d8a55"/>
+<rect x="380" y="345" width="110" height="55" rx="12" fill="#fff" stroke="#d97706"/><rect x="510" y="345" width="110" height="55" rx="12" fill="#fff" stroke="#d97706"/>
+<rect x="735" y="345" width="150" height="55" rx="12" fill="#fff" stroke="#7357b6"/>
+<text x="125" y="380" text-anchor="middle">検索</text><text x="255" y="380" text-anchor="middle">整理</text><text x="435" y="380" text-anchor="middle">実装</text><text x="565" y="380" text-anchor="middle">テスト</text><text x="810" y="380" text-anchor="middle">レビュー</text>
+</svg>
+<figcaption>図8：マネージャー、チーム、担当者のような階層をAIエージェントでも設計できる。</figcaption>
+</figure>
+
+<h2>モデルの選択もオーケストレーションの一部になる</h2>
+<p>オーケストレーションというと、「どのサブエージェントを呼び出すか」を決める仕組みだと思われがちですが、実際にはその先にあるモデルの使い分けまで含めて考えることができます。</p>
+<p>同じサブエージェントでも、状況に応じて使うモデルを変えることができます。普段は高速で安価なモデルを使い、難しい問題に遭遇したときだけ高性能なモデルへ切り替える、といった構成も考えられます。</p>
+
+<figure>
+<svg viewBox="0 0 1000 350" role="img" aria-label="オーケストレーターが決めること">
+<rect width="1000" height="350" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">オーケストレーターが決めること</text>
+<circle cx="500" cy="180" r="85" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<text x="500" y="173" text-anchor="middle" font-size="22" font-weight="700">Orchestrator</text><text x="500" y="202" text-anchor="middle">全体を制御</text>
+<rect x="70" y="135" width="230" height="90" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="700" y="95" width="230" height="90" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="700" y="225" width="230" height="90" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="185" y="170" text-anchor="middle" font-size="20" font-weight="700">誰に頼む？</text><text x="185" y="200" text-anchor="middle">どのAgentか</text>
+<text x="815" y="130" text-anchor="middle" font-size="20" font-weight="700">どのモデル？</text><text x="815" y="160" text-anchor="middle">能力・コスト</text>
+<text x="815" y="260" text-anchor="middle" font-size="20" font-weight="700">次は何する？</text><text x="815" y="290" text-anchor="middle">仕事の流れ</text>
+<line x1="300" y1="180" x2="415" y2="180" stroke="#2f6fca" stroke-width="3"/><line x1="585" y1="155" x2="700" y2="140" stroke="#2f6fca" stroke-width="3"/><line x1="585" y1="205" x2="700" y2="260" stroke="#2f6fca" stroke-width="3"/>
+</svg>
+<figcaption>図9：誰に任せるか、どのモデルを使うか、次に何をするかを一体として考える。</figcaption>
+</figure>
+
+<figure>
+<svg viewBox="0 0 1000 355" role="img" aria-label="モデル切り替えパターン">
+<rect width="1000" height="355" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">モデルの使い分けには複数のパターンがある</text>
+<text x="70" y="105" font-size="19" font-weight="700">① 常に同じモデル</text>
+<rect x="300" y="78" width="160" height="55" rx="12" fill="#eaf2ff" stroke="#2f6fca"/><rect x="500" y="78" width="160" height="55" rx="12" fill="#eaf2ff" stroke="#2f6fca"/>
+<text x="380" y="113" text-anchor="middle">Model A</text><text x="580" y="113" text-anchor="middle">Model A</text>
+<text x="70" y="200" font-size="19" font-weight="700">② 状況に応じて切り替え</text>
+<rect x="300" y="170" width="160" height="55" rx="12" fill="#edf8f0" stroke="#2d8a55"/><rect x="500" y="170" width="160" height="55" rx="12" fill="#f4efff" stroke="#7357b6"/>
+<text x="380" y="205" text-anchor="middle">軽量モデル</text><text x="580" y="205" text-anchor="middle">高性能モデル</text>
+<line x1="460" y1="197" x2="500" y2="197" stroke="#2f6fca" stroke-width="3"/>
+<text x="70" y="295" font-size="19" font-weight="700">③ 段階的にエスカレーション</text>
+<rect x="300" y="265" width="130" height="55" rx="12" fill="#edf8f0" stroke="#2d8a55"/><rect x="465" y="265" width="130" height="55" rx="12" fill="#fff4e8" stroke="#d97706"/><rect x="630" y="265" width="130" height="55" rx="12" fill="#f4efff" stroke="#7357b6"/>
+<text x="365" y="300" text-anchor="middle">Level 1</text><text x="530" y="300" text-anchor="middle">Level 2</text><text x="695" y="300" text-anchor="middle">Level 3</text>
+</svg>
+<figcaption>図10：固定、状況切り替え、段階的エスカレーションなど、複数の設計が考えられる。</figcaption>
+</figure>
+
+<h2>オーケストレーション設計で考えること</h2>
+<p>AIシステム全体を「一つの巨大で賢いAI」として作る必要はありません。能力や速度、コストが異なるモデルを複数配置し、それぞれが得意な仕事を担当する組織として設計できます。</p>
+<p>そのとき、どの仕事を分けるのか、どのモデルに任せるのか、どの条件で高性能なモデルへエスカレーションするのか、結果をどのようにつないで次へ渡すのかまで考える必要があります。</p>
+<p>ただし、サブエージェントを増やせば自動的に速く安くなるわけではありません。エージェント同士で情報を受け渡す処理にも時間とコストがかかり、振り分けを間違えれば同じ仕事を何度もやり直すことにもなります。</p>
+
+<figure>
+<svg viewBox="0 0 1000 390" role="img" aria-label="オーケストレーション設計のポイント">
+<rect width="1000" height="390" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">オーケストレーション設計の4つの判断</text>
+<rect x="75" y="110" width="390" height="90" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="535" y="110" width="390" height="90" rx="16" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<rect x="75" y="235" width="390" height="90" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="535" y="235" width="390" height="90" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="270" y="148" text-anchor="middle" font-size="20" font-weight="700">どの仕事を分けるか</text><text x="270" y="178" text-anchor="middle">役割の境界</text>
+<text x="730" y="148" text-anchor="middle" font-size="20" font-weight="700">どのモデルに任せるか</text><text x="730" y="178" text-anchor="middle">能力・速度・コスト</text>
+<text x="270" y="273" text-anchor="middle" font-size="20" font-weight="700">いつエスカレーションするか</text><text x="270" y="303" text-anchor="middle">切り替え条件</text>
+<text x="730" y="273" text-anchor="middle" font-size="20" font-weight="700">結果をどうつなぐか</text><text x="730" y="303" text-anchor="middle">情報の受け渡し</text>
+</svg>
+<figcaption>図11：役割分担だけでなく、モデル選択、切り替え条件、情報の受け渡しまで設計する。</figcaption>
+</figure>
+
+<section class="summary">
+<h2 style="margin-top:0">一言で覚えるなら</h2>
+<p>サブエージェントは、仕事を分担するための「担当者」です。そしてオーケストレーションは、その担当者たちへ仕事を配り、結果を受け取り、次の仕事へつなぐ「仕事の回し方」です。</p>
+<p>さらに、サブエージェントごとに異なるモデルを割り当てれば、簡単な仕事は高速で安価なモデルへ、難しい仕事は高性能なモデルへ、といった使い分けもできます。</p>
+<p><strong>能力の違うAIに役割を持たせ、会社のように仕事を分担しながら、一つの目的に向かって動かす。</strong>これが、AI開発にオーケストレーションを持ち込む面白さの一つです。</p>
+</section>
+
+<figure>
+<svg viewBox="0 0 1000 420" role="img" aria-label="AIエージェント活用のまとめ">
+<rect width="1000" height="420" fill="#fbfdff"/>
+<text x="40" y="52" font-size="28" font-weight="700">まとめ：AIを「チーム」として動かす</text>
+<rect x="400" y="85" width="200" height="80" rx="18" fill="#eaf2ff" stroke="#2f6fca" stroke-width="3"/>
+<text x="500" y="120" text-anchor="middle" font-size="21" font-weight="700">Orchestrator</text><text x="500" y="147" text-anchor="middle">仕事を配る</text>
+<rect x="85" y="245" width="220" height="95" rx="16" fill="#edf8f0" stroke="#2d8a55" stroke-width="3"/>
+<rect x="390" y="245" width="220" height="95" rx="16" fill="#fff4e8" stroke="#d97706" stroke-width="3"/>
+<rect x="695" y="245" width="220" height="95" rx="16" fill="#f4efff" stroke="#7357b6" stroke-width="3"/>
+<text x="195" y="282" text-anchor="middle" font-size="20" font-weight="700">高速・安価</text><text x="195" y="314" text-anchor="middle">軽い仕事</text>
+<text x="500" y="282" text-anchor="middle" font-size="20" font-weight="700">専門担当</text><text x="500" y="314" text-anchor="middle">役割に集中</text>
+<text x="805" y="282" text-anchor="middle" font-size="20" font-weight="700">高性能</text><text x="805" y="314" text-anchor="middle">難しい判断</text>
+<line x1="500" y1="165" x2="195" y2="245" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="165" x2="500" y2="245" stroke="#2f6fca" stroke-width="4"/>
+<line x1="500" y1="165" x2="805" y2="245" stroke="#2f6fca" stroke-width="4"/>
+<text x="500" y="385" text-anchor="middle" font-size="20" fill="#647084">役割分担 + モデル選択 + エスカレーション</text>
+</svg>
+<figcaption>図12：複数のAIを役割分担させ、必要な能力を使い分けながら一つの目的へ向かわせる。</figcaption>
+</figure>
+
+</main>
+</body>
+</html>
