@@ -1,0 +1,11 @@
+filters:
+  and:
+    - 'file.ext == "md"'
+    - 'file.inFolder("Inbox")'
+views:
+  - type: table
+    name: 未整理のメモ
+    order:
+      - file.name
+      - status
+      - file.mtime

@@ -1,0 +1,14 @@
+filters:
+  and:
+    - file.ext == "md"
+    - or:
+        - status == "Researching"
+        - status == "Experimenting"
+views:
+  - type: table
+    name: 進行中のノート
+    order:
+      - file.name
+      - status
+      - project
+      - file.mtime

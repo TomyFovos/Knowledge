@@ -26,6 +26,7 @@ Knowledge/
 
 ## 原則
 
+- ノート・資料・画像のファイル名は、内容が分かる日本語にする。製品名や技術名は必要に応じて原語を残し、ノートの見出しとファイル名を揃える。名前を変更したら、内部リンクと設定内の参照も更新する。
 - Markdown + AssetsをSSOTにする。
 - KakuとObsidianは同じRepositoryを直接開く。
 - Concept / Pattern / System / Idea / Experiment / Decision / Lessonなどはフォルダではなく `type` Propertyで表す。
@@ -92,4 +93,4 @@ Kakuは主に以下に使います。
 Obsidianでも同じRepositoryルートをVaultとして開きます。
 Hearth・Bases・Dataviewで閲覧とDashboardを担当し、Obsidian Syncでスマホと同期します。
 
-セットアップ手順は `SETUP_OBSIDIAN.md` を参照してください。
+セットアップ手順は `ObsidianとKakuのセットアップ.md` を参照してください。
