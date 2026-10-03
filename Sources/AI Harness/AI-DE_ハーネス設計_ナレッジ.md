@@ -834,3 +834,4 @@ AI-DEは「Agent Harnessそのもの」ではなく、
 > **AIによる開発活動全体を管理するDevelopment Environmentであり、その内部にDevelopment Runtime、Harness Host、Agent Harnessを持つ。**
 
 という整理が、現在の構成に最も近い。
+#lesson
