@@ -9,4 +9,5 @@
 .obsidian/plugins/*/styles.css
 .obsidian/plugins/*/manifest.json
 
-.kaku/*
+# Kaku local state
+/.kaku/
