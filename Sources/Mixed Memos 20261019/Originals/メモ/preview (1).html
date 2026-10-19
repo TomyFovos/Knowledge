@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本ハーネス アーキテクチャ（日本語・アイコン版）</title>
+<style>
+:root{
+  --bg:#08101e;--panel:#101a2d;--panel2:#14223a;--stroke:#314565;
+  --text:#edf4ff;--muted:#a9b8cf;
+  --blue:#67a3ff;--green:#65d99c;--orange:#f3b35e;
+  --purple:#b78cff;--red:#ff7d8e;--cyan:#66d7e5;--yellow:#f2d96d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI","Yu Gothic UI","Noto Sans JP",sans-serif;padding-bottom:24px}
+header{width:min(80vw,1700px);margin:0 auto;padding:24px 28px 14px;border-bottom:1px solid #22324f;background:linear-gradient(180deg,#111a2d,#08101e);border-radius:0 0 18px 18px}
+h1{font-size:28px;margin:0}
+.sub{margin-top:8px;color:var(--muted);line-height:1.7}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:wrap;width:min(80vw,1700px);margin:0 auto;padding:12px 18px;background:rgba(8,16,30,.96);border-bottom:1px solid #22324f}
+.tab{padding:9px 13px;border:1px solid #334766;border-radius:10px;background:#111b2f;color:#dce8ff;font-weight:700;cursor:pointer}
+.tab.active{background:#24508d;border-color:#74aaff}
+.view{display:none;width:min(80vw,1700px);margin:0 auto;padding:20px}.view.active{display:block}
+.card{background:var(--panel);border:1px solid #263955;border-radius:18px;padding:12px;box-shadow:0 12px 35px rgba(0,0,0,.18)}
+.scroll{overflow:auto}
+svg{width:100%;height:auto;min-width:980px}
+.title{fill:#f2f7ff;font-size:20px;font-weight:800}
+.txt{fill:#f2f7ff;font-size:17px;font-weight:800}
+.small{fill:#cfdaec;font-size:13.5px;font-weight:600}
+.tiny{fill:#a9b8cf;font-size:11.5px}
+.tag{fill:#c8d8f2;font-size:12px;font-weight:700}
+.box{fill:#121d31;stroke:#536a8f;stroke-width:2}
+.blue{fill:#13294d;stroke:#67a3ff;stroke-width:2.2}
+.green{fill:#122e25;stroke:#65d99c;stroke-width:2.2}
+.orange{fill:#332412;stroke:#f3b35e;stroke-width:2.2}
+.purple{fill:#281c3d;stroke:#b78cff;stroke-width:2.2}
+.red{fill:#351925;stroke:#ff7d8e;stroke-width:2.2}
+.cyan{fill:#11303a;stroke:#66d7e5;stroke-width:2.2}
+.yellow{fill:#332f14;stroke:#f2d96d;stroke-width:2.2}
+.dashed{stroke-dasharray:8 6}
+.line{stroke:#8ea9d9;stroke-width:2.2;fill:none}
+.note{margin-top:14px;padding:14px 16px;border-left:4px solid var(--blue);border-radius:9px;background:#10192c;color:#d9e4f7;line-height:1.75}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;color:var(--muted);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:50%}
+footer{width:min(80vw,1700px);margin:0 auto;padding:18px 24px 32px;color:var(--muted);font-size:12.5px}
+#svg-tip{
+  position:fixed;z-index:1000;display:none;max-width:360px;
+  padding:10px 12px;border:1px solid #516a94;border-radius:10px;
+  background:rgba(8,16,30,.97);color:#eef5ff;font-size:13px;line-height:1.55;
+  pointer-events:none;box-shadow:0 8px 26px rgba(0,0,0,.32);white-space:pre-line
+}
+.hint-bar{width:min(80vw,1700px);margin:14px auto 0;padding:10px 14px;border:1px dashed #5577aa;border-radius:12px;background:#0d1728;color:#d7e6ff;font-size:13px;line-height:1.7}
+.hint-key{display:inline-block;margin-right:12px;padding:2px 8px;border:1px solid #5f7fb3;border-radius:999px;color:#eef6ff;background:#14243f;font-size:12px;font-weight:700}
+.explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.explain-card{background:var(--panel2);border:1px solid #2f4567;border-radius:14px;padding:12px 14px}
+.explain-card h3{margin:0 0 8px;font-size:14px;color:#f0f6ff}
+.explain-card p{margin:0;color:#cfdcf1;font-size:13px;line-height:1.75}
+.explain-title{margin:16px 2px 8px;color:#eef5ff;font-size:15px;font-weight:800}
+svg .hoverable-node{cursor:help;stroke-dasharray:8 5}
+svg text.hoverable-label{cursor:help}
+svg line.help-underline{stroke:#dfeaff;stroke-width:1.5;stroke-dasharray:2 3;opacity:.9}
+
+svg rect.blue,svg rect.green,svg rect.orange,svg rect.purple,svg rect.red,
+svg rect.cyan,svg rect.yellow,svg rect.box{cursor:help}
+.status-pill{font-size:12px;color:var(--muted)}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>日本ハーネス アーキテクチャ — 日本語・アイコン版</h1>
+  <div class="sub">主要ノードを「色 + アイコン + 短い日本語説明」で統一。各主要ノードはホバーすると補足説明を表示します。</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="landscape">1. 全体像</button>
+  <button class="tab" data-tab="aide">2. AI-DE内部</button>
+  <button class="tab" data-tab="execution">3. AI実行・LLM経路</button>
+  <button class="tab" data-tab="integration">4. 知識・資産・外部連携</button>
+  <button class="tab" data-tab="verification">5. Platform Test・検証</button>
+  <button class="tab" data-tab="ownership">6. Repository・責務</button>
+  <button class="tab" data-tab="features">7. AI-DE 全機能</button>
+</div>
+<div class="hint-bar"><span class="hint-key">見方</span> 点線の下線が付いたラベル、または点線枠のノードにマウスを乗せると、日本語の詳しい説明が表示されます。<span class="hint-key">目的</span> 図だけで位置関係をつかみ、下の「この図の機能説明」で各機能を1対1で確認できる構成にしています。</div>
+
+<!-- Shared icon symbols are repeated inside each SVG via <defs> for standalone rendering compatibility. -->
+
+<section id="landscape" class="view active">
+<div class="card scroll">
+<svg viewBox="0 0 1500 860">
+<defs>
+  <marker id="a1" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="user" viewBox="0 0 32 32"><circle cx="16" cy="10" r="5" fill="none" stroke="#fff" stroke-width="2"/><path d="M6 28c1-7 5-10 10-10s9 3 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="monitor" viewBox="0 0 32 32"><rect x="4" y="5" width="24" height="17" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 27h8M16 22v5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="workflow" viewBox="0 0 32 32"><circle cx="7" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="24" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 11M23 10l-5 11" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="shield" viewBox="0 0 32 32"><path d="M16 3l10 4v7c0 7-4 12-10 15C10 26 6 21 6 14V7z" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 16l3 3 7-8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="router" viewBox="0 0 32 32"><path d="M5 9h16M16 5l5 4-5 4M27 23H11M16 19l-5 4 5 4" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="cloud" viewBox="0 0 32 32"><path d="M9 25h14a6 6 0 0 0 1-12 9 9 0 0 0-17-2A7 7 0 0 0 9 25z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="test" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 20h10M12 24l2 2 5-5" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="docs" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8z" fill="none" stroke="#fff" stroke-width="2"/><path d="M20 5v6h6M12 16h10M12 20h10" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="ticket" viewBox="0 0 32 32"><path d="M5 10a3 3 0 0 0 0 6v6h22v-6a3 3 0 0 0 0-6V4H5z" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 7v12" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/></symbol>
+  <symbol id="git" viewBox="0 0 32 32"><circle cx="8" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="8" cy="25" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="24" cy="16" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M8 10v12M8 14c7 0 9 2 13 2" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="microscope" viewBox="0 0 32 32"><path d="M12 5l6 6-4 4-6-6zM14 15c-2 5 1 9 6 9h5M7 28h20M20 7l3-3" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+</defs>
+
+<rect x="20" y="20" width="1460" height="790" rx="26" fill="none" stroke="#40577f" stroke-width="3"/>
+<text x="45" y="58" class="title">日本ハーネス = AI開発を成立させるシステム群の上位アーキテクチャ</text>
+
+<!-- Human -->
+<rect x="55" y="105" width="220" height="185" rx="18" class="green"/>
+<circle cx="105" cy="150" r="27" fill="#214b3b"/><use href="#user" x="89" y="134" width="32" height="32"/>
+<text x="145" y="153" class="txt">Human</text>
+<text x="95" y="198" class="small">目的 / 判断 / 承認</text>
+<text x="95" y="226" class="small">Governance / Exception</text>
+<text x="95" y="254" class="tiny">最終責任</text>
+
+<!-- Orca -->
+<rect x="335" y="85" width="270" height="225" rx="18" class="blue"/>
+<circle cx="385" cy="132" r="27" fill="#1d4175"/><use href="#monitor" x="369" y="116" width="32" height="32"/>
+<text x="425" y="136" class="txt">Orca</text>
+<text x="375" y="180" class="small">AI開発管理コンソール</text>
+<text x="375" y="208" class="small">状態表示 + 意図・Command送信</text>
+<text x="375" y="236" class="small">SSH / Terminal / Worktree</text>
+<text x="375" y="264" class="small">Diff / Decision / Gate UI</text>
+<text x="375" y="289" class="tiny">任意。OrcaなしでもAI-DEは成立</text>
+
+<!-- AI-DE -->
+<rect x="665" y="78" width="405" height="265" rx="18" class="blue"/>
+<circle cx="720" cy="128" r="30" fill="#1d4175"/><use href="#workflow" x="702" y="110" width="36" height="36"/>
+<text x="770" y="134" class="txt">AI-DE</text>
+<text x="705" y="180" class="small">開発ハーネス本体 / 実行と状態のAuthority</text>
+<text x="705" y="212" class="small">Requirements → Design → Implementation</text>
+<text x="705" y="240" class="small">→ Test → Review</text>
+<text x="705" y="278" class="small">State / Gate / Task / Attempt / Operation</text>
+<text x="705" y="306" class="small">Artifact / Evidence / Human Decision</text>
+<text x="705" y="330" class="tiny">State Store = Runtime State SSOT</text>
+
+<path d="M275 190H335" class="line" marker-end="url(#a1)"/>
+<path d="M605 190H665" class="line" marker-end="url(#a1)"/>
+<path d="M275 250C430 360 560 350 665 260" class="line dashed" marker-end="url(#a1)"/>
+<text x="425" y="355" class="tag">CLI / APIでAI-DEへ直接</text>
+
+<!-- Security Proxy -->
+<rect x="1120" y="92" width="320" height="128" rx="18" class="purple"/>
+<circle cx="1168" cy="137" r="27" fill="#4b2d70"/><use href="#shield" x="1152" y="121" width="32" height="32"/>
+<text x="1208" y="142" class="txt">Security Proxy</text>
+<text x="1160" y="180" class="small">LLM外部送信のセキュリティ境界</text>
+<text x="1160" y="204" class="tiny">Mask ON/OFF。OFFでも通過</text>
+
+<!-- OpenCodex -->
+<rect x="1120" y="248" width="320" height="112" rx="18" class="orange"/>
+<circle cx="1168" cy="292" r="27" fill="#6b461c"/><use href="#router" x="1152" y="276" width="32" height="32"/>
+<text x="1208" y="297" class="txt">OpenCodex</text>
+<text x="1160" y="333" class="small">Provider / Model の接続・振り分け</text>
+
+<!-- LLM Provider群 -->
+<rect x="1120" y="400" width="320" height="160" rx="18" class="red"/>
+<circle cx="1168" cy="445" r="27" fill="#6d2936"/><use href="#cloud" x="1152" y="429" width="32" height="32"/>
+<text x="1208" y="450" class="txt">LLM Provider群</text>
+<text x="1160" y="488" class="small">Claude / OpenAI / Codex</text>
+<text x="1160" y="516" class="small">Qwen / Other Cloud</text>
+<text x="1160" y="544" class="small">Local LLM</text>
+
+<path d="M1070 160H1120" class="line" marker-end="url(#a1)"/>
+<path d="M1280 220V248" class="line" marker-end="url(#a1)"/>
+<path d="M1280 360V400" class="line" marker-end="url(#a1)"/>
+
+<!-- STK -->
+<rect x="70" y="455" width="300" height="160" rx="18" class="cyan"/>
+<circle cx="120" cy="500" r="27" fill="#1f5761"/><use href="#test" x="104" y="484" width="32" height="32"/>
+<text x="160" y="505" class="txt">Software-Test-Knowledge</text>
+<text x="110" y="545" class="small">汎用ソフトウェアテスト知識</text>
+<text x="110" y="573" class="tiny">「何をテストするか」の候補を提供</text>
+<text x="110" y="596" class="tiny">適用判断Authorityではない</text>
+
+<!-- Document Asset -->
+<rect x="405" y="455" width="300" height="160" rx="18" class="cyan"/>
+<circle cx="455" cy="500" r="27" fill="#1f5761"/><use href="#docs" x="439" y="484" width="32" height="32"/>
+<text x="495" y="505" class="txt">Document Asset</text>
+<text x="445" y="545" class="small">過去ドキュメント活用基盤</text>
+<text x="445" y="573" class="tiny">Playbook / Template / Exemplar</text>
+<text x="445" y="596" class="tiny">Import / Read / Write-back</text>
+
+<!-- Tracker -->
+<rect x="740" y="455" width="275" height="160" rx="18" class="yellow"/>
+<circle cx="790" cy="500" r="27" fill="#60561c"/><use href="#ticket" x="774" y="484" width="32" height="32"/>
+<text x="830" y="505" class="txt">Task Tracker</text>
+<text x="780" y="545" class="small">GitHub Issues / Backlog</text>
+<text x="780" y="573" class="tiny">Work Source</text>
+<text x="780" y="596" class="tiny">実行状態の正本ではない</text>
+
+<path d="M220 455C330 380 555 380 755 342" class="line" marker-end="url(#a1)"/>
+<path d="M555 455C625 400 700 380 800 342" class="line" marker-end="url(#a1)"/>
+<path d="M875 455V343" class="line" marker-end="url(#a1)"/>
+
+<!-- Repo -->
+<rect x="70" y="660" width="945" height="118" rx="18" class="green"/>
+<circle cx="125" cy="716" r="29" fill="#214b3b"/><use href="#git" x="108" y="699" width="34" height="34"/>
+<text x="170" y="710" class="txt">Repository / Worktree / 成果物出力先</text>
+<text x="110" y="747" class="small">複数Git Repository / Worktree / Excel / Word / SharePoint / その他</text>
+<text x="110" y="772" class="tiny">Repository物理配置はAI-DEが強制しない</text>
+
+<!-- Verification -->
+<rect x="1070" y="645" width="370" height="138" rx="18" class="box"/>
+<circle cx="1120" cy="694" r="27" fill="#273650"/><use href="#microscope" x="1104" y="678" width="32" height="32"/>
+<text x="1160" y="699" class="txt">検証レイヤー</text>
+<text x="1110" y="737" class="small">Platform Test / 生成物テスト</text>
+<text x="1110" y="763" class="tiny">Runtime不変条件 / 障害注入 / Evidence</text>
+</svg>
+</div>
+<div class="legend">
+  <span><i class="sw" style="background:var(--green)"></i>人間・作業対象</span>
+  <span><i class="sw" style="background:var(--blue)"></i>Control / UI</span>
+  <span><i class="sw" style="background:var(--cyan)"></i>Knowledge / Asset</span>
+  <span><i class="sw" style="background:var(--purple)"></i>Security</span>
+  <span><i class="sw" style="background:var(--orange)"></i>Routing / Execution接続</span>
+  <span><i class="sw" style="background:var(--red)"></i>外部AI</span>
+</div>
+<div class="note"><b>境界:</b> 日本ハーネスは巨大な単一Repositoryではなく、AI-DE・Orca・STK・Document Asset・Security Proxyなどを束ねる上位Architecture。OpenCodexは利用するRouting component、LLM ProviderやGitHub/Backlog等は外部接続先。</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>人間</h3><p>目的を決める人です。AIが提示した計画を承認し、追加質問に答え、例外やリスク受容のような責任ある判断を引き受けます。</p></div>
+<div class="explain-card"><h3>Orca</h3><p>人間がAI開発全体を見て、操作して、進捗を管理する画面です。正本状態は持たず、AI-DEが持つ状態を見せる立場です。</p></div>
+<div class="explain-card"><h3>AI-DE</h3><p>開発ハーネス本体です。必要な作業を組み立て、権限を守ってAIを動かし、成果物が条件を満たしたかを確認します。</p></div>
+<div class="explain-card"><h3>セキュリティプロキシレイヤー</h3><p>LLMに出ていく通信の境界です。必要に応じてマスキングを行い、外部送信を統制します。</p></div>
+<div class="explain-card"><h3>OpenCodex</h3><p>AI-DEが特定のLLMへつながるための接続部品です。どのProviderを使うかの差を吸収します。</p></div>
+<div class="explain-card"><h3>LLM Provider群</h3><p>実際に推論するAIです。ClaudeやOpenAI系などがここに入ります。Provider自体は権限やGateの正本を持ちません。</p></div>
+<div class="explain-card"><h3>STK</h3><p>汎用的なテスト知識を提供します。『何をテストできるか』の候補を広く出しますが、『今回必ず何をやるか』は決めません。</p></div>
+<div class="explain-card"><h3>Document Asset</h3><p>チームの既存ドキュメントや成果物形式を活用するための基盤です。AIを既存のやり方へ適応させる要の領域です。</p></div>
+<div class="explain-card"><h3>Task Tracker</h3><p>Issueなどの外部仕事起点です。開発対象の入口ですが、AI-DEの実行状態そのものの正本ではありません。</p></div>
+</div></section>
+
+<section id="aide" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1500 990">
+<defs>
+  <marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="plug" viewBox="0 0 32 32"><path d="M12 5v8M20 5v8M9 13h14v4a7 7 0 0 1-7 7v4M11 28h10" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="cpu" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="2" fill="none" stroke="#fff" stroke-width="2"/><rect x="12" y="12" width="8" height="8" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 3v5M16 3v5M21 3v5M11 24v5M16 24v5M21 24v5M3 11h5M3 16h5M3 21h5M24 11h5M24 16h5M24 21h5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="db" viewBox="0 0 32 32"><ellipse cx="16" cy="7" rx="10" ry="4" fill="none" stroke="#fff" stroke-width="2"/><path d="M6 7v9c0 2 4 4 10 4s10-2 10-4V7M6 16v9c0 2 4 4 10 4s10-2 10-4v-9" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="playgear" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2"/><path d="M13 11l8 5-8 5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="folder" viewBox="0 0 32 32"><path d="M4 9h9l3 3h12v14H4z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="question" viewBox="0 0 32 32"><path d="M12 11a5 5 0 1 1 7 5c-2 1-3 2-3 4M16 25h.01" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="graph" viewBox="0 0 32 32"><circle cx="7" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="25" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8l12 0M9 10l5 12M23 10l-5 12" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="gate" viewBox="0 0 32 32"><path d="M6 28V8h20v20M6 13h20M11 8V4h10v4" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 20l3 3 7-8" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="history" viewBox="0 0 32 32"><path d="M7 10H3V6M4 10a12 12 0 1 1-1 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/><path d="M16 9v8l5 3" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="archive" viewBox="0 0 32 32"><rect x="5" y="8" width="22" height="19" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M4 5h24v6H4zM12 16h8" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="lock" viewBox="0 0 32 32"><rect x="7" y="14" width="18" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 14v-4a5 5 0 0 1 10 0v4" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="package" viewBox="0 0 32 32"><path d="M5 10l11-6 11 6v12l-11 6-11-6zM5 10l11 6 11-6M16 16v12" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="bolt" viewBox="0 0 32 32"><path d="M18 3L8 18h8l-2 11 10-16h-8z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="branch" viewBox="0 0 32 32"><circle cx="9" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="9" cy="25" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="24" cy="16" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M9 10v12M9 14c7 0 8 2 12 2" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+</defs>
+
+<rect x="30" y="25" width="1440" height="920" rx="26" fill="none" stroke="#476aa5" stroke-width="3"/>
+<text x="55" y="62" class="title">AI-DE 内部アーキテクチャ</text>
+
+<rect x="70" y="100" width="295" height="180" rx="18" class="blue"/>
+<circle cx="118" cy="145" r="26" fill="#1d4175"/><use href="#plug" x="102" y="129" width="32" height="32"/>
+<text x="158" y="150" class="txt">Protocol Host</text>
+<text x="105" y="190" class="small">JSON-RPC 2.0 / NDJSON</text>
+<text x="105" y="218" class="small">Unix Domain Socket</text>
+<text x="105" y="246" class="tiny">initialize / Snapshot / Event / Command</text>
+
+<rect x="425" y="90" width="990" height="220" rx="18" class="blue"/>
+<circle cx="475" cy="132" r="26" fill="#1d4175"/><use href="#cpu" x="459" y="116" width="32" height="32"/>
+<text x="515" y="137" class="txt">アプリケーションサービス / Core</text>
+
+<rect x="465" y="170" width="210" height="105" rx="12" class="box"/>
+<use href="#folder" x="485" y="186" width="26" height="26"/><text x="520" y="207" class="small">Project / Repository</text>
+<text x="485" y="238" class="tiny">Work Item / Project UUID</text>
+
+<rect x="700" y="170" width="210" height="105" rx="12" class="box"/>
+<use href="#question" x="720" y="186" width="26" height="26"/><text x="755" y="207" class="small">Requirements / QA</text>
+<text x="720" y="238" class="tiny">Review Stage 1 / 2 / 3</text>
+
+<rect x="935" y="170" width="210" height="105" rx="12" class="box"/>
+<use href="#graph" x="955" y="186" width="26" height="26"/><text x="990" y="207" class="small">Phase / Task Graph</text>
+<text x="955" y="238" class="tiny">Task / Attempt</text>
+
+<rect x="1170" y="170" width="210" height="105" rx="12" class="box"/>
+<use href="#gate" x="1190" y="186" width="26" height="26"/><text x="1225" y="207" class="small">Gate / Decision</text>
+<text x="1190" y="238" class="tiny">Capability / Governance</text>
+
+<path d="M365 190H425" class="line" marker-end="url(#a2)"/>
+
+<!-- State Store -->
+<rect x="70" y="355" width="650" height="440" rx="18" class="green"/>
+<circle cx="120" cy="400" r="27" fill="#214b3b"/><use href="#db" x="104" y="384" width="32" height="32"/>
+<text x="160" y="405" class="txt">State Store = Runtime State SSOT</text>
+<text x="105" y="440" class="tiny">SQLite or PostgreSQL / 1 Project = 1 Authority Backend</text>
+
+<rect x="105" y="475" width="265" height="125" rx="12" class="box"/>
+<text x="125" y="510" class="small">現在状態</text>
+<text x="125" y="538" class="tiny">Project / Work Item / Phase / Task</text>
+<text x="125" y="562" class="tiny">Attempt / Gate / Decision / revision</text>
+
+<rect x="400" y="475" width="285" height="125" rx="12" class="box"/>
+<use href="#history" x="420" y="490" width="25" height="25"/><text x="455" y="510" class="small">履歴 / 監査</text>
+<text x="420" y="538" class="tiny">Operation Log / Gate Evaluation</text>
+<text x="420" y="562" class="tiny">Command Receipt / Transactional Outbox</text>
+
+<rect x="105" y="630" width="265" height="125" rx="12" class="box"/>
+<use href="#archive" x="125" y="646" width="25" height="25"/><text x="160" y="666" class="small">Artifact / Evidence 参照</text>
+<text x="125" y="694" class="tiny">Artifact Identity / Revision</text>
+<text x="125" y="718" class="tiny">digest / locator / metadata</text>
+
+<rect x="400" y="630" width="285" height="125" rx="12" class="box"/>
+<use href="#lock" x="420" y="646" width="25" height="25"/><text x="455" y="666" class="small">State Store 基盤</text>
+<text x="420" y="694" class="tiny">Schema Migration / Host Lock</text>
+<text x="420" y="718" class="tiny">1 Project = 1 Active Host / Fail Closed</text>
+
+<!-- Runtime -->
+<rect x="770" y="355" width="645" height="440" rx="18" class="orange"/>
+<circle cx="820" cy="400" r="27" fill="#6b461c"/><use href="#playgear" x="804" y="384" width="32" height="32"/>
+<text x="860" y="405" class="txt">Execution Runtime（AI実行基盤）</text>
+
+<rect x="805" y="475" width="265" height="125" rx="12" class="box"/>
+<use href="#package" x="825" y="490" width="25" height="25"/><text x="860" y="510" class="small">実行計画</text>
+<text x="825" y="538" class="tiny">Execution Packet</text>
+<text x="825" y="562" class="tiny">Role / Model / Capability</text>
+
+<rect x="1100" y="475" width="280" height="125" rx="12" class="box"/>
+<use href="#bolt" x="1120" y="490" width="25" height="25"/><text x="1155" y="510" class="small">Worker / Tool 実行</text>
+<text x="1120" y="538" class="tiny">trusted launcher / Tool Guard</text>
+<text x="1120" y="562" class="tiny">Provider Adapter</text>
+
+<rect x="805" y="630" width="265" height="125" rx="12" class="box"/>
+<use href="#bolt" x="825" y="646" width="25" height="25"/><text x="860" y="666" class="small">Operation</text>
+<text x="825" y="694" class="tiny">Intent → Effect → Result → Evidence</text>
+<text x="825" y="718" class="tiny">pending / executing / succeeded / failed / indeterminate</text>
+
+<rect x="1100" y="630" width="280" height="125" rx="12" class="box"/>
+<use href="#branch" x="1120" y="646" width="25" height="25"/><text x="1155" y="666" class="small">実行Workspace</text>
+<text x="1120" y="694" class="tiny">Repository / Worktree</text>
+<text x="1120" y="718" class="tiny">Base Commit / Attempt binding</text>
+
+<path d="M720 575H770" class="line" marker-end="url(#a2)"/>
+<path d="M650 310V355" class="line" marker-end="url(#a2)"/>
+<path d="M1035 310V355" class="line" marker-end="url(#a2)"/>
+
+<rect x="235" y="835" width="1030" height="72" rx="14" class="cyan"/>
+<circle cx="290" cy="871" r="23" fill="#1f5761"/><use href="#archive" x="276" y="857" width="28" height="28"/>
+<text x="330" y="876" class="txt">Local Object Store — 大容量データをDigestで保存</text>
+<text x="330" y="899" class="tiny">Screenshot / Log / Test Report / Evidence / Large Diff 等</text>
+</svg>
+</div>
+<div class="note"><b>SSOT原則:</b> Snapshotは保存された正本ではなくState Storeから再構築する。Protocol Eventは通知であり、Transactional Outboxから配信する。</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>Protocol Host</h3><p>ClientからのJSONメッセージを受け、AI-DE Coreへ渡す入口です。薄い橋渡し層として保ちます。</p></div>
+<div class="explain-card"><h3>アプリケーションサービス / Core</h3><p>AI-DEの正式な判断を行う心臓部です。Plan、Task、Gate、Human Decision反映などをここで処理します。</p></div>
+<div class="explain-card"><h3>Current State</h3><p>今このProjectがどこまで進んでいるかの最新状態です。PhaseやTaskの進捗を見るときに参照します。</p></div>
+<div class="explain-card"><h3>History / Audit</h3><p>何がいつ起きたかの履歴です。監査、追跡、復旧判断の根拠になります。</p></div>
+<div class="explain-card"><h3>Artifact / Evidence Ref</h3><p>成果物や証跡そのものではなく、それらへの参照情報です。重い実体は外部保存を前提にします。</p></div>
+<div class="explain-card"><h3>State Store基盤</h3><p>SQLiteまたはPostgreSQLで実装されるRuntime Stateの保存先です。イベントや画面表示ではなく、ここが正本です。</p></div>
+<div class="explain-card"><h3>Execution Runtime</h3><p>AIやツールを実際に動かし、AttemptとOperationを生成する実行基盤です。</p></div>
+<div class="explain-card"><h3>Execution Planning</h3><p>どのTaskをどういう権限・入力・期待結果で実行するかを固める部分です。</p></div>
+<div class="explain-card"><h3>Worker / Tool 実行</h3><p>CLI、テスト、ファイル変更、外部呼び出しなどを実際に行う部分です。Capabilityで制御されます。</p></div>
+<div class="explain-card"><h3>Execution Workspace</h3><p>どのRepository / Worktree / Commitで実行したかを示す作業場所情報です。再現性と追跡性のために重要です。</p></div>
+<div class="explain-card"><h3>Local Object Store</h3><p>大きな成果物や証跡をDigest参照で保持する保存先です。DBを肥大化させないための実体置き場です。</p></div>
+</div></section>
+
+<section id="execution" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1500 770">
+<defs>
+  <marker id="a3" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="wf3" viewBox="0 0 32 32"><circle cx="7" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="24" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 11M23 10l-5 11" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="play3" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2"/><path d="M13 11l8 5-8 5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="shield3" viewBox="0 0 32 32"><path d="M16 3l10 4v7c0 7-4 12-10 15C10 26 6 21 6 14V7z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="router3" viewBox="0 0 32 32"><path d="M5 9h16M16 5l5 4-5 4M27 23H11M16 19l-5 4 5 4" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="cloud3" viewBox="0 0 32 32"><path d="M9 25h14a6 6 0 0 0 1-12 9 9 0 0 0-17-2A7 7 0 0 0 9 25z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+</defs>
+<text x="40" y="52" class="title">AI実行・LLM経路</text>
+
+<g>
+<rect x="55" y="110" width="250" height="155" rx="18" class="blue"/>
+<circle cx="105" cy="156" r="27" fill="#1d4175"/><use href="#wf3" x="89" y="140" width="32" height="32"/>
+<text x="145" y="161" class="txt">AI-DE Core</text>
+<text x="95" y="202" class="small">Task / Capability / Model方針</text>
+<text x="95" y="232" class="tiny">意思決定Authority</text>
+</g>
+
+<g>
+<rect x="365" y="110" width="270" height="155" rx="18" class="orange"/>
+<circle cx="415" cy="156" r="27" fill="#6b461c"/><use href="#play3" x="399" y="140" width="32" height="32"/>
+<text x="455" y="161" class="txt">Execution Runtime（AI実行基盤）</text>
+<text x="405" y="202" class="small">Execution Packet / Worker</text>
+<text x="405" y="232" class="tiny">Operation / Tool Guard</text>
+</g>
+
+<g>
+<rect x="695" y="110" width="250" height="155" rx="18" class="purple"/>
+<circle cx="745" cy="156" r="27" fill="#4b2d70"/><use href="#shield3" x="729" y="140" width="32" height="32"/>
+<text x="785" y="161" class="txt">Security Proxy</text>
+<text x="735" y="202" class="small">Mask ON / OFF</text>
+<text x="735" y="232" class="tiny">OFFでも必ず通過</text>
+</g>
+
+<g>
+<rect x="1005" y="110" width="220" height="155" rx="18" class="orange"/>
+<circle cx="1055" cy="156" r="27" fill="#6b461c"/><use href="#router3" x="1039" y="140" width="32" height="32"/>
+<text x="1095" y="161" class="txt">OpenCodex</text>
+<text x="1045" y="202" class="small">Provider / Model の接続・振り分け</text>
+<text x="1045" y="232" class="tiny">Authorityではない</text>
+</g>
+
+<g>
+<rect x="1280" y="75" width="170" height="225" rx="18" class="red"/>
+<circle cx="1365" cy="120" r="27" fill="#6d2936"/><use href="#cloud3" x="1349" y="104" width="32" height="32"/>
+<text x="1365" y="165" text-anchor="middle" class="txt">LLM Provider群</text>
+<text x="1365" y="198" text-anchor="middle" class="small">Claude</text>
+<text x="1365" y="226" text-anchor="middle" class="small">OpenAI / Codex</text>
+<text x="1365" y="254" text-anchor="middle" class="small">Qwen / Local</text>
+</g>
+
+<path d="M305 188H365M635 188H695M945 188H1005M1225 188H1280" class="line" marker-end="url(#a3)"/>
+
+<rect x="55" y="370" width="530" height="280" rx="18" class="green"/>
+<text x="95" y="415" class="txt">AI-DE側の責務</text>
+<text x="95" y="458" class="small">✓ Role / Task難易度 / Capabilityを決定</text>
+<text x="95" y="492" class="small">✓ Provider固有値をCore Planへ漏らさない</text>
+<text x="95" y="526" class="small">✓ Intent / Effect / Result / Evidenceを記録</text>
+<text x="95" y="560" class="small">✓ retry / fallback / stopをAI-DEが判断</text>
+<text x="95" y="594" class="small">✓ State Store書込不能なら新規Effect停止</text>
+
+<rect x="635" y="370" width="365" height="280" rx="18" class="purple"/>
+<text x="675" y="415" class="txt">Security Proxy</text>
+<text x="675" y="458" class="small">✓ Project単位Masking</text>
+<text x="675" y="492" class="small">✓ 機密情報保護</text>
+<text x="675" y="526" class="small">✓ ON/OFFに関係なく経路固定</text>
+<text x="675" y="560" class="small">✓ Local LLMも同一境界</text>
+<text x="675" y="598" class="tiny">DB Secret管理は担当しない</text>
+
+<rect x="1050" y="370" width="400" height="280" rx="18" class="orange"/>
+<text x="1090" y="415" class="txt">OpenCodex</text>
+<text x="1090" y="458" class="small">✓ Provider / Modelへの接続</text>
+<text x="1090" y="492" class="small">✓ 複数Provider差異の吸収</text>
+<text x="1090" y="526" class="small">✓ Routing component</text>
+<text x="1090" y="560" class="small">× Gate / Task Authorityは持たない</text>
+
+<rect x="55" y="685" width="1395" height="55" rx="12" class="box"/>
+<text x="752" y="719" text-anchor="middle" class="small">Human → Orca（任意）→ AI-DE → Security Proxy → OpenCodex → LLM Provider</text>
+</svg>
+</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>AI-DE Core</h3><p>実行前に必要な権限や実行計画を固めます。実行中に好き勝手に条件を書き換えないための起点です。</p></div>
+<div class="explain-card"><h3>Security Proxy</h3><p>外に出る前の最後の安全装置です。AIが読む文面そのものを保護したいときの境界です。</p></div>
+<div class="explain-card"><h3>OpenCodex / Provider Router</h3><p>どのLLMへどう投げるかを扱います。AI-DEは『誰に依頼するか』を抽象化し、ここが実接続を担当します。</p></div>
+<div class="explain-card"><h3>Providers</h3><p>実際の推論先です。ここで得た回答だけでは正式完了にならず、ResultやEvidenceまで揃う必要があります。</p></div>
+<div class="explain-card"><h3>Execution Packet</h3><p>Taskを実行するときの実行指示書です。使ってよい権限、入力、期待する出力、制約などを含みます。</p></div>
+<div class="explain-card"><h3>Operation Log</h3><p>AIが何をしようとし、何が起き、結果がどうだったかをIntent / Effect / Resultで残す記録です。</p></div>
+</div></section>
+
+<section id="integration" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1500 880">
+<defs>
+  <marker id="a4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="core4" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="test4" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 23l2 2 5-5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="docs4" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8z" fill="none" stroke="#fff" stroke-width="2"/><path d="M20 5v6h6M12 16h10M12 20h10" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="ticket4" viewBox="0 0 32 32"><path d="M5 10a3 3 0 0 0 0 6v6h22v-6a3 3 0 0 0 0-6V4H5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="storage4" viewBox="0 0 32 32"><path d="M5 8h22v18H5zM9 13h14M9 18h14M9 23h8" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+</defs>
+<text x="40" y="52" class="title">知識・資産・外部システム連携</text>
+
+<rect x="555" y="85" width="390" height="170" rx="18" class="blue"/>
+<circle cx="608" cy="131" r="27" fill="#1d4175"/><use href="#core4" x="592" y="115" width="32" height="32"/>
+<text x="648" y="136" class="txt">AI-DE Core</text>
+<text x="595" y="178" class="small">Port / Adapter境界を通して外部基盤を利用</text>
+<text x="595" y="207" class="tiny">取得した情報そのものはAuthorityではない</text>
+
+<rect x="65" y="335" width="365" height="255" rx="18" class="cyan"/>
+<circle cx="115" cy="382" r="27" fill="#1f5761"/><use href="#test4" x="99" y="366" width="32" height="32"/>
+<text x="155" y="387" class="txt">Software-Test-Knowledge</text>
+<text x="105" y="430" class="small">何をテストするかの候補</text>
+<text x="105" y="466" class="small">• 汎用テスト候補</text>
+<text x="105" y="498" class="small">• Pattern / Practice / Relation</text>
+<text x="105" y="530" class="tiny">mandatory / recommended / unneeded はAI-DE側</text>
+
+<rect x="495" y="335" width="510" height="340" rx="18" class="cyan"/>
+<circle cx="545" cy="382" r="27" fill="#1f5761"/><use href="#docs4" x="529" y="366" width="32" height="32"/>
+<text x="585" y="387" class="txt">過去ドキュメント活用基盤</text>
+<text x="535" y="430" class="small">Document Asset Port</text>
+<text x="535" y="466" class="small">• Discover / Search / Resolve / Read</text>
+<text x="535" y="498" class="small">• Import / Write-back</text>
+<text x="535" y="545" class="tiny">Team Playbook = When / Required</text>
+<text x="535" y="570" class="tiny">Template = How to format</text>
+<text x="535" y="595" class="tiny">Exemplar = Examples</text>
+<text x="535" y="630" class="tiny">Egress = Storage Connector × Document Codec</text>
+
+<rect x="1065" y="335" width="365" height="255" rx="18" class="yellow"/>
+<circle cx="1115" cy="382" r="27" fill="#60561c"/><use href="#ticket4" x="1099" y="366" width="32" height="32"/>
+<text x="1155" y="387" class="txt">Task Tracker Adapter</text>
+<text x="1105" y="430" class="small">Work Source</text>
+<text x="1105" y="466" class="small">• GitHub Issues</text>
+<text x="1105" y="498" class="small">• Backlog</text>
+<text x="1105" y="530" class="tiny">AI-DE内部ではWork Itemとして抽象化</text>
+
+<path d="M650 255C525 300 385 305 255 335M750 255V335M850 255C980 300 1115 300 1240 335" class="line" marker-end="url(#a4)"/>
+
+<rect x="80" y="735" width="1340" height="95" rx="16" class="green"/>
+<circle cx="130" cy="782" r="26" fill="#214b3b"/><use href="#storage4" x="114" y="766" width="32" height="32"/>
+<text x="170" y="787" class="txt">保存先 / Repository / Document出力</text>
+<text x="170" y="817" class="small">Git Repository / NAS / SharePoint / Filesystem / Excel / Word / PDF / その他</text>
+<path d="M750 675V735" class="line" marker-end="url(#a4)"/>
+</svg>
+</div>
+<div class="note"><b>Document Asset詳細は別設計。</b> AI-DE CoreはStorage方式やDocument形式に直接依存せず、Document Asset Port経由で利用する。</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>STK</h3><p>テスト観点の知識源です。たとえば非同期処理や二重送信のような観点候補を出す役割です。</p></div>
+<div class="explain-card"><h3>Template</h3><p>成果物の形式見本です。Excelの列構成や文書の節構成のように、『どういう形で出すか』を支えます。</p></div>
+<div class="explain-card"><h3>Exemplar</h3><p>過去成果物の良い例です。AIが書きぶりや粒度を合わせる参考になりますが、それ自体がAuthorityではありません。</p></div>
+<div class="explain-card"><h3>Document Asset System</h3><p>過去ドキュメントを発見、検索、読取、取込、書戻しするための基盤です。チーム既存資産をAIへ接続します。</p></div>
+<div class="explain-card"><h3>Storage / Repository / Document Output</h3><p>Git、ファイルサーバー、SharePointなど、実際の出入り口です。AIはここへ直接好き勝手に書かず、定められた経路を通ります。</p></div>
+<div class="explain-card"><h3>Task Tracker Adapter</h3><p>GitHub Issuesなどの外部課題管理とつなぐ部品です。今後Backlog等へ広げるための拡張点です。</p></div>
+</div></section>
+
+<section id="verification" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1500 900">
+<defs>
+  <marker id="a5" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="runtime5" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2"/><path d="M13 11l8 5-8 5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="lock5" viewBox="0 0 32 32"><rect x="7" y="14" width="18" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 14v-4a5 5 0 0 1 10 0v4" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="boundary5" viewBox="0 0 32 32"><path d="M5 5v22M27 5v22M11 16h10M18 12l4 4-4 4" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="bug5" viewBox="0 0 32 32"><path d="M11 10h10v12a5 5 0 0 1-10 0zM14 5l2 5M18 5l-2 5M6 14h5M21 14h5M6 20h5M21 20h5" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="evidence5" viewBox="0 0 32 32"><path d="M7 5h13l5 5v17H7zM20 5v6h6" fill="none" stroke="#fff" stroke-width="2"/><circle cx="14" cy="18" r="4" fill="none" stroke="#fff" stroke-width="2"/><path d="M17 21l4 4" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="micro5" viewBox="0 0 32 32"><path d="M12 5l6 6-4 4-6-6zM14 15c-2 5 1 9 6 9h5M7 28h20M20 7l3-3" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="file5" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8zM20 5v6h6" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 20l3 3 7-8" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+</defs>
+<text x="40" y="52" class="title">Platform Test / 検証アーキテクチャ</text>
+
+<rect x="520" y="85" width="460" height="180" rx="18" class="blue"/>
+<circle cx="575" cy="132" r="27" fill="#1d4175"/><use href="#runtime5" x="559" y="116" width="32" height="32"/>
+<text x="615" y="137" class="txt">AI-DE Runtime</text>
+<text x="560" y="180" class="small">State Store / Execution Runtime（AI実行基盤） / Protocol</text>
+<text x="560" y="210" class="small">Gate / Artifact / Evidence</text>
+<text x="560" y="238" class="tiny">正常系だけでなく異常時Stateも検証</text>
+
+<rect x="70" y="360" width="305" height="220" rx="18" class="green"/>
+<circle cx="120" cy="405" r="27" fill="#214b3b"/><use href="#lock5" x="104" y="389" width="32" height="32"/>
+<text x="160" y="410" class="txt">Runtime不変条件</text>
+<text x="105" y="455" class="small">Gate前Phase遷移禁止</text>
+<text x="105" y="487" class="small">Capability超過禁止</text>
+<text x="105" y="519" class="small">Evidenceなし完了禁止</text>
+
+<rect x="420" y="360" width="305" height="220" rx="18" class="purple"/>
+<circle cx="470" cy="405" r="27" fill="#4b2d70"/><use href="#boundary5" x="454" y="389" width="32" height="32"/>
+<text x="510" y="410" class="txt">決定的実行境界</text>
+<text x="455" y="455" class="small">Intent保存前後</text>
+<text x="455" y="487" class="small">Effect前後</text>
+<text x="455" y="519" class="small">Result保存前後</text>
+
+<rect x="770" y="360" width="305" height="220" rx="18" class="red"/>
+<circle cx="820" cy="405" r="27" fill="#6d2936"/><use href="#bug5" x="804" y="389" width="32" height="32"/>
+<text x="860" y="410" class="txt">障害注入</text>
+<text x="805" y="455" class="small">crash / timeout</text>
+<text x="805" y="487" class="small">provider / tool error</text>
+<text x="805" y="519" class="small">state_store_error</text>
+
+<rect x="1120" y="360" width="305" height="220" rx="18" class="orange"/>
+<circle cx="1170" cy="405" r="27" fill="#6b461c"/><use href="#evidence5" x="1154" y="389" width="32" height="32"/>
+<text x="1210" y="410" class="txt">Evidence検証</text>
+<text x="1155" y="455" class="small">Artifact Revision</text>
+<text x="1155" y="487" class="small">Evidence completeness</text>
+<text x="1155" y="519" class="small">Gate evaluation history</text>
+
+<path d="M650 265C500 320 360 320 230 360M720 265C650 315 610 325 570 360M780 265C850 315 900 325 920 360M850 265C1000 315 1160 320 1270 360" class="line" marker-end="url(#a5)"/>
+
+<rect x="160" y="660" width="525" height="150" rx="18" class="cyan"/>
+<circle cx="215" cy="710" r="27" fill="#1f5761"/><use href="#micro5" x="199" y="694" width="32" height="32"/>
+<text x="255" y="715" class="txt">Platform Test</text>
+<text x="200" y="755" class="small">AI-DEという開発基盤そのものを検証</text>
+<text x="200" y="784" class="tiny">Feature Registry / Component Inventory / Evidence / 障害注入</text>
+
+<rect x="815" y="660" width="525" height="150" rx="18" class="yellow"/>
+<circle cx="870" cy="710" r="27" fill="#60561c"/><use href="#file5" x="854" y="694" width="32" height="32"/>
+<text x="910" y="715" class="txt">生成物テスト</text>
+<text x="855" y="755" class="small">AI-DEが生成・同期する成果物を検証</text>
+<text x="855" y="784" class="tiny">Determinism / stale / orphan / tamper / provenance</text>
+</svg>
+</div>
+<div class="note"><b>重要:</b> 障害注入はProduct Protocolに載せず、Platform Test / internal test interfaceとして扱う。</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>Runtime Invariants</h3><p>絶対に壊してはいけない条件をプログラムで確認します。親より強い権限の子Agentが生まれていないか、などを見ます。</p></div>
+<div class="explain-card"><h3>Deterministic Boundary</h3><p>同じ条件なら同じように進むべき範囲を明確にし、AI-DE自体の検証をしやすくする仕組みです。</p></div>
+<div class="explain-card"><h3>Fault Injection</h3><p>わざと失敗やクラッシュを起こして、ハーネスが壊れにくいかを確認するテスト方法です。</p></div>
+<div class="explain-card"><h3>Evidence Verification</h3><p>AIが『やりました』と言うだけでなく、証跡が本当に揃っているかを確認する検証です。</p></div>
+<div class="explain-card"><h3>Generated Artifact Test</h3><p>生成・同期された成果物が、構造や由来の観点で壊れていないかを確認します。</p></div>
+</div></section>
+
+<section id="ownership" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1500 950">
+<defs>
+  <symbol id="repo6" viewBox="0 0 32 32"><path d="M4 9h9l3 3h12v14H4z" fill="none" stroke="#fff" stroke-width="2"/><path d="M9 17h14M9 21h10" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="monitor6" viewBox="0 0 32 32"><rect x="4" y="5" width="24" height="17" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 27h8M16 22v5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="test6" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="docs6" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8zM20 5v6h6M12 16h10M12 20h10" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="shield6" viewBox="0 0 32 32"><path d="M16 3l10 4v7c0 7-4 12-10 15C10 26 6 21 6 14V7z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="router6" viewBox="0 0 32 32"><path d="M5 9h16M16 5l5 4-5 4M27 23H11M16 19l-5 4 5 4" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+</defs>
+<text x="40" y="52" class="title">Repository / 責務の所在</text>
+
+<rect x="55" y="95" width="410" height="705" rx="18" class="blue"/>
+<circle cx="108" cy="142" r="27" fill="#1d4175"/><use href="#repo6" x="92" y="126" width="32" height="32"/>
+<text x="148" y="147" class="txt">TomyFovos/AI-DE</text>
+<text x="95" y="195" class="small">• Core / Application Service</text>
+<text x="95" y="228" class="small">• Protocol v1 / Protocol Host</text>
+<text x="95" y="261" class="small">• State Store / SQLite / PostgreSQL</text>
+<text x="95" y="294" class="small">• Project Identity / Host Lock / Migration</text>
+<text x="95" y="327" class="small">• Task / Attempt / Operation / Operation Log</text>
+<text x="95" y="360" class="small">• Execution Runtime（AI実行基盤） / trusted launcher</text>
+<text x="95" y="393" class="small">• Capability / Policy / Runtime Invariant</text>
+<text x="95" y="426" class="small">• Requirements / QA Ledger / Gate</text>
+<text x="95" y="459" class="small">• Human Decision / Governance / Exception</text>
+<text x="95" y="492" class="small">• Artifact Revision / Evidence / Object Store</text>
+<text x="95" y="525" class="small">• Provider Adapter / AI_MODELS.yaml</text>
+<text x="95" y="558" class="small">• Platform Test / 生成物テスト</text>
+<text x="95" y="618" class="tiny">実行状態のAuthorityはAI-DEに集約</text>
+
+<rect x="545" y="95" width="395" height="485" rx="18" class="green"/>
+<circle cx="598" cy="142" r="27" fill="#214b3b"/><use href="#monitor6" x="582" y="126" width="32" height="32"/>
+<text x="638" y="147" class="txt">TomyFovos/Orca</text>
+<text x="585" y="195" class="small">• AI-DE Protocol Client</text>
+<text x="585" y="228" class="small">• Project / Phase / Task Projection</text>
+<text x="585" y="261" class="small">• Operation / Evidence表示</text>
+<text x="585" y="294" class="small">• Human Decision / Gate UI</text>
+<text x="585" y="327" class="small">• Capability Profile設定UI</text>
+<text x="585" y="360" class="small">• SSH / Terminal / Worktree</text>
+<text x="585" y="393" class="small">• Editor / Diff / Notification</text>
+<text x="585" y="447" class="tiny">Orcaは実行状態の正本を持たない</text>
+
+<rect x="1030" y="95" width="405" height="300" rx="18" class="cyan"/>
+<circle cx="1083" cy="142" r="27" fill="#1f5761"/><use href="#test6" x="1067" y="126" width="32" height="32"/>
+<text x="1123" y="147" class="txt">Software-Test-Knowledge</text>
+<text x="1070" y="195" class="small">• 汎用Software Test Knowledge</text>
+<text x="1070" y="228" class="small">• Candidate / Relation / Status</text>
+<text x="1070" y="261" class="small">• Release / Versioning</text>
+<text x="1070" y="315" class="tiny">Project固有の適用判断AuthorityはAI-DE側</text>
+
+<rect x="545" y="640" width="395" height="190" rx="18" class="cyan dashed"/>
+<circle cx="598" cy="688" r="27" fill="#1f5761"/><use href="#docs6" x="582" y="672" width="32" height="32"/>
+<text x="638" y="693" class="txt">Document Asset（将来候補Repo）</text>
+<text x="585" y="738" class="small">• 過去ドキュメント活用</text>
+<text x="585" y="771" class="small">• Storage / Codec / Search内部実装</text>
+
+<rect x="1030" y="475" width="405" height="225" rx="18" class="purple dashed"/>
+<circle cx="1083" cy="523" r="27" fill="#4b2d70"/><use href="#shield6" x="1067" y="507" width="32" height="32"/>
+<text x="1123" y="528" class="txt">Security Proxy（将来候補Repo）</text>
+<text x="1070" y="573" class="small">• LLM通信Security Boundary</text>
+<text x="1070" y="606" class="small">• Project masking ON/OFF</text>
+<text x="1070" y="639" class="small">• 中央Service配備も可能</text>
+
+<rect x="1030" y="755" width="405" height="110" rx="18" class="orange"/>
+<circle cx="1083" cy="810" r="27" fill="#6b461c"/><use href="#router6" x="1067" y="794" width="32" height="32"/>
+<text x="1123" y="815" class="txt">OpenCodex</text>
+<text x="1070" y="846" class="small">外部のModel / Provider接続Componentとして利用</text>
+
+<rect x="55" y="850" width="885" height="58" rx="14" class="box"/>
+<text x="498" y="886" text-anchor="middle" class="small">日本ハーネス自体は現時点で巨大な単一Repositoryにしない</text>
+</svg>
+</div>
+<div class="note"><b>Repository分割基準:</b> 「整理しやすいから」ではなく、独立したAuthority・Deployment・Lifecycleを持つかで判断する。</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>AI-DEが持つAuthority</h3><p>Runtime State、Gate判定、Human Decision反映、Task実行記録など、正式な開発状態の中心はAI-DEです。</p></div>
+<div class="explain-card"><h3>Orcaが持たないAuthority</h3><p>Orcaは見せる・操作する側であり、正式状態や開発判断の正本を持ちません。</p></div>
+<div class="explain-card"><h3>Project固有の適用判断</h3><p>どの規定が適用され、どのTaskが必要かといった案件固有判断はAI-DE側で持ちます。</p></div>
+<div class="explain-card"><h3>OpenCodexの位置づけ</h3><p>OpenCodexは接続部品です。便利ですが、AI-DEの代わりに進捗やGateを管理する立場ではありません。</p></div>
+</div></section>
+
+
+<section id="features" class="view">
+<div class="card scroll">
+<svg viewBox="0 0 1900 1510" aria-label="AI-DE 全機能マップ">
+<defs>
+  <marker id="af" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="f-core" viewBox="0 0 32 32"><circle cx="7" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="24" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 11M23 10l-5 11" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-doc" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8zM20 5v6h6M12 16h10M12 20h10" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-qa" viewBox="0 0 32 32"><path d="M12 10a5 5 0 1 1 7 5c-2 1-3 2-3 4M16 25h.01" stroke="#fff" stroke-width="2" fill="none"/><path d="M5 5h22v23H5z" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-gate" viewBox="0 0 32 32"><path d="M6 28V8h20v20M6 13h20M11 8V4h10v4" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 20l3 3 7-8" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-task" viewBox="0 0 32 32"><circle cx="7" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="25" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 12M23 10l-5 12" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-run" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2"/><path d="M13 11l8 5-8 5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-db" viewBox="0 0 32 32"><ellipse cx="16" cy="7" rx="10" ry="4" fill="none" stroke="#fff" stroke-width="2"/><path d="M6 7v9c0 2 4 4 10 4s10-2 10-4V7M6 16v9c0 2 4 4 10 4s10-2 10-4v-9" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-brain" viewBox="0 0 32 32"><path d="M12 27c-4 0-6-3-5-6-3-2-2-7 1-8-1-4 4-7 7-4 2-4 8-2 8 2 4 0 6 5 3 8 2 3-1 8-5 8" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 8v18M11 13c3 0 5 2 5 5M21 14c-3 0-5 2-5 5" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-knowledge" viewBox="0 0 32 32"><path d="M5 6h9c3 0 5 2 5 5v16c0-3-2-5-5-5H5zM27 6h-9c-3 0-5 2-5 5v16c0-3 2-5 5-5h9z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-spider" viewBox="0 0 32 32"><circle cx="16" cy="16" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="5" cy="5" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="27" cy="5" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="5" cy="27" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="27" cy="27" r="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M8 8l5 5M24 8l-5 5M8 24l5-5M24 24l-5-5M16 3v9M16 20v9M3 16h9M20 16h9" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-link" viewBox="0 0 32 32"><path d="M12 20l-2 2a5 5 0 0 1-7-7l5-5a5 5 0 0 1 7 0M20 12l2-2a5 5 0 1 1 7 7l-5 5a5 5 0 0 1-7 0M11 21l10-10" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-test" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 23l2 2 5-5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-recover" viewBox="0 0 32 32"><path d="M7 10H3V6M4 10a12 12 0 1 1-1 10" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 9v8l5 3" stroke="#fff" stroke-width="2"/></symbol>
+</defs>
+
+<text x="45" y="55" class="title">AI-DE 全機能マップ</text>
+<text x="45" y="84" class="small">AI-DEの「開発を進める」「状態を残す」「知見を次へ生かす」「検証する」「外部資産と連携する」を一枚に集約</text>
+
+<!-- center -->
+<rect x="665" y="125" width="570" height="165" rx="22" class="blue"/>
+<circle cx="725" cy="180" r="32" fill="#1d4175"/><use href="#f-core" x="706" y="161" width="38" height="38"/>
+<text x="775" y="185" class="title">AI-DE</text>
+<text x="715" y="224" class="small">人間と合意した目的から、要件定義 → 設計 → 製造 → テスト → レビューをAI主体で進める開発ハーネス</text>
+<text x="715" y="255" class="tiny">North Star: Conformance / Evidence over Assertion / Adapt, Don’t Impose</text>
+
+<!-- Requirements -->
+<rect x="60" y="345" width="410" height="365" rx="18" class="cyan"/>
+<circle cx="112" cy="392" r="27" fill="#1f5761"/><use href="#f-qa" x="96" y="376" width="32" height="32"/>
+<text x="152" y="397" class="txt">要件定義・QA</text>
+<text x="100" y="442" class="small">• Requirement / Acceptance Criteria</text>
+<text x="100" y="474" class="small">• QA Ledger：質問・調査・回答履歴</text>
+<text x="100" y="506" class="small">• QA CompleteでRequirements Gateへ</text>
+<text x="100" y="538" class="small">• Rationale：なぜ必要かを保持</text>
+<text x="100" y="570" class="small">• mandatory / recommended の区別</text>
+<text x="100" y="614" class="small">Requirement Review</text>
+<text x="120" y="642" class="tiny">Stage 1: 決定的構造検証</text>
+<text x="120" y="665" class="tiny">Stage 2: 論理Review seam</text>
+<text x="120" y="688" class="tiny">Stage 3: AIによる意味Review</text>
+
+<!-- Governance -->
+<rect x="500" y="345" width="410" height="365" rx="18" class="purple"/>
+<circle cx="552" cy="392" r="27" fill="#4b2d70"/><use href="#f-gate" x="536" y="376" width="32" height="32"/>
+<text x="592" y="397" class="txt">Governance・Gate・権限</text>
+<text x="540" y="442" class="small">• Human Decision：会話ではなく構造化状態</text>
+<text x="540" y="474" class="small">• Gate = Evidence + Approval + Policy + Artifact</text>
+<text x="540" y="506" class="small">• Gate overrideなし</text>
+<text x="540" y="538" class="small">• Governance / Exception後に再評価</text>
+<text x="540" y="570" class="small">• Capability Profile</text>
+<text x="560" y="598" class="tiny">Strict / Standard / Open / Read-only / Original</text>
+<text x="540" y="630" class="small">• Authority Conservation</text>
+<text x="560" y="658" class="tiny">子Agent / Subagentは親の権限を超えない</text>
+<text x="540" y="686" class="small">• Runtime Invariant</text>
+
+<!-- Planning -->
+<rect x="940" y="345" width="410" height="365" rx="18" class="yellow"/>
+<circle cx="992" cy="392" r="27" fill="#60561c"/><use href="#f-task" x="976" y="376" width="32" height="32"/>
+<text x="1032" y="397" class="txt">計画・仕事の分解</text>
+<text x="980" y="442" class="small">• Snapshot → COMPILE → Plan</text>
+<text x="980" y="474" class="small">• COMPILEは決定的にPlanを生成</text>
+<text x="980" y="506" class="small">• Planning DecisionとNormative Stateを分離</text>
+<text x="980" y="538" class="small">• Work Item / Phase / Task Graph</text>
+<text x="980" y="570" class="small">• Task Dependencyで順序・並列を表現</text>
+<text x="980" y="602" class="small">• Task / Attemptを分離</text>
+<text x="980" y="634" class="small">• Provider / Model名をPlanへ漏らさない</text>
+<text x="980" y="676" class="tiny">新しい仕事はAI-DEを通して正式Task化</text>
+
+<!-- Runtime -->
+<rect x="1380" y="345" width="455" height="365" rx="18" class="orange"/>
+<circle cx="1432" cy="392" r="27" fill="#6b461c"/><use href="#f-run" x="1416" y="376" width="32" height="32"/>
+<text x="1472" y="397" class="txt">Execution Runtime</text>
+<text x="1420" y="442" class="small">• Execution Packet</text>
+<text x="1420" y="474" class="small">• trusted worker launcher</text>
+<text x="1420" y="506" class="small">• Worker / Tool Guard / Provider Adapter</text>
+<text x="1420" y="538" class="small">• Execution Workspace</text>
+<text x="1440" y="566" class="tiny">Repository / Worktree / Base Commit</text>
+<text x="1420" y="598" class="small">• Operation = Intent → Effect → Result → Evidence</text>
+<text x="1420" y="630" class="small">• Operation LogをAttempt単位で保持</text>
+<text x="1420" y="662" class="small">• indeterminateでEffect不明状態を表現</text>
+<text x="1420" y="694" class="tiny">State Store書込不能時は新規EffectをFail Closed</text>
+
+<!-- State store -->
+<rect x="60" y="755" width="410" height="405" rx="18" class="green"/>
+<circle cx="112" cy="802" r="27" fill="#214b3b"/><use href="#f-db" x="96" y="786" width="32" height="32"/>
+<text x="152" y="807" class="txt">State Store・Artifact・Evidence</text>
+<text x="100" y="852" class="small">• Runtime Stateの唯一のSSOT</text>
+<text x="100" y="884" class="small">• SQLite / PostgreSQL Backend</text>
+<text x="100" y="916" class="small">• Project UUID / 1 Project = 1 Active Host</text>
+<text x="100" y="948" class="small">• Relational Core + JSON Extension</text>
+<text x="100" y="980" class="small">• revision / expected_revision</text>
+<text x="100" y="1012" class="small">• Command Receipt / command_id</text>
+<text x="100" y="1044" class="small">• Transactional Outbox</text>
+<text x="100" y="1076" class="small">• Artifact + immutable Artifact Revision</text>
+<text x="100" y="1108" class="small">• Evidence metadata + Local Object Store</text>
+<text x="100" y="1140" class="tiny">大容量PayloadはDB BlobではなくDigest参照</text>
+
+<!-- Models -->
+<rect x="500" y="755" width="410" height="405" rx="18" class="red"/>
+<circle cx="552" cy="802" r="27" fill="#6d2936"/><use href="#f-brain" x="536" y="786" width="32" height="32"/>
+<text x="592" y="807" class="txt">AI Model・Provider管理</text>
+<text x="540" y="852" class="small">• AI_MODELS.yaml = Model設定SSOT</text>
+<text x="540" y="884" class="small">• 抽象tier → 具体Model解決</text>
+<text x="540" y="916" class="small">• allow_tier_fallback明示時のみfallback</text>
+<text x="540" y="948" class="small">• Provider Registry / Adapter</text>
+<text x="540" y="980" class="small">• Codex / Claude / Copilot / OpenCode等</text>
+<text x="540" y="1012" class="small">• Model Health / 利用不可Cache</text>
+<text x="540" y="1044" class="small">• Security Proxyを必ず通過</text>
+<text x="540" y="1076" class="small">• OpenCodexでProvider / Modelへ接続</text>
+<text x="540" y="1108" class="tiny">Cloud / Local LLMを同じAuthority規則で扱う</text>
+
+<!-- Knowledge feedback -->
+<rect x="940" y="755" width="410" height="405" rx="18" class="cyan"/>
+<circle cx="992" cy="802" r="27" fill="#1f5761"/><use href="#f-knowledge" x="976" y="786" width="32" height="32"/>
+<text x="1032" y="807" class="txt">開発知見・Feedback Loop</text>
+<text x="980" y="852" class="small">• Project Knowledgeを蓄積</text>
+<text x="980" y="884" class="small">• Requirement / Design / Human Decision</text>
+<text x="980" y="916" class="small">• Attempt / Operation / Evidence / Failure</text>
+<text x="980" y="948" class="small">• 過去の判断・結果を次の開発へ還流</text>
+<text x="980" y="980" class="small">• 同じ論点を繰り返し再考しない</text>
+<text x="980" y="1012" class="small">• STK / Document Assetから得た知識を活用</text>
+<text x="980" y="1054" class="small">次の Requirements / Design / Test / Review へ</text>
+<path d="M1010 1090c70 45 210 45 280 0" class="line" marker-end="url(#af)"/>
+<text x="980" y="1135" class="tiny">破線領域: 複数Project横断Learning / Reusable Knowledgeの詳細は今後設計</text>
+
+<!-- Trace graph -->
+<rect x="1380" y="755" width="455" height="405" rx="18" class="blue"/>
+<circle cx="1432" cy="802" r="27" fill="#1d4175"/><use href="#f-spider" x="1416" y="786" width="32" height="32"/>
+<text x="1472" y="807" class="txt">Feature Trace Graph / Spider View</text>
+<text x="1420" y="852" class="small">• Source / Document / Testの対応関係をGraph化</text>
+<text x="1420" y="884" class="small">• File粒度 / Function粒度を切替</text>
+<text x="1420" y="916" class="small">• Test → Feature / Component対応</text>
+<text x="1420" y="948" class="small">• README等へのLink</text>
+<text x="1420" y="980" class="small">• .spiderignoreで対象除外</text>
+<text x="1420" y="1012" class="small">• View切替</text>
+<text x="1420" y="1044" class="small">• 変更影響範囲の理解を支援</text>
+<text x="1420" y="1088" class="tiny">Knowledge / Test / Artifactの関係を可視化する既存機能系統</text>
+
+<!-- Integration bottom -->
+<rect x="60" y="1205" width="580" height="235" rx="18" class="cyan"/>
+<circle cx="112" cy="1252" r="27" fill="#1f5761"/><use href="#f-link" x="96" y="1236" width="32" height="32"/>
+<text x="152" y="1257" class="txt">外部知識・資産・課題管理との連携</text>
+<text x="100" y="1302" class="small">• STK：広くテスト候補を取得 → Test Design Agentが適用判断</text>
+<text x="100" y="1334" class="small">• Document Asset Port：Discover / Search / Read / Import / Write-back</text>
+<text x="100" y="1366" class="small">• Team Playbook / Template / Exemplar</text>
+<text x="100" y="1398" class="small">• Task Tracker Adapter：GitHub Issues → 将来Backlog等</text>
+
+<!-- Verification bottom -->
+<rect x="670" y="1205" width="580" height="235" rx="18" class="green"/>
+<circle cx="722" cy="1252" r="27" fill="#214b3b"/><use href="#f-test" x="706" y="1236" width="32" height="32"/>
+<text x="762" y="1257" class="txt">Platform Test・生成物検証</text>
+<text x="710" y="1302" class="small">• Platform Test：AI-DEそのものを検証</text>
+<text x="710" y="1334" class="small">• Feature Registry / Component Inventory / Generated Inventory</text>
+<text x="710" y="1366" class="small">• Deterministic Boundary / Fault Injection</text>
+<text x="710" y="1398" class="small">• Generated Artifact Test / provenance / stale / orphan / tamper</text>
+
+<!-- Recovery bottom -->
+<rect x="1280" y="1205" width="555" height="235" rx="18" class="orange dashed"/>
+<circle cx="1332" cy="1252" r="27" fill="#6b461c"/><use href="#f-recover" x="1316" y="1236" width="32" height="32"/>
+<text x="1372" y="1257" class="txt">Recovery・長時間自律実行</text>
+<text x="1320" y="1302" class="small">• Failure Report / Recovery Packet</text>
+<text x="1320" y="1334" class="small">• Effect後Crash → Operation indeterminate</text>
+<text x="1320" y="1366" class="small">• State Store復旧 / Backup設計</text>
+<text x="1320" y="1398" class="tiny">Durable Session / mid-Attempt Resume / 自動復旧範囲は詳細未決</text>
+
+<!-- subtle flow lines -->
+<path d="M950 290V330" class="line" marker-end="url(#af)"/>
+<path d="M450 710V745M705 710V745M1145 710V745M1600 710V745" class="line" marker-end="url(#af)"/>
+</svg>
+</div>
+
+<div class="legend">
+  <span><i class="sw" style="background:var(--blue)"></i>Core / 可視化 / 開発制御</span>
+  <span><i class="sw" style="background:var(--cyan)"></i>Knowledge / Requirements / 外部資産</span>
+  <span><i class="sw" style="background:var(--purple)"></i>Governance / 権限</span>
+  <span><i class="sw" style="background:var(--orange)"></i>実行 / Recovery</span>
+  <span><i class="sw" style="background:var(--green)"></i>State / Verification</span>
+  <span><i class="sw" style="background:var(--red)"></i>Model / Provider</span>
+  <span>破線枠 = 機能方向はあるが詳細・時期が未確定</span>
+</div>
+
+<div class="note">
+<b>この7枚目の位置づけ:</b> 1〜6枚目が「責務境界・Architecture」を見るための図なのに対し、これは
+<b>AI-DEが何をする製品なのかを機能面から一望する図</b>です。
+特に「開発知見を残して次に生かす」「Spider Viewで関係を可視化する」といった、Runtime構造図では省略していた機能も含めています。
+</div>
+<div class="explain-title">この図の機能説明</div><div class="explain-grid">
+<div class="explain-card"><h3>要件定義・QA</h3><p>AIと人間の対話から要求を固める機能です。質問、回答、根拠、追加調査を管理します。</p></div>
+<div class="explain-card"><h3>Governance・Gate・権限</h3><p>規定や承認を守りながらAI開発を進める機能です。必須作業と提案作業の区別にも関係します。</p></div>
+<div class="explain-card"><h3>計画・仕事の分解</h3><p>必要なPhaseやTaskを組み立てる機能です。ここで組んだTaskがAI実行の対象になります。</p></div>
+<div class="explain-card"><h3>Execution Runtime</h3><p>Taskを実際に動かす実行エンジンです。Worker、Tool、Providerを制御し、実行履歴も残します。</p></div>
+<div class="explain-card"><h3>State Store・Artifact・Evidence</h3><p>実行状態と履歴の保存、成果物と証跡の参照管理を行う機能です。</p></div>
+<div class="explain-card"><h3>AI Model・Provider管理</h3><p>利用するModelやProviderを管理し、Projectごとの設定に沿ってAIを実行可能にする機能です。</p></div>
+<div class="explain-card"><h3>開発知見・Feedback Loop</h3><p>今回の開発で得た情報を次へ生かす機能です。判断履歴や失敗例を資産化します。</p></div>
+<div class="explain-card"><h3>Feature Trace Graph / Spider View</h3><p>機能・コード・ドキュメント・テストの関係を可視化し、理解負債を減らす機能です。</p></div>
+<div class="explain-card"><h3>外部知識・資産・課題管理との連携</h3><p>STK、Document Asset、Task Trackerなど、AI-DEの外側にある資産とつながる機能です。</p></div>
+<div class="explain-card"><h3>Platform Test・生成物検証</h3><p>AI-DE自体の正しさと、作った成果物の妥当性を検証する機能です。</p></div>
+<div class="explain-card"><h3>Recovery・長時間自律実行</h3><p>AIが長時間動いても壊れにくく、失敗後も追跡・復旧しやすくする機能です。</p></div>
+</div></section>
+
+<footer>現時点の合意を可視化した作業用Architecture Artifact。製品名・Protocol名などの固有名詞は原語を残し、説明は日本語化。破線領域や未決事項は実装済みと誤認しないこと。</footer>
+<div id="svg-tip" role="tooltip"></div>
+
+<script>
+const tips = {
+  "Human": "人間です。\n役割: 目的を決める、AIが組み立てた計画を承認する、必要な質問に答える、リスク受容や例外を正式に判断すること。\nここで重要なのは、人間が毎回細かい実装手順を全部決めるのではなく、一意に決まらない判断を引き受けることです。",
+  "Orca": "AI開発管理コンソールです。\n役割: AI-DEが持っている正式な状態を見やすく表示し、人間の指示やCommandをAI-DEへ送ること。\nできること: 進捗確認、複数リポジトリ・複数AIの管理、SSH先での操作。\nやらないこと: Gate判定やStateの正本化。Orcaが勝手に開発判断を確定してはいけません。",
+  "AI-DE": "日本ハーネスの中核となる開発ハーネスです。\n役割: 人間と合意した目的から、要件定義、設計、製造、テスト、レビューまでをAI主体で進めること。\n内部では、必要な作業を組み立て、権限を守って実行し、結果が要求を満たしたかをEvidenceで確認します。",
+  "Security Proxy": "LLMへ送る前のセキュリティ境界です。\n役割: 外部へ出る通信を一度ここへ通し、必要に応じてマスキングや監査を行うこと。\n補足: プロジェクト設定でマスキングを弱めたり無効化したりしても、通信経路そのものはここを通る想定です。",
+  "OpenCodex": "ModelやProviderに接続する外部コンポーネントです。\n役割: どのLLMへ送るか、どう接続するかを吸収すること。\nできること: 複数Providerの利用。\nやらないこと: Task、Gate、Human DecisionのAuthorityを持つこと。",
+  "LLM Provider群": "実際に推論を行うLLMの集合です。\n例: OpenAI系、Claude系、Qwen系、ローカルLLMなど。\n重要なのは、Providerが変わっても、日本ハーネス側の権限・Evidence・Gateの考え方は変えないことです。",
+  "Software-Test-Knowledge": "ソフトウェアテストの汎用知識基盤です。\n役割: 『どのようなテスト観点があり得るか』を広く提供すること。\nやらないこと: 今回必ずどのテストを実施するかを最終決定すること。採用判断は案件側、AI-DE側、人間承認側で行います。",
+  "Document Asset": "過去の設計書、テスト仕様書、Template、Exemplarなどを活用する基盤です。\n役割: 各チームが今持っているやり方や成果物形式を取り込み、AIがそれに合わせて成果物を作れるようにすること。\n補足: 詳細設計は別論点として後送されています。",
+  "Task Tracker": "仕事の入口になる課題管理システムです。\n例: GitHub Issues。将来はBacklogなども想定。\n役割: 何に対して開発を進めるかの外部起点を持つこと。\nやらないこと: AI-DEのRuntime Stateの正本になること。",
+  "Protocol Host": "OrcaなどのClientとAI-DE Coreをつなぐ軽量の実行プロセスです。\n役割: ソケット経由のJSONメッセージを受け取り、AI-DE Coreへ橋渡しすること。\n重要なのは、Business Logicはこの層に厚く持たせず、Core側に寄せることです。",
+  "アプリケーションサービス / Core": "AI-DEの中核ロジックです。\n役割: State Machine、Plan生成、Task展開、Gate評価、Human Decision反映などの正式な判断を行うこと。\nここが壊れるとAI-DE全体の判断が壊れるため、Platform Testの中心的対象になります。",
+  "State Store = Runtime State SSOT": "Runtime Stateの唯一の正本です。\n役割: Project、Work Item、Phase、Task、Attempt、Operation、Human Decision、Gate、Artifact Revisionなどを保存すること。\n補足: SQLiteかPostgreSQLを使い、イベントや会話ログを正本にしない方針です。",
+  "Execution Runtime（AI実行基盤）": "AIやツールを実際に動かす基盤です。\n役割: Execution Packetに基づいてWorkerやToolを動かし、Attempt、Operation、Evidenceを生成すること。\n重要なのは、何をしてよいかをCapabilityで制御し、実行結果をIntent→Effect→Resultで残すことです。",
+  "Local Object Store — 大容量データをDigestで保存": "大きな成果物や証跡を置く保存領域です。\n役割: Screenshot、Log、Test Report、画像、重いドキュメントなどを本体として保存し、State Storeには参照情報だけを持たせること。\nこれによりDB肥大化を防ぎます。",
+  "要件定義・QA": "要件定義を進める機能群です。\n役割: Requirement、Acceptance Criteria、QA表、追加質問、回答履歴を管理すること。\n停止条件の考え方: QA表を埋め、次フェーズへ安全に進めるだけの要件が揃ったら先へ進みます。完全性を過剰に求めすぎないことも重要です。",
+  "Governance・Gate・権限": "規定、承認、権限を守るための機能群です。\n役割: Human Decision、Gate、Capability、Exception、Invariantを通して、AIが勝手に越えてはいけない境界を守ること。\n例: セキュリティレビュー必須の規定があるなら、人間の気分でスキップできないようにします。",
+  "計画・仕事の分解": "開発を実行可能な単位へ分解する機能群です。\n役割: SnapshotをもとにCOMPILEし、Phase、Task Graph、Attempt単位へ落とすこと。\n補足: AIは新しい作業の提案はできますが、正式なTask化はAI-DEを通して行います。",
+  "開発知見・Feedback Loop": "今回の開発で得た知見を次に生かす機能群です。\n役割: Requirement、Decision、Attempt、Evidence、Failure、作業結果などを残し、次の要件定義や設計判断に再利用すること。\nこれにより、毎回ゼロから考え直す負債を減らします。",
+  "Feature Trace Graph / Spider View": "機能、コード、ドキュメント、テストの関係を可視化する機能です。\n役割: どの機能がどのファイル・どのテスト・どのドキュメントに対応しているかをGraphで把握すること。\n使い道: 影響範囲の把握、テスト抜けの検知、ドキュメントとの紐付け確認。",
+  "Platform Test・生成物検証": "AI-DE自身と生成物を検証する機能群です。\n役割: Runtime Invariant、Deterministic Boundary、Fault Injection、Generated Artifact Testなどにより、ハーネスと生成物の両方が壊れていないか確かめること。",
+  "Recovery・長時間自律実行": "失敗しても壊れにくくするための機能領域です。\n役割: 障害時のFailure Report、Recovery Packet、復旧方針の保持。\n現状: 方向性はあるが、一部の詳細は今後の設計対象です。"
+};
+
+
+const tip=document.getElementById('svg-tip');
+function numeric(el,name){ const v=parseFloat(el.getAttribute(name)); return Number.isFinite(v)?v:null; }
+document.querySelectorAll('svg rect.blue,svg rect.green,svg rect.orange,svg rect.purple,svg rect.red,svg rect.cyan,svg rect.yellow,svg rect.box').forEach(rect=>{
+  const x=numeric(rect,'x'), y=numeric(rect,'y'), w=numeric(rect,'width'), h=numeric(rect,'height');
+  if([x,y,w,h].some(v=>v===null)) return;
+  const svg=rect.ownerSVGElement;
+  const labels=[...svg.querySelectorAll('text.txt,text.title')].filter(t=>{
+    const tx=numeric(t,'x'), ty=numeric(t,'y');
+    return tx!==null && ty!==null && tx>=x && tx<=x+w && ty>=y && ty<=y+h;
+  });
+  if(!labels.length) return;
+  const label=labels[0].textContent.trim();
+  const desc=tips[label];
+  if(!desc) return;
+  rect.dataset.tip=desc;
+  rect.classList.add('hoverable-node');
+  rect.setAttribute('tabindex','0');
+  rect.setAttribute('aria-label',label+'。'+desc);
+  labels.forEach(t=>t.classList.add('hoverable-label'));
+  const show=(ev)=>{
+    tip.textContent=label+' — '+desc;
+    tip.style.display='block';
+    const px=(ev.clientX||40)+14, py=(ev.clientY||40)+14;
+    tip.style.left=Math.min(px,window.innerWidth-380)+'px';
+    tip.style.top=Math.min(py,window.innerHeight-120)+'px';
+  };
+  rect.addEventListener('mousemove',show);
+  rect.addEventListener('mouseenter',show);
+  rect.addEventListener('mouseleave',()=>tip.style.display='none');
+  rect.addEventListener('focus',()=>{tip.textContent=label+' — '+desc;tip.style.display='block';tip.style.left='20px';tip.style.top='90px';});
+  rect.addEventListener('blur',()=>tip.style.display='none');
+});
+
+
+function addHelpUnderline(textEl){
+  try{
+    const bb=textEl.getBBox();
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', bb.x);
+    line.setAttribute('x2', bb.x + bb.width);
+    line.setAttribute('y1', bb.y + bb.height + 3);
+    line.setAttribute('y2', bb.y + bb.height + 3);
+    line.setAttribute('class','help-underline');
+    textEl.parentNode.insertBefore(line, textEl.nextSibling);
+  }catch(e){}
+}
+setTimeout(()=>{
+  document.querySelectorAll('svg text.hoverable-label').forEach(addHelpUnderline);
+},0);
+
+const tabs=[...document.querySelectorAll('.tab')];
+const views=[...document.querySelectorAll('.view')];
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('active'));
+  views.forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.tab).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+</script>
+</body>
+</html>

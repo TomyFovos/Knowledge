@@ -1,0 +1,481 @@
+# ドキュメント資産設計 別セッション引き継ぎ条件
+
+更新日: 2026-08-27
+
+この文書は、ドキュメント資産のAuthority、鮮度、Binding、優先順位、Conflict、Import / Write-back等を別セッションで詳細設計するための引き継ぎ条件をまとめたもの。
+
+ここではドキュメント資産の内部設計そのものは決めない。
+AI-DE側との接続境界と、別セッションで必ず決めて戻してほしい論点だけを固定する。
+
+---
+
+# 1. 今ここで決めること
+
+AI-DE Coreは、ドキュメント資産の内部構造や保存先へ直接依存しない。
+
+AI-DE内部に、ドキュメント資産利用のための抽象境界を置く。
+
+仮称:
+
+```text
+Document Asset Port
+```
+
+実装側は、将来以下のどちらでもよい。
+
+```text
+AI-DE Core
+    ↓
+Document Asset Port
+    ├ Local implementation
+    └ External / service implementation
+```
+
+つまり、ドキュメント資産機能がAI-DEリポジトリ内に実装されても、
+別サービスとして実装されても、
+AI-DE Core側の利用方法は変わらないようにする。
+
+---
+
+# 2. AI-DEからドキュメント資産側へ渡すContext
+
+少なくとも以下を渡せるようにする。
+
+- Project
+- Task Tracker上の課題 / Work Item
+- Phase
+- Task
+- 変更対象
+- Repository
+- Path / Component
+- Team
+- 実行目的
+- 必要なArtifact種別
+- 必要に応じて現在のRequirements / Design / Test Context
+
+このContextを基に、
+「今回どの資産が関係するか」をドキュメント資産側で判断できるようにする。
+
+---
+
+# 3. AI-DEがドキュメント資産側から受け取りたいもの
+
+AI-DEは、最低限以下を受け取れる必要がある。
+
+## 3.1 Asset Reference
+
+資産を一意に参照できる安定したID。
+
+```text
+asset_id
+revision / version
+```
+
+同じファイル名や同じ場所でも、
+どのRevisionを使ったのかを後から特定できること。
+
+## 3.2 ContentまたはContentへの参照
+
+AI-DEが実際に利用できる本文、
+もしくは本文へアクセスするための参照。
+
+AI-DE CoreがSharePoint、Git、File Server等の個別仕様を知らなくてよいこと。
+
+## 3.3 Applicability Result
+
+今回のProject / Issue / Phase / Taskに、
+その資産がどう関係するのかを返せること。
+
+内部でどのようにAuthorityやBindingを判断するかは別セッションで決める。
+
+ただしAI-DE側には少なくとも、
+
+```text
+applicable
+not_applicable
+requires_human_decision
+```
+
+のように、
+利用可否を判断できる結果を返せること。
+
+名称や詳細Schemaは後で決めてよい。
+
+## 3.4 Decision Trace / Basis
+
+「なぜこの資産を今回使ったのか」を後から説明できる情報。
+
+AI-DEのEvidence / Auditへ残せること。
+
+内部のAuthority計算式そのものをAI-DEへ漏らす必要はない。
+
+## 3.5 Capability
+
+ドキュメント資産実装が何をサポートしているか判定できること。
+
+例:
+
+- search / discover
+- read
+- resolve applicability
+- import
+- write-back
+- revision check
+- conflict detection
+
+将来機能を追加してもAI-DE Coreが壊れないようにする。
+
+---
+
+# 4. AI-DEから利用する意味上の操作
+
+具体的なAPI名はまだFreezeしない。
+
+ただし、AI-DEから以下の意味上の操作を行える境界を用意する。
+
+## 4.1 Discover / Search
+
+今回の変更に関係しそうな資産を探す。
+
+## 4.2 Resolve
+
+見つかった資産の中から、
+今回のContextで利用すべきもの、
+参考扱いにすべきもの、
+人間判断が必要なものを判断する。
+
+Authority、Scope、Binding、Freshness等の内部ロジックは、
+ドキュメント資産側の責務とする。
+
+## 4.3 Read
+
+確定したAsset Revisionを読む。
+
+## 4.4 Import
+
+既存ファイルをドキュメント資産側へ取り込む。
+
+具体的なImport方法は別セッションで決める。
+
+## 4.5 Write-back
+
+AI-DEが作成 / 更新したArtifactを、
+既存の保存先・ファイル形式へ書き戻す。
+
+具体的な競合処理、Revision、承認、Commit方法は別セッションで決める。
+
+---
+
+# 5. AI-DE側で固定しないもの
+
+以下は今のセッションでは決めない。
+
+- Document種別の最終Schema
+- Authorityの段階
+- 数値Priority
+- Freshnessの計算方法
+- Precedence Rule
+- Conflict Resolution Rule
+- Lifecycle Status
+- Ownership Model
+- Provenance Schema
+- Binding Schema
+- Exception Schema
+- Template / Playbook / ExemplarへのPromotion条件
+- Storage
+- Search Engine
+- Vector DB
+- RAG構成
+- SharePoint Connector仕様
+- Git Connector仕様
+- File Server Connector仕様
+- XLSX / DOCX / Markdown Codec仕様
+- Write-back Conflict Resolution
+- External Human Editとの競合処理
+
+これらは別セッションの設計対象とする。
+
+---
+
+# 6. 別セッションで必ず決める論点
+
+以下をすべてクリアすれば、
+AI-DE側へ統合できる状態とみなす。
+
+## 6.1 Classification
+
+何をどの種類の資産として扱うか。
+
+候補例:
+
+- Governance Source
+- Team Playbook
+- Template
+- Exemplar
+- Project Artifact
+
+ただしこの分類自体も再検討してよい。
+
+## 6.2 Authority
+
+どの資産が、
+
+- 従うべきRule
+- 必須Process
+- 推奨
+- 参考例
+
+なのかをどう表すか。
+
+単純なPriority番号だけで済ませないこと。
+
+## 6.3 Scope
+
+その資産がどこに適用されるか。
+
+例:
+
+- Company
+- Organization
+- Team
+- Project
+- Repository
+- Path
+- Component
+- Issue / Work Item
+- Phase
+- Artifact type
+
+## 6.4 Binding
+
+資産と適用対象をどう正式に結びつけるか。
+
+「検索で見つかったから適用」にはしない。
+
+## 6.5 Precedence
+
+複数の資産が同時にApplicableになった場合、
+どの順序・ルールで判断するか。
+
+## 6.6 Conflict
+
+複数資産が矛盾した場合、
+
+- 自動解決できる条件
+- 人間判断へ送る条件
+- Fail Closedにする条件
+
+を決める。
+
+## 6.7 Freshness
+
+古い文書をどう扱うか。
+
+更新日時だけで判断するのか、
+LifecycleやSuperseded関係を優先するのかも含めて決める。
+
+## 6.8 Lifecycle
+
+最低限、
+
+- draft
+- active
+- deprecated
+- superseded
+- retired
+
+等が必要かを検討する。
+
+正式名称は別セッションで決める。
+
+## 6.9 Ownership
+
+誰がその資産を管理・承認・更新できるか。
+
+## 6.10 Provenance
+
+その資産が、
+
+- 誰が作ったか
+- どこから来たか
+- 何を元に生成されたか
+- いつ承認されたか
+
+を追跡できるようにする。
+
+## 6.11 Promotion
+
+既存の過去資料やExemplarを、
+
+- Template
+- Team Playbook
+- Governance Source
+
+等へ昇格させる場合の正式手順。
+
+AIが自動でAuthorityへ昇格させないこと。
+
+## 6.12 Exception
+
+通常Ruleから外れる場合の正式な例外処理。
+
+誰が承認できるか、
+期限や適用範囲をどう持つかも含める。
+
+## 6.13 Human Decision
+
+AIだけではAuthority、Conflict、Promotion等を解決できない場合、
+Human Decisionへどう送るか。
+
+AI-DEのHuman Decisionモデルと接続できること。
+
+## 6.14 Import
+
+既存資産を取り込む際、
+
+- 元ファイルを正本とするのか
+- コピーを保持するのか
+- Parsed Representationをどう扱うか
+- Revisionをどう認識するか
+
+を決める。
+
+## 6.15 Write-back
+
+既存XLSX / DOCX等へ戻す際、
+
+- 元形式を維持する方法
+- Revision確認
+- 外部編集とのConflict
+- Atomicity
+- Approval
+- Failure時の扱い
+
+を決める。
+
+## 6.16 Audit / Evidence
+
+AI-DEが、
+
+- どの資産を使ったか
+- どのRevisionを使ったか
+- なぜ使ったか
+- どのRuleが適用されたか
+- Human Decisionがあったか
+
+をEvidenceとして残せること。
+
+---
+
+# 7. 別セッションで必ず確認する危険パターン
+
+以下を避けられる設計になっているか確認する。
+
+## 7.1 古い文書が新しい正式文書より優先される
+
+単純な検索Scoreや更新日時だけで決めない。
+
+## 7.2 過去の成果物が勝手にRuleへ昇格する
+
+ExemplarとAuthorityを混同しない。
+
+## 7.3 RAGで見つかったものが自動的にMandatoryになる
+
+RetrievalとAuthorityを分離する。
+
+## 7.4 同名ファイルでRevisionが分からなくなる
+
+Asset IDとRevisionを追跡する。
+
+## 7.5 Team固有Ruleが別Teamへ漏れる
+
+Scope / Bindingを明示する。
+
+## 7.6 Human DecisionなしでConflictを勝手に解決する
+
+Authority上判断不能ならHuman Decisionへ送る。
+
+## 7.7 AI-DE CoreへConnector固有処理が漏れる
+
+Git / SharePoint / File Server等はAdapter側へ閉じ込める。
+
+## 7.8 Write-backで人間の変更を上書きする
+
+Revision / Conflict Detectionなしで上書きしない。
+
+## 7.9 文書をContextへ大量投入する
+
+Applicableな資産と必要部分だけをAI-DEへ渡す。
+
+## 7.10 「Priority」という1軸ですべてを決める
+
+Authority、Scope、Lifecycle、Binding、Conflict等を分離して検討する。
+
+---
+
+# 8. 別セッションの成果物として持ち帰ってほしいもの
+
+最低限、以下を1つの設計書として持ち帰る。
+
+1. Document Asset全体モデル
+2. Asset分類
+3. Authorityモデル
+4. Scope / Bindingモデル
+5. Precedence / Conflict Resolution
+6. Freshness / Lifecycle
+7. Ownership / Provenance
+8. Promotion
+9. Exception
+10. Human Decisionとの接続
+11. Importモデル
+12. Write-backモデル
+13. Revision / Conflict管理
+14. Audit / Evidence
+15. Document Asset Portへ返すデータモデル
+16. Capability一覧
+17. 代表的な正常系シナリオ
+18. 代表的なConflictシナリオ
+19. Fail Closed条件
+20. Phase 1 / Laterの実装分割
+
+---
+
+# 9. 統合時の合格条件
+
+別セッションで作った設計が次を満たせば、
+AI-DE本体側の設計へ統合可能とする。
+
+- AI-DE Coreが保存場所やファイル形式を知らなくてよい。
+- AssetをStable ID + Revisionで参照できる。
+- 今回ApplicableなAssetを問い合わせられる。
+- なぜApplicableなのか追跡できる。
+- Authority判断不能時にHuman Decisionへ送れる。
+- Retrieval結果とAuthorityが分離されている。
+- Import / Write-backを同じAsset Identity上で扱える。
+- 外部編集とのConflictを検出できる。
+- AI-DE Evidenceへ利用AssetとRevisionを残せる。
+- 将来Connector / Codec / Storageを差し替えられる。
+- ドキュメント資産内部の設計変更でAI-DE Coreが壊れない。
+
+---
+
+# 10. 今のAI-DE側で進めてよいこと
+
+ドキュメント資産設計の完成を待たず、
+AI-DE側は以下を進めてよい。
+
+- Requirements + Issue単位QA Ledger
+- QA Complete
+- Requirement Review Pipeline
+- Phase Gate整理
+- State Store
+- Task Tracker Adapter
+- AI-DE Protocol
+- Execution Runtime
+- Security Proxy Layer
+- Provider / Tool Guard
+- Artifact / Evidence
+- Document Asset Portの抽象Interfaceだけ用意
+
+Document Asset Portの具体的な内部実装は、
+別セッションの設計が戻ってから接続する。

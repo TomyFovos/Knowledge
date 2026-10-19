@@ -1,0 +1,1297 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日本ハーネス 設計判断SSOT v1.0 — 再構成版</title>
+<style>
+:root{
+  --bg:#f6f8fb;--panel:#fff;--text:#1f2937;--muted:#667085;--line:#d8dee8;
+  --dark:#111827;--ok:#166534;--okbg:#ecfdf3;--hold:#92400e;--holdbg:#fff7ed;
+  --open:#991b1b;--openbg:#fef2f2;--info:#1d4ed8;--infobg:#eff6ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;line-height:1.7}
+header{background:var(--dark);color:#fff;padding:32px 24px 26px}
+.wrap,main{max-width:1240px;margin:auto}
+h1{font-size:30px;margin:0 0 8px}
+.subtitle{color:#d1d5db;max-width:1000px;margin:0}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px;font-size:13px}
+.meta span{border:1px solid #475569;border-radius:999px;padding:4px 10px}
+main{padding:24px 20px 60px}
+section{scroll-margin-top:92px;margin-bottom:30px}
+h2{font-size:23px;margin:0 0 14px;border-bottom:2px solid #cbd5e1;padding-bottom:8px;color:#111827}
+h3{font-size:18px;margin:22px 0 10px}
+.card,.callout,.decision,.entry-card{background:#fff;border:1px solid var(--line);border-radius:11px;padding:16px;margin:10px 0}
+.callout{border-left:5px solid #475569}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.badge{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 8px;margin-right:5px}
+.frozen{color:var(--ok);background:var(--okbg);border:1px solid #bbf7d0}
+.defer{color:var(--hold);background:var(--holdbg);border:1px solid #fed7aa}
+.open{color:var(--open);background:var(--openbg);border:1px solid #fecaca}
+.info{color:var(--info);background:var(--infobg);border:1px solid #bfdbfe}
+.id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;color:#334155}
+.head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.title{font-weight:700;color:#111827}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:10px 11px;text-align:left;vertical-align:top}
+th{background:#f1f5f9;color:#334155;font-size:13px}
+pre{background:#0f172a;color:#e5e7eb;border-radius:9px;padding:15px 17px;overflow:auto;line-height:1.55;font-size:13px}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.small{font-size:13px;color:var(--muted)}
+ul,ol{padding-left:24px} li{margin:4px 0}
+details{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 14px;margin:8px 0}
+summary{cursor:pointer;font-weight:700;color:#334155}
+
+.master-tabs{position:sticky;top:0;z-index:30;background:rgba(246,248,251,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:9px 0;margin-bottom:18px}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap}
+.tabbar button{cursor:pointer;font:inherit;border:1px solid var(--line);background:#fff;color:#334155;border-radius:999px;padding:8px 14px}
+.tabbar button.on{background:#111827;color:#fff;border-color:#111827}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.panel-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
+.panel-title{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+.panel-title h2{border:0;margin:0;padding:0}
+.panel-desc{color:#475569;max-width:900px}
+.quick-nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.quick-nav a{text-decoration:none;color:#334155;background:#f8fafc;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:13px}
+.section-stack>section{margin-bottom:30px}
+
+.entry-overview{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
+.route-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.entry-card h3{margin:0 0 8px}
+.entry-card button{cursor:pointer;font:inherit;border:0;background:#111827;color:#fff;border-radius:8px;padding:8px 11px}
+@media(max-width:980px){.entry-overview{grid-template-columns:1fr}.route-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.route-grid,.grid{grid-template-columns:1fr}}
+
+.mmd-ctrl{position:sticky;top:60px;z-index:9;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:12px 0}
+.mmd-ctrl b.lab{font-size:13px;color:#334155}
+.mmd-ctrl button,.view-ctrl button,.aud-tabs button{cursor:pointer;font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:#334155;border-radius:8px;padding:6px 12px}
+.mmd-ctrl button.on,.view-ctrl button.on,.aud-tabs button.on{background:#111827;color:#fff;border-color:#111827}
+.mmd{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0;overflow:auto}
+.mmd .mermaid{font-size:13px}
+.mmd pre{white-space:pre-wrap}
+.figcap{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.aud-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.diag-panel{display:none}.diag-panel.active{display:block}
+.persona-intro{border-left:5px solid #0f766e}
+.persona-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.persona-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}
+.persona-card b{display:block;margin-bottom:6px;color:#111827}
+
+.term-help{text-decoration:underline dotted #64748b;text-underline-offset:3px;cursor:help;border-radius:3px}
+.term-help:focus{outline:2px solid #94a3b8;outline-offset:2px}
+#term-tooltip{position:fixed;z-index:99999;max-width:360px;background:#111827;color:#fff;border:1px solid #475569;border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.55;box-shadow:0 10px 30px rgba(15,23,42,.25);pointer-events:none;display:none}
+#term-tooltip .tt-term{font-weight:700;margin-bottom:3px}#term-tooltip .tt-note{color:#d1d5db}
+.onboard-note{background:#eff6ff;border-left:5px solid #3b82f6}
+.onboard-path{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.onboard-step{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px}.onboard-step b{display:block;color:#111827;margin-bottom:4px}
+.role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.non-normative{font-size:12px;color:#475569;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:8px 10px;margin:8px 0}
+footer{background:#111827;color:#cbd5e1;padding:24px 20px;font-size:13px}
+footer .wrap{max-width:1240px;margin:auto}
+@media(max-width:760px){.onboard-path,.role-grid,.persona-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<h1>日本ハーネス 設計判断 SSOT</h1>
+<p class="subtitle">v1.0 Design Freeze の情報はそのままに、読む目的ごとに構成だけを整理し直した版。図・補助説明より本文のDecisionを優先する。</p>
+<div class="meta"><span>Version 1.0</span><span>Mode: FROZEN</span><span>Frozen: 2026-08-25</span><span>Structure: Reorganized</span></div>
+</div>
+</header>
+
+<main>
+<section id="entry">
+<div class="entry-overview">
+  <div class="entry-card">
+    <h2>このHTMLの読み方</h2>
+    <p>最初から最後まで順番に読む構成をやめ、目的ごとに5つへ整理しました。</p>
+    <ul>
+      <li><strong>入口</strong>：前提、キャッチアップ、変更しない原則</li>
+      <li><strong>図</strong>：新人・設計・実装・商売向けの図</li>
+      <li><strong>確定事項</strong>：凍結済み判断と後送事項</li>
+      <li><strong>中核モデル</strong>：規範、事実、Phase 1</li>
+      <li><strong>運用・履歴</strong>：変更手続き、廃止案、過去議論</li>
+    </ul>
+  </div>
+  <div class="entry-card">
+    <h2>立場別の最短ルート</h2>
+    <ul>
+      <li><strong>新人</strong>：入口 → 図「新人向け」</li>
+      <li><strong>設計</strong>：図「設計向け」→ 中核モデル</li>
+      <li><strong>実装</strong>：図「実装向け」→ 中核モデル → 運用</li>
+      <li><strong>商売</strong>：図「商売向け」→ 確定事項</li>
+    </ul>
+  </div>
+</div>
+<div class="route-grid">
+  <div class="entry-card"><h3>新人向け</h3><p>「何ができる仕組みか」を最短で掴む。</p><button data-open="panel-diagrams" data-audience-target="newcomer">新人向け図へ</button></div>
+  <div class="entry-card"><h3>設計向け</h3><p>責務境界と確定モデルを確認する。</p><button data-open="panel-diagrams" data-audience-target="design">設計向け図へ</button></div>
+  <div class="entry-card"><h3>実装向け</h3><p>部品の切り分けと処理の流れを確認する。</p><button data-open="panel-diagrams" data-audience-target="implementation">実装向け図へ</button></div>
+  <div class="entry-card"><h3>商売向け</h3><p>お客さんへ何を価値として伝えるか確認する。</p><button data-open="panel-diagrams" data-audience-target="sales">商売向け図へ</button></div>
+</div>
+</section>
+
+<div class="master-tabs"><div class="tabbar">
+<button class="on" data-panel="panel-entry">入口</button>
+<button data-panel="panel-diagrams">図</button>
+<button data-panel="panel-freeze">確定事項</button>
+<button data-panel="panel-core">中核モデル</button>
+<button data-panel="panel-ops">運用・履歴</button>
+</div></div>
+
+<div id="panel-entry" class="tab-panel active"><div class="panel-shell">
+  <div class="panel-title"><div><h2>入口</h2><div class="panel-desc">この文書の前提と読み方を理解する場所。新規参画者はここから始める。</div></div></div>
+  <div class="quick-nav"><a href="#mode">Freeze宣言</a><a href="#onboarding">キャッチアップ</a><a href="#principles">設計原則</a></div>
+  <div class="section-stack"><section id="mode">
+<h2>0. Design Freeze 宣言</h2>
+<div class="callout">
+<strong>2026-08-25、設計議論を v1.0 で Freeze した。Phase 1 は GO。Fatal contradiction なし。</strong><br>
+提案 → 対抗レビュー → 再反証 → 収束レビュー → 最終裁定のサイクルは完了し、<strong>両レビュー系統が Freeze を受領済み</strong>。以後は設計レビューを行わず、実装 Issue へ移行する。<br><br>
+<strong>以後の目的は「より完全な設計」ではなく「Phase 1を安全に開始できる十分な設計で止める」こと。</strong><br>
+新しい概念・型・Invariant・Contract・kindを増やすことは原則禁止する。未決事項は、Phase 1を実際に止めるものだけ残す。
+</div>
+<table>
+<thead><tr><th>ルール</th><th>運用</th></tr></thead>
+<tbody>
+<tr><td><strong>CLOSE-01</strong></td><td>既に方向が合意している事項は、細部未定を理由に再オープンしない。細部は実装時に決められるなら「後送」にする。</td></tr>
+<tr><td><strong>CLOSE-02</strong></td><td>新しい論点を追加できるのは、§2の確定原則または既存の確定Decisionを破る<strong>具体的な反例</strong>がある場合だけ。</td></tr>
+<tr><td><strong>CLOSE-03</strong></td><td>「将来必要かもしれない」はOPEN理由にしない。Phase 1で不要ならDeferredへ移す。</td></tr>
+<tr><td><strong>CLOSE-04</strong></td><td>最後のOpusレビュー後は、残った2論点を裁定し v1.0 へFreezeする。別の対抗レビュー周回を開始しない。</td></tr>
+</tbody>
+</table>
+
+<h3>0-1. 最終裁定サマリ</h3>
+<table>
+<thead><tr><th>判定項目</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>Fatal contradiction</td><td><span class="badge frozen">なし</span>§1 / §2 を PRINCIPLE-001〜008 に照らして通し、交差点を個別確認した。矛盾なし。</td></tr>
+<tr><td>FINAL-OPEN-01</td><td><span class="badge frozen">採用</span>v0.6 推奨案をそのまま採用。Base kind 3種 + modifier + process action。→ §4</td></tr>
+<tr><td>FINAL-OPEN-02</td><td><span class="badge frozen">最小修正して採用</span>Fact Claim + Current View Resolver を採用。既定 resolution policy と conflicted の評価を追記。<strong>I-22r は廃止。</strong>→ §5</td></tr>
+<tr><td>§2 凍結事項</td><td><span class="badge frozen">Freeze 可能</span>12 + 10 項目を変更なしで v1.0 へ。</td></tr>
+<tr><td>Phase 1</td><td><span class="badge frozen">GO</span>§6 の成功条件5項目すべてに達成経路がある。Deferred 項目は妨げない。</td></tr>
+<tr><td>対抗レビュー側の受領</td><td><span class="badge frozen">受領済</span>2026-08-25、対抗レビュー側が §2 / §4 / §5 / §7 および図 L1〜L4 について食い違いなしを確認し、Freeze を受領。実装 Issue への移行に同意。</td></tr>
+</tbody>
+</table>
+<div class="callout"><strong>この設計の Phase 1 における成否は、もはや設計の精緻さでは決まらない。</strong><br>
+決めるのは次の2つであり、どちらも実装・運用の問題である。<br>
+① XLSX の update Egress が実際に通るか　② 最初の Team Playbook が実際に書かれるか</div>
+
+</section><section id="onboarding">
+<h2>補助. 開発者向けキャッチアップ</h2>
+<div class="callout onboard-note"><strong>この節は補助資料であり、仕様・Decisionではない。</strong><br>新規参画者が短時間で全体像を掴むための読み方を示す。本文と食い違う場合は、必ず本文のDecisionを優先する。</div>
+<h3>最短キャッチアップ導線</h3>
+<div class="onboard-path">
+<div class="onboard-step"><b>10分：全体像</b>L1 / L2 の図 → §1 原則 → §2-1 追加凍結事項。「日本ハーネス / AI-DE / Execution / Artifact」の責務境界だけ掴む。</div>
+<div class="onboard-step"><b>30分：実装に必要な概念</b>L3 / L4 → §4 Normative Effect Model → §5 Fact Model。Norm / Fact / Planning Decision / Gate の関係を理解する。</div>
+<div class="onboard-step"><b>実装開始前：自分の担当だけ深掘り</b>§6 Phase 1成功条件を確認し、担当領域に対応するDecision IDだけを読み直す。過去v0.xは「なぜ？」が出たときだけ参照。</div>
+</div>
+<h3>担当別の読む場所</h3>
+<div class="role-grid">
+<div class="card"><strong>AI-DE / Control Plane担当</strong><p>COMPILE-001 / FINAL-COMPILE-01 / §4 / §5 / GATE-001 を優先。</p></div>
+<div class="card"><strong>Execution Runtime / Agent担当</strong><p>EXEC-001 / FINAL-EXEC-01 / FINAL-EXEC-02 / Execution Packet / capability境界を優先。</p></div>
+<div class="card"><strong>Artifact / Document担当</strong><p>ARTIFACT-001/002 / FINAL-ARTIFACT-01 / Egress / Storage Connector × Document Codec を優先。</p></div>
+<div class="card"><strong>Orca / UI担当</strong><p>OrcaはProjection / Command Originator。Authoritative State Transitionを持たない、という境界を最優先で確認。</p></div>
+</div>
+<h3>参画完了の目安</h3>
+<ul>
+<li>Human / AI / Policy / Code の責務を自分の言葉で説明できる。</li>
+<li>同じChange State Snapshotから同じPlanになる理由を説明できる。</li>
+<li>FactとFinding、Normative DecisionとPlanning Decisionの違いを説明できる。</li>
+<li>AIが直接Rule / Gate / Authoritative Factを書き換えられない理由を説明できる。</li>
+<li>TeamのExcel / Wordを統一形式へ移行させずに扱う理由を説明できる。</li>
+</ul>
+<div class="non-normative"><strong>推奨運用：</strong>新規メンバーに過去の全議論を読ませない。まず本v1.0と担当領域だけを読み、実装Issueには必ず関連Decision IDを付ける。「なぜこの制約があるのか」が必要になった時だけv0.xへ遡る。</div>
+</section><section id="principles">
+<h2>1. 変更しない設計原則</h2>
+<div class="grid">
+<div class="card"><strong>PRINCIPLE-001</strong><pre><code>HUMAN  = 本当に必要な意思決定
+AI     = 意味理解・設計・実装・意味レビュー
+POLICY = 何を要求するか
+CODE   = 一意に決定できる処理</code></pre></div>
+<div class="card"><strong>PRINCIPLE-002</strong><p>Authority Conservation。委譲された以上のAuthorityを持たせない。</p></div>
+<div class="card"><strong>PRINCIPLE-003</strong><p>Evidence over Assertion。証明できないことを証明済みと扱わない。</p></div>
+<div class="card"><strong>PRINCIPLE-004</strong><p>Adapt, Don't Impose。現場のWord / Excel / DMS / Team手順に基盤側が適応する。</p></div>
+<div class="card"><strong>PRINCIPLE-005</strong><p>ConversationをSSOTにしない。</p></div>
+<div class="card"><strong>PRINCIPLE-006</strong><p>Planは決定的、Executionは非決定性を許容して記録する。</p></div>
+<div class="card"><strong>PRINCIPLE-007</strong><p>Provider / Modelの都合をPlanへ漏らさない。</p></div>
+<div class="card"><strong>PRINCIPLE-008</strong><p>AI-DEを便利機能の巨大集合にしない。</p></div>
+</div>
+</section></div>
+</div></div>
+
+<div id="panel-diagrams" class="tab-panel"><div class="panel-shell">
+  <div class="panel-title"><div><h2>図</h2><div class="panel-desc">同じ確定設計を、読み手ごとに適切な粒度へ変えて見せる場所。</div></div></div>
+  <div class="section-stack"><section id="diagrams">
+<h2>図タブ</h2>
+<div class="callout">
+<strong>図だけを見たい人向けの入口。</strong> 読み手ごとに必要な粒度が違うため、図を <strong>新人向け / 設計向け / 実装向け / 商売向け</strong> の4タブに分けた。<br>
+<span class="small">どのタブも本文の確定Decisionを説明するための図であり、図と本文が食い違う場合は本文を優先する。</span>
+</div>
+
+<div class="aud-tabs" role="tablist" aria-label="図の対象別タブ">
+  <button class="on" data-audience="newcomer" role="tab" aria-selected="true">新人向け</button>
+  <button data-audience="design" role="tab" aria-selected="false">設計向け</button>
+  <button data-audience="implementation" role="tab" aria-selected="false">実装向け</button>
+  <button data-audience="sales" role="tab" aria-selected="false">商売向け</button>
+</div>
+
+<div class="diag-panels">
+  
+<div class="diag-panel" data-audience="newcomer">
+  <div class="callout persona-intro">
+    <strong>新人向け</strong><br>
+    難しい言葉をできるだけ減らして、「この仕組みで何ができるか」が分かるようにした図です。<br>
+    最初は <strong>既存の資料を読み込む → 今回やることを決める → AIが作業する → 確認して戻す</strong> の流れだけ押さえれば大丈夫です。
+  </div>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <b>この図で分かること</b>
+      <ul>
+        <li>現場のExcelやWordをそのまま使う</li>
+        <li>チームの決まりに合わせて作業を選ぶ</li>
+        <li>AIが作業しても、最後は確認できる形で残す</li>
+      </ul>
+    </div>
+    <div class="persona-card">
+      <b>まず見る順番</b>
+      <ol>
+        <li>全体の流れ</li>
+        <li>今回の変更から何が決まるか</li>
+        <li>最後に何が残るか</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>新人向け図1. まず全体像</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+flowchart TB
+  A["現場の既存資産<br/>Excel / Word / PDF / Git<br/><br/>今ある資料ややり方をそのまま使う"]
+  B["決まりを整理する場所<br/><br/>会社やチームの決まりを<br/>機械で使える形にまとめる"]
+  C["今回やることを決める仕組み<br/><br/>変更内容を見て<br/>必要な作業を選ぶ"]
+  D["AIが作業する場所<br/><br/>決められた範囲だけで<br/>設計・実装・試験を進める"]
+  E["確認して戻す<br/><br/>成果物と確認結果を残し<br/>元のExcelやWordへ反映する"]
+  A -->|"資料と決まりを読む"| B
+  B -->|"守るべき内容を渡す"| C
+  C -->|"必要な作業を決める"| D
+  D -->|"成果物と根拠を返す"| E
+  E -. "現場の資料が更新される" .-> A
+  </div></div>
+  <p class="figcap">要するに、<strong>今の資料を捨てずに、チームのやり方に沿って AI を動かす仕組み</strong>です。</p>
+
+  <h3>新人向け図2. 変更が来たときの流れ</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+flowchart LR
+  I["変更依頼やIssue<br/><br/>何を直したいかが入る"]
+  P["今回必要な作業の一覧<br/><br/>設計が必要か<br/>試験が必要かを決める"]
+  W["作業の実行<br/><br/>AIや人が担当を進める"]
+  G["確認<br/><br/>試験結果・レビュー・承認を確認する"]
+  O["完了<br/><br/>成果物と根拠が残る"]
+  I --> P --> W --> G --> O
+  </div></div>
+  <p class="figcap">この図では、<strong>「何をやるか」を先に決めてから動く</strong>ことが大事です。いきなり AI に全部任せるわけではありません。</p>
+</div>
+
+  
+<div class="diag-panel design-panel" data-audience="design">
+  <div class="callout persona-intro">
+    <strong>設計向け</strong><br>
+    アーキテクチャ設計に携わる人向けです。責務境界、決定が集まる場所、どこが正式な判断を持つかを確認するための図を置いています。<br>
+    現在の確定判断に沿った <strong>既存の図</strong> と、読みやすくした <strong>説明の図</strong> を切り替えられます。
+  </div>
+  
+<div class="callout"><strong>L1 から L4 へ向かうほどカプセル化を解いた図になる。</strong>ボタンで全図が同時に切り替わる。L1 は経営・他部門への説明用、L2 は日常の共通言語、L3 は責務境界の確認用、L4 は実装者が参照する完全版。<br>
+<span class="small">図はこの文書の判断を可視化したもの。図と本文が食い違う場合は本文の Decision が優先する。</span></div>
+
+<div class="mmd-ctrl">
+  <b class="lab">詳細度</b>
+  <button data-level="1">L1 概観</button>
+  <button data-level="2">L2 主要フロー</button>
+  <button data-level="3">L3 責務</button>
+  <button data-level="4">L4 完全</button>
+  <span class="small">現在：<b class="lvname"></b></span>
+</div>
+<div class="view-ctrl">
+  <b class="lab">表示</b>
+  <button data-view="diagram">既存の図</button>
+  <button data-view="explain">説明の図</button>
+  <span class="small">説明の図では、箱や矢印の中に「それで何ができるか」を日本語で埋め込んで表示する。</span>
+</div>
+
+<h3>図1. 全体アーキテクチャ</h3>
+<div class="mmd" data-levels="1"><div class="mermaid">
+flowchart TB
+  ORG["現場の既存資産&lt;br/&gt;Word・Excel・PDF・SharePoint・Git"]
+  NORM["Normative Space&lt;br/&gt;組織の規範"]
+  AIDE["AI-DE&lt;br/&gt;Policy-Driven Development Runtime"]
+  EXEC["Execution&lt;br/&gt;Worker・Provider"]
+  ORG -->|Ingress| NORM
+  NORM --> AIDE
+  AIDE -->|Execution Packet| EXEC
+  EXEC -->|Artifact・Evidence| AIDE
+  AIDE -->|Egress| ORG
+</div></div>
+
+<div class="mmd" data-levels="2"><div class="mermaid">
+flowchart TB
+  CH["Change&lt;br/&gt;開発意図の同一性"] --> SS["Change State Snapshot&lt;br/&gt;immutable"]
+  SS --> CMP["Development Compiler&lt;br/&gt;純関数"]
+  CMP --> PLAN["Development Plan"]
+  CMP --> CR["Compilation Record&lt;br/&gt;監査単位"]
+  PLAN --> TASK["Task"]
+  TASK --> ATT["Attempt"]
+  ATT --> PKT["Execution Packet"]
+  PKT --> WK["Worker・Provider"]
+  WK --> ART["Artifact・Evidence"]
+  ART --> GATE["Gate"]
+  GATE -->|PASS| DONE["完了"]
+  GATE -->|FAIL| FR["Failure Report&lt;br/&gt;Exception は作らない"]
+  ART -->|新しい事実| SS
+</div></div>
+
+<div class="mmd" data-levels="3"><div class="mermaid">
+flowchart TB
+  subgraph SRC["現場の正本"]
+    S1["規程・手順書"]
+    S2["成果物&lt;br/&gt;Excel・Word"]
+  end
+  SNAP["Governance Snapshot"]
+  NORM["Normative Space&lt;br/&gt;constraint・process・binding"]
+  FACT["Fact View"]
+  FIND["Finding View"]
+  PD["Planning Decision"]
+  SS["Change State Snapshot"]
+  CMP["Development Compiler"]
+  PLAN["Development Plan"]
+  TASK["Task"]
+  ATT["Attempt"]
+  PKT["Execution Packet"]
+  ASSET["Assets&lt;br/&gt;Knowledge・Template・Exemplar"]
+  WK["Worker・Provider・Sandbox"]
+  ART["Artifact Revision"]
+  EVD["Evidence"]
+  GATE["Gate"]
+  EGR["Egress&lt;br/&gt;Storage Connector × Document Codec"]
+  ORCA["Orca&lt;br/&gt;Command Originator"]
+  S1 --> SNAP
+  SNAP -->|解釈と人間の承認| NORM
+  NORM --> SS
+  FACT --> SS
+  FIND --> SS
+  PD --> SS
+  SS --> CMP
+  CMP --> PLAN
+  PLAN --> TASK
+  TASK --> ATT
+  ATT --> PKT
+  PKT --> WK
+  ASSET -. materialize .-> PKT
+  NORM -. Binding .-> PKT
+  WK --> ART
+  WK --> EVD
+  ART --> GATE
+  EVD --> GATE
+  NORM --> GATE
+  GATE -.->|Finding| FIND
+  ART --> EGR
+  EGR --> S2
+  S2 -.->|人間の外部編集を観測| ART
+  ORCA -->|Command| SS
+</div></div>
+
+<div class="mmd" data-levels="4"><div class="mermaid">
+flowchart TB
+  subgraph ORG["現場の正本 — 移行を要求しない"]
+    S1["規程・開発手順書&lt;br/&gt;Word・PDF・DMS"]
+    S2["成果物&lt;br/&gt;XLSX・DOCX・SharePoint"]
+  end
+  subgraph NRM["Normative Space"]
+    SNAP["Governance Snapshot&lt;br/&gt;immutable・digest・attestation"]
+    ENV["Common Envelope&lt;br/&gt;authority・scope・origin&lt;br/&gt;lifecycle・precedence・delegation"]
+    K1["constraint"]
+    K2["process"]
+    K3["binding"]
+    MOD["exception&lt;br/&gt;modifier"]
+    ACT["require_human_decision&lt;br/&gt;process action"]
+  end
+  subgraph FCT["Fact Model"]
+    PRD["Fact Producer"]
+    CLM["Fact Claim&lt;br/&gt;immutable"]
+    REG["Subject Registry&lt;br/&gt;authorized producers&lt;br/&gt;allowed basis・resolution policy"]
+    RSV["Current View Resolver"]
+    VW["Current Fact View&lt;br/&gt;known・unknown・conflicted"]
+  end
+  FIND["Finding View&lt;br/&gt;lifecycle と disposition を分離"]
+  PD["Planning Decision&lt;br/&gt;Norm が宣言した選択肢空間の中でのみ選ぶ"]
+  SS["Change State Snapshot&lt;br/&gt;norm・fact・finding・planning decision・source"]
+  CMP["Development Compiler&lt;br/&gt;純関数"]
+  CR["Compilation Record&lt;br/&gt;inputs・outputs・unresolved"]
+  PLAN["Development Plan&lt;br/&gt;injected_by で逆引き可能"]
+  TASK["Task&lt;br/&gt;Completion は機械判定"]
+  ATT["Attempt&lt;br/&gt;Provider・Model 固定"]
+  PKT["Execution Packet&lt;br/&gt;契約 + digest pin 参照"]
+  ADV["Advisory Session&lt;br/&gt;capability は人間の read 権限の部分集合"]
+  RT["日本ハーネス Execution Runtime&lt;br/&gt;全 LLM 実行の唯一の出口"]
+  WK["Worker・Sandbox・Tool Guard"]
+  ART["Artifact Revision&lt;br/&gt;native・canonical・structure"]
+  EVD["Evidence"]
+  GATE["Gate&lt;br/&gt;Evidence・Approval・Policy・Artifact を AND 評価"]
+  EGR["Egress&lt;br/&gt;Storage Connector × Document Codec"]
+  INV["Control Plane Invariants"]
+  ORCA["Orca&lt;br/&gt;Projection と Command のみ"]
+  S1 --> SNAP
+  SNAP -->|解釈 + Authority Decision| ENV
+  ENV --> K1
+  ENV --> K2
+  ENV --> K3
+  MOD -. 委譲範囲で効果を修正 .-> K1
+  MOD -.-> K2
+  MOD -.-> K3
+  K2 --> ACT
+  ACT -->|選択肢空間を宣言| PD
+  PRD --> CLM
+  REG -->|admission 制御| CLM
+  CLM --> RSV
+  REG --> RSV
+  RSV --> VW
+  ENV --> SS
+  VW --> SS
+  FIND --> SS
+  PD --> SS
+  SS --> CMP
+  CMP --> PLAN
+  CMP --> CR
+  PLAN --> TASK
+  TASK --> ATT
+  ATT --> PKT
+  K3 -. Binding で権威が発生 .-> PKT
+  PKT --> RT
+  ADV --> RT
+  RT --> WK
+  WK --> ART
+  WK --> EVD
+  WK -.->|Fact Proposal| PRD
+  WK -.->|Finding| FIND
+  ART --> GATE
+  EVD --> GATE
+  ENV --> GATE
+  GATE -.->|FAIL は Failure Report まで| FIND
+  ART --> EGR
+  EGR --> S2
+  S2 -.->|観測可能な範囲で Revision 化| ART
+  ORCA -->|Command| SS
+  ORCA -.->|read only 相談| ADV
+  CR --> INV
+  GATE --> INV
+  PKT --> INV
+</div></div>
+<p class="figcap">L4 の点線は「参照・提案・観測」を表し、実線は「Authority を伴う流れ」を表す。Agent 側から Norm へ向かう実線が存在しないことが Authority Conservation の可視化になっている。</p>
+<div class="mmd mmd-exp" data-view="explain" data-levels="1"><div class="mermaid">
+
+flowchart TB
+  A["現場の既存資産<br/>Excel / Word / PDF / Git<br/><br/>今のやり方を変えずに取り込める"]
+  B["Normative Space<br/><br/>会社やチームの決まりを<br/>機械で使える形に整理する"]
+  C["AI-DE<br/><br/>今回やるべき作業を<br/>自動で計画する"]
+  D["AI実行<br/><br/>決められた範囲だけで<br/>実際の作業を行う"]
+  E["現場の既存資産へ戻す<br/>Excel / Word / Git など<br/><br/>成果物を元の形式で反映する"]
+  A -->|"既存資産を読む"| B
+  B -->|"必要な作業を決める"| C
+  C -->|"安全な作業範囲を渡す"| D
+  D -->|"成果物と根拠を返す"| E
+
+</div></div><div class="mmd mmd-exp" data-view="explain" data-levels="2"><div class="mermaid">
+
+flowchart TB
+  A["Change State Snapshot<br/><br/>ある時点の開発状況を固定する<br/>同じ状況なら同じ計画を再現できる"]
+  B["Development Compiler<br/><br/>変更内容と決まりから<br/>必要な作業を組み立てる"]
+  C["Development Plan<br/><br/>今回必要な設計・実装・試験・確認を<br/>一覧として表す"]
+  D["Task / Attempt / Execution Packet<br/><br/>AIへ渡す作業単位と実行条件を<br/>明確にする"]
+  E["AI実行<br/><br/>決められた範囲で作業する"]
+  F["Gate<br/><br/>成果物・試験・レビュー・承認が<br/>揃った時だけ次へ進める"]
+  G["Artifact / Evidence<br/><br/>作った成果物と確認根拠を残す"]
+  A -->|"入力を固定"| B -->|"計画を作る"| C -->|"作業へ分解"| D -->|"実行"| E
+  E -->|"結果を返す"| G -->|"通過判定"| F
+  G -. "新しい事実や指摘が出たら" .-> A
+
+</div></div><div class="mmd mmd-exp" data-view="explain" data-levels="3"><div class="mermaid">
+
+flowchart TB
+  S["Governance Sources<br/><br/>規程・手順書・既存文書を読む"]
+  N["Normative Space<br/><br/>守る決まりを整理する"]
+  F["Fact / Finding / Planning Decision<br/><br/>現実の状態・指摘・人間判断を集める"]
+  P["Change State Snapshot<br/><br/>計画に使う入力を固定する"]
+  C["Development Compiler<br/><br/>必要な作業を決める"]
+  K["Knowledge / Template / Exemplar<br/><br/>作業内容や様式を具体化する材料"]
+  X["Execution Packet<br/><br/>AIに許す作業範囲と出力条件"]
+  R["Execution Runtime<br/><br/>AIを実際に動かす"]
+  A["Artifact Revision / Evidence<br/><br/>成果物と根拠を記録する"]
+  E["Egress<br/><br/>Excel や Word へ戻す"]
+  O["Orca<br/><br/>正式状態を書き換えずに<br/>操作要求と表示を担当する"]
+  S --> N
+  N --> P
+  F --> P
+  P --> C --> X --> R --> A --> E
+  K -. "Plan は変えずに具体化を助ける" .-> X
+  O -. "操作要求" .-> C
+
+</div></div><div class="mmd mmd-exp" data-view="explain" data-levels="4"><div class="mermaid">
+
+flowchart TB
+  A["権限を持つ流れ<br/><br/>規範の決定・計画の生成・<br/>Gate通過・成果物確定など"]
+  B["提案や参照の流れ<br/><br/>AIの提案・知識参照・観測結果など"]
+  C["Normative Space<br/><br/>どの決まりが有効かを管理する"]
+  D["Current Fact View<br/><br/>現在の判断に使う事実をまとめる"]
+  E["Development Compiler<br/><br/>決まりと事実から計画を作る"]
+  F["Execution Runtime<br/><br/>通常作業も相談用AI利用も<br/>ここを通す"]
+  G["Gate<br/><br/>証拠と承認が揃った時だけ通す"]
+  H["Artifact Revision<br/><br/>AI版・人間修正版を記録する"]
+  I["重要な読み方<br/><br/>AI側から規範を書き換える実線はない<br/>人間判断の位置は規範が先に決める"]
+  C --> E
+  D --> E
+  E --> F --> G --> H
+  B -. "AIの提案や知識参照" .-> F
+  A --- I
+
+</div></div>
+</div>
+
+
+<h3>図2. Normative Effect Model（§4 の可視化）</h3>
+<div class="mmd" data-levels="1,2"><div class="mermaid">
+flowchart LR
+  ENV["Common Envelope"]
+  K1["constraint&lt;br/&gt;許容状態・条件・Capability"]
+  K2["process&lt;br/&gt;Task・Gate・Review・Human choice"]
+  K3["binding&lt;br/&gt;Template・Knowledge・Output Contract"]
+  MOD["exception&lt;br/&gt;modifier"]
+  ACT["require_human_decision&lt;br/&gt;process action"]
+  ENV --> K1
+  ENV --> K2
+  ENV --> K3
+  MOD -. 効果を修正 .-> K1
+  MOD -.-> K2
+  MOD -.-> K3
+  K2 --> ACT
+</div></div>
+
+<div class="mmd" data-levels="3,4"><div class="mermaid">
+flowchart TB
+  subgraph EV["Common Envelope — Precedence 計算に効くものだけを置く"]
+    F1["id / version"]
+    F2["authority&lt;br/&gt;issuer・delegation"]
+    F3["scope / applicability"]
+    F4["origin / authorship"]
+    F5["lifecycle"]
+    F6["precedence"]
+  end
+  subgraph PL["kind 別 Payload — Compile 時の意味論"]
+    K1["constraint"]
+    K2["process"]
+    K3["binding"]
+    ACT["require_human_decision"]
+    K2 --> ACT
+  end
+  MOD["exception&lt;br/&gt;Base Rule の効果を委譲範囲で修正する Grant"]
+  PREC["Precedence 計算&lt;br/&gt;NORM-01：Base Rule 上でのみ行う&lt;br/&gt;exception 用の第2格子を作らない"]
+  PD["Planning Decision"]
+  NOREL["NORM-02：選択肢空間は Norm が宣言する&lt;br/&gt;Planning Decision は構造的に規範を緩和できない&lt;br/&gt;AI は require_human_decision を作れない"]
+  EV --> PREC
+  PL --> COMP["Development Compiler"]
+  MOD -. 委譲範囲で修正 .-> PL
+  PREC --> COMP
+  ACT -->|選択肢空間| PD
+  PD --> NOREL
+  NOREL --> COMP
+</div></div>
+<p class="figcap">メタ規範（規範を変える権限に関する規範）は constraint の「Capability を制約」に収まるため、第4の kind を必要としない。</p>
+<div class="mmd mmd-exp" data-view="explain" data-levels="1,2"><div class="mermaid">
+
+flowchart LR
+  C["constraint<br/><br/>やってよい範囲を決める<br/>必要条件や権限を制限する"]
+  P["process<br/><br/>何をやる必要があるか決める<br/>作業・確認・人間判断を定める"]
+  B["binding<br/><br/>どの様式や知識を使うか決める<br/>Template や Knowledge を結び付ける"]
+  X["exception<br/><br/>元の決まりを消さずに<br/>効き方だけを限定的に変える"]
+  H["require_human_decision<br/><br/>AIだけで決めてはいけない選択を<br/>人間へ戻す"]
+  C --- P --- B
+  X -. "必要な時だけ修正" .-> C
+  X -.-> P
+  X -.-> B
+  H -. "process の中で使う" .-> P
+
+</div></div><div class="mmd mmd-exp" data-view="explain" data-levels="3,4"><div class="mermaid">
+
+flowchart TB
+  E["共通情報<br/><br/>誰の決まりか<br/>どこへ効くか<br/>どの版か<br/>どう優先するか"]
+  K["種類ごとの中身<br/><br/>制約なら制約の内容<br/>工程なら工程の内容<br/>結び付けなら結び付けの内容"]
+  P["優先順位の考え方<br/><br/>優先順位は Base Rule 上で計算する<br/>例外だけの別の優先格子は作らない"]
+  D["Planning Decision<br/><br/>人間は規範が許した選択肢の中でだけ選べる<br/>規範そのものは勝手に緩めない"]
+  A["AIの限界<br/><br/>AIは新しい人間判断ポイントを作れない<br/>必要なら規範が先に宣言する"]
+  E --> K
+  E --> P
+  K --> D
+  P --> D
+  D --> A
+
+</div></div>
+</div>
+
+
+<h3>図3. Fact Model（§5 の可視化）</h3>
+<div class="mmd" data-levels="1,2"><div class="mermaid">
+flowchart LR
+  PR["Fact Producer"] --> CL["Fact Claim&lt;br/&gt;immutable"]
+  REG["Subject Registry"] --> CL
+  CL --> RS["Current View Resolver"]
+  REG --> RS
+  RS --> VW["Current Fact View&lt;br/&gt;known・unknown・conflicted"]
+  VW --> PE["Policy Evaluation"]
+</div></div>
+
+<div class="mmd" data-levels="3,4"><div class="mermaid">
+flowchart TB
+  P1["static-analyzer&lt;br/&gt;basis: observed"]
+  P2["intent-extractor&lt;br/&gt;basis: inferred"]
+  P3["human&lt;br/&gt;basis: explicit"]
+  REG["Subject Registry&lt;br/&gt;type・authorized producers&lt;br/&gt;allowed basis・resolution policy"]
+  ADM{"admission 制御&lt;br/&gt;producer は authorized か&lt;br/&gt;basis は allowed か"}
+  REJ["受理しない"]
+  LED["Fact Claim Ledger&lt;br/&gt;immutable・破壊的 supersede をしない"]
+  RSV["Current View Resolver&lt;br/&gt;source revision・producer&lt;br/&gt;evidence・validity・subject policy"]
+  DEF["FACT-01 既定 resolution policy&lt;br/&gt;低 basis は高 basis を置換せず conflicted"]
+  VW["Current Fact View"]
+  ST1["known"]
+  ST2["unknown"]
+  ST3["conflicted"]
+  PE["Policy Evaluation"]
+  SAFE["FACT-02&lt;br/&gt;unknown と conflicted は&lt;br/&gt;要件を課す側へ倒す"]
+  P1 --> ADM
+  P2 --> ADM
+  P3 --> ADM
+  REG --> ADM
+  ADM -->|不可| REJ
+  ADM -->|可| LED
+  LED --> RSV
+  REG --> RSV
+  DEF -.-> RSV
+  RSV --> VW
+  VW --> ST1
+  VW --> ST2
+  VW --> ST3
+  ST1 --> PE
+  ST2 --> SAFE
+  ST3 --> SAFE
+  SAFE --> PE
+</div></div>
+<p class="figcap">I-22r が廃止できた理由。inferred な producer は subject 単位の admission 制御で弾かれるため、全 subject 共通の basis 全順序は不要になる。I-22r の意図は FACT-01 の既定 policy として保存されている。</p>
+<div class="mmd mmd-exp" data-view="explain" data-levels="1,2"><div class="mermaid">
+
+flowchart LR
+  P["Fact Producer<br/><br/>どの仕組みや人が<br/>どの事実を出してよいか決まっている"]
+  C["Fact Claim<br/><br/>事実の候補を上書きせず残す"]
+  R["Current View Resolver<br/><br/>今使うべき事実を<br/>一貫した方法で決める"]
+  V["Current Fact View<br/><br/>現在の開発判断に使う事実"]
+  G["Policy Evaluation<br/><br/>その事実を使って<br/>必要条件を判定する"]
+  P --> C --> R --> V --> G
+
+</div></div><div class="mmd mmd-exp" data-view="explain" data-levels="3,4"><div class="mermaid">
+
+flowchart TB
+  A["admission 制御<br/><br/>その producer がその種類の事実を<br/>登録してよいか確認する"]
+  B["Subject Registry<br/><br/>事実の種類ごとに<br/>型・basis・解決方法を定義する"]
+  C["Fact Ledger<br/><br/>Fact Claim を壊さず残す"]
+  D["Resolver<br/><br/>今使う値を選ぶ<br/>分からない時は競合や不明として残す"]
+  E["FACT-01<br/><br/>特に指定がなければ<br/>弱い basis は強い basis を置き換えない"]
+  F["FACT-02<br/><br/>unknown と conflicted は<br/>要件を課す側へ倒す"]
+  G["I-22r 廃止の意味<br/><br/>全事実で共通の単純な優先順は作らない<br/>種類ごとの定義と Resolver で安全に扱う"]
+  A --> C
+  B --> A
+  B --> D
+  C --> D
+  D --> E
+  D --> F
+  D --> G
+
+</div></div>
+</div>
+
+
+</div>
+
+  
+<div class="diag-panel" data-audience="implementation">
+  <div class="callout persona-intro">
+    <strong>実装向け</strong><br>
+    実装担当が「どの部品を作るのか」「どこで責務を切るのか」を確認するための図です。<br>
+    見るべき順番は <strong>部品分割 → 1件の処理の流れ → 外部連携</strong> です。
+  </div>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <b>最初に押さえること</b>
+      <ul>
+        <li>正式な判断を持つのは AI-DE 側</li>
+        <li>AI 実行は実行系、計画生成は制御系</li>
+        <li>Excel / Word 連携は別部品で吸収する</li>
+      </ul>
+    </div>
+    <div class="persona-card">
+      <b>実装の切り分け</b>
+      <ul>
+        <li>制御系：規範、事実、計画、Gate</li>
+        <li>実行系：Task、Attempt、Packet、Runtime</li>
+        <li>連携系：保存先連携、文書形式連携、知識参照</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>実装向け図1. どの部品を作るか</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+flowchart TB
+  O["Orca<br/><br/>操作要求と表示だけを担当"]
+  subgraph C["AI-DE の制御系"]
+    N["規範の管理<br/>何を守るか"]
+    F["事実と指摘の管理<br/>今何が分かっているか"]
+    S["Snapshot<br/>計画入力を固定する"]
+    P["Compiler / Plan<br/>今回の作業を決める"]
+    G["Gate / 証拠確認<br/>通してよいかを判断する"]
+  end
+  subgraph X["AI-DE の実行系"]
+    T["Task"]
+    A["Attempt"]
+    K["Execution Packet"]
+    R["Execution Runtime"]
+  end
+  subgraph L["連携系"]
+    D["知識・テンプレート・参考例"]
+    SC["保存先連携<br/>Git / SharePoint / ファイルサーバー"]
+    DC["文書形式連携<br/>Excel / Word / Markdown"]
+  end
+  AR["成果物と根拠"]
+  O --> P
+  N --> S
+  F --> S
+  S --> P --> T --> A --> K --> R --> AR --> G
+  D -. "具体化に使う" .-> K
+  R --> SC
+  R --> DC
+  G -. "新しい事実や指摘" .-> F
+  </div></div>
+  <p class="figcap">ここで一番大事なのは、<strong>計画を決める場所と、AIを動かす場所を分ける</strong>ことです。</p>
+
+  <h3>実装向け図2. 1件の処理でどこを通るか</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+sequenceDiagram
+  participant U as 利用者 / Orca
+  participant C as AI-DE 制御系
+  participant E as AI-DE 実行系
+  participant X as 外部連携
+  U->>C: 変更依頼・操作要求
+  C->>C: Snapshot を作る
+  C->>C: Plan / Task を作る
+  C->>E: Execution Packet を渡す
+  E->>X: AI 実行 / 文書更新 / 保存先連携
+  X-->>E: 成果物・証拠
+  E-->>C: Artifact / Evidence
+  C->>C: Gate 判定
+  C-->>U: 結果表示
+  </div></div>
+  <p class="figcap">実装時は、<strong>外部に出すのは Packet、戻すのは Artifact / Evidence</strong> という往復を意識すると整理しやすくなります。</p>
+</div>
+
+  
+<div class="diag-panel" data-audience="sales">
+  <div class="callout persona-intro">
+    <strong>商売向け</strong><br>
+    お客さんや社内説明で、「この仕組みを入れると何が良くなるのか」を伝えるための図です。<br>
+    技術名よりも、<strong>既存資産を活かせる / やり方を再現できる / 証跡が残る</strong> を中心に見せます。
+  </div>
+  <div class="persona-grid">
+    <div class="persona-card">
+      <b>伝える価値</b>
+      <ul>
+        <li>今のExcelやWordを捨てなくてよい</li>
+        <li>チームごとのやり方を AI が再現できる</li>
+        <li>品質確認の根拠を残せる</li>
+      </ul>
+    </div>
+    <div class="persona-card">
+      <b>向いている説明相手</b>
+      <ul>
+        <li>部門責任者</li>
+        <li>現場導入を検討するお客さん</li>
+        <li>営業・提案書を作る人</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>商売向け図1. 現状の悩みと導入後</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+flowchart LR
+  subgraph P["よくある悩み"]
+    P1["資料が散らばっている"]
+    P2["チームごとにやり方が違う"]
+    P3["テストや確認が漏れやすい"]
+    P4["なぜそうしたか説明しづらい"]
+  end
+  NH["日本ハーネス<br/><br/>既存資産を読み込み<br/>チームのやり方に沿って<br/>AI を動かす"]
+  subgraph V["導入後にできること"]
+    V1["既存の Excel / Word をそのまま使える"]
+    V2["必要な作業を自動で選べる"]
+    V3["成果物と確認根拠を残せる"]
+    V4["人依存を減らして引き継ぎしやすい"]
+  end
+  P --> NH --> V
+  </div></div>
+  <p class="figcap">売りは「新しい管理方式へ全部乗せ換えること」ではなく、<strong>今ある資産を活かしたまま AI を導入できること</strong>です。</p>
+
+  <h3>商売向け図2. 導入イメージ</h3>
+  <div class="mmd aud-mmd"><div class="mermaid">
+flowchart TB
+  A["既存環境<br/>SharePoint / Git / ファイルサーバー / Excel / Word"]
+  B["日本ハーネス<br/>決まりを読み、必要な作業を決め、AIを統制する"]
+  C["導入効果<br/>手順の再現 / 品質の安定 / 説明可能性"]
+  A -->|"そのまま接続"| B -->|"結果を戻す"| A
+  B --> C
+  </div></div>
+  <p class="figcap">お客さんに見せるときは、<strong>置き換えではなく接続</strong>、<strong>自動化だけでなく統制</strong> を強調すると伝わりやすいです。</p>
+</div>
+
+</div>
+</section></div>
+</div></div>
+
+<div id="panel-freeze" class="tab-panel"><div class="panel-shell">
+  <div class="panel-title"><div><h2>確定事項</h2><div class="panel-desc">Freezeされた判断と、Phase 1では意図的に後送した内容を確認する場所。</div></div></div>
+  <div class="quick-nav"><a href="#frozen">凍結事項</a><a href="#deferred">後送事項</a></div>
+  <div class="section-stack"><section id="frozen">
+<h2>2. v1.0へ持っていく凍結事項</h2>
+<div class="callout"><strong>凍結済み。再議論しない。</strong>変更は §8 の変更手続きに従う。最終裁定において、以下 22 項目に Fatal contradiction は検出されなかった。</div>
+
+<table>
+<thead><tr><th>ID</th><th>凍結する判断</th></tr></thead>
+<tbody>
+<tr><td><strong>ARCH-001</strong></td><td>日本ハーネスは上位Ecosystem。AI-DE / Orca / STK / Document・Artifact連携等を包含する。</td></tr>
+<tr><td><strong>AIDE-001</strong></td><td>AI-DE = Policy-Driven Development Runtime。North Star = Conformance。</td></tr>
+<tr><td><strong>AIDE-002</strong></td><td>Development Compilerは非決定的Asset検索を入力にしない。Asset materializationはExecution側。</td></tr>
+<tr><td><strong>ASSET-001</strong></td><td>Assetはinert。Knowledge / Template等のAuthorityはGovernance Bindingから生じる。</td></tr>
+<tr><td><strong>STK-001</strong></td><td>STK = What to test。Team Playbook = When / Required。Template = How to format。Exemplar = 実例。</td></tr>
+<tr><td><strong>RECORD-001</strong></td><td>FactとFindingを分離する。AIの意味評価をReality SSOTへ直接入れない。</td></tr>
+<tr><td><strong>COMPILE-001</strong></td><td>CompileはimmutableなChange State Snapshotを読み、同じSnapshotから同じPlanを返す。</td></tr>
+<tr><td><strong>TASK-001/002</strong></td><td>Task / Attemptを分離し、Task Completion / Artifact Acceptanceも分離する。</td></tr>
+<tr><td><strong>EXEC-001</strong></td><td>Provider / SubagentはExecution detail。親のPermission / Artifact ownership / Output Contractを超えない。</td></tr>
+<tr><td><strong>GATE-001</strong></td><td>Gate overrideを作らない。緩和は正式なGovernance / Exception経路を通し、Gateを再評価する。</td></tr>
+<tr><td><strong>ARTIFACT-001/002</strong></td><td>EgressまでAdaptする。人間の外部編集は禁止せず、観測可能な範囲でRevision化する。</td></tr>
+<tr><td><strong>KNOWLEDGE-001</strong></td><td>required Knowledgeは決定的、advisory KnowledgeはExecution側の非決定性として記録する。</td></tr>
+</tbody>
+</table>
+
+<h3>2-1. 議論を経て凍結する追加方向</h3>
+<table>
+<thead><tr><th>ID</th><th>最終方向</th></tr></thead>
+<tbody>
+<tr><td><strong>FINAL-AUTH-01</strong></td><td>事前にRule / Authority Decisionで承認された条件をCodeが発火させることは、新しいDecisionではなく<strong>執行</strong>。結果は根拠Rule revision / DecisionへTrace可能。</td></tr>
+<tr><td><strong>FINAL-RECORD-01</strong></td><td>Findingは<strong>観測上のlifecycle</strong>と<strong>人間のdisposition</strong>を分離し、<code>accepted</code>というGate bypassを誘発するstatusを持たない。具体enumは実装時。</td></tr>
+<tr><td><strong>FINAL-GATE-01</strong></td><td>Risk Acceptanceが<strong>実際のGovernance要求を緩和する場合</strong>だけExceptionが必要。Planning relevanceだけではException要否を決めない。</td></tr>
+<tr><td><strong>FINAL-EXEC-01</strong></td><td>Advisory AIはAI-DE Coreの責務にしない。日本ハーネス共通Execution境界からProviderを呼ぶ。Advisory→Attemptは同じ権限を昇格せず、新しいExecution Packet / capabilityを取得する。</td></tr>
+<tr><td><strong>FINAL-EXEC-02</strong></td><td>Conversation transcriptはPacket入力でも自動Evidenceでもない。Audit / Provenance用途。Evidence化は将来のEvidence Contractに従う。</td></tr>
+<tr><td><strong>FINAL-CONTRACT-01</strong></td><td>ContractはSeamから始め、Compatibility Obligationが発生した境界だけCandidate / Stableへ成熟させる。実装数だけで成熟度を決めない。</td></tr>
+<tr><td><strong>FINAL-RULE-01</strong></td><td>Normの<strong>origin / authorship / authority</strong>を分離する。Rule変更のAuthoring / Amendment / Exception / Repealをモデル外操作にしない。</td></tr>
+<tr><td><strong>FINAL-ARTIFACT-01</strong></td><td>観測できない期間・範囲について「外部変更がなかった」と主張しない。Connectorのstatic capabilityだけでなく実際のObservation coverageをEvidenceとして扱う。</td></tr>
+<tr><td><strong>FINAL-COMPILE-01</strong></td><td>Normative Spaceを変えずPlanを変える<strong>Planning Authority Decision</strong>は存在するため、Change State SnapshotでNormative Stateとは分離して扱う。</td></tr>
+<tr><td><strong>FINAL-TASK-01</strong></td><td>Phase 1ではAIの裁量的Task再分割をPlanへ昇格させない。AIはAttempt内部Sub-stepを自由に分解できる。新Factで既存Ruleの展開数が変わる場合は通常Recompile。</td></tr>
+</tbody>
+</table>
+</section><section id="deferred">
+<h2>3. Phase 1を止めないため後送する事項</h2>
+<p>以下は「未解決」ではなく<strong>Deferred</strong>。v1.0設計Freezeのブロッカーにしない。</p>
+<table>
+<thead><tr><th>項目</th><th>後送理由</th></tr></thead>
+<tbody>
+<tr><td>Advisory Sessionの詳細Schema / token形式</td><td>Phase 1のPDDR縦切りに不要。Data egress policy + mode-bound capabilityという原則だけ保持。</td></tr>
+<tr><td>Impact Previewのthreshold / UI項目</td><td>実測して決める。Authorityそのものはissuer delegationから得る。Impactは追加escalation材料。</td></tr>
+<tr><td>Rule変更時の具体Approval Matrix</td><td>Issuer / delegation model確定後に実装で詰める。Draft自体はCompile入力にしない。</td></tr>
+<tr><td>Artifact Observation Coverageの具体Schema</td><td>Phase 1は観測可能なGit / File System系Connectorで縦切りする。</td></tr>
+<tr><td>Contract一覧（6本 / 8本）</td><td>実装から抽出する。境界だけ保持し、空のContractを先に凍結しない。</td></tr>
+<tr><td>AIによるPlan-level Task decomposition</td><td>Phase 2以降。Phase 1はSub-stepで十分。</td></tr>
+<tr><td>Conversation Evidence昇格</td><td>Evidence Contractが必要になる時点まで実装しない。</td></tr>
+<tr><td>Subject Registry の具体的な subject 名前空間</td><td>FINAL-OPEN-02 裁定の実装詳細。Producer の may_assert と同時に決める。</td></tr>
+<tr><td>subject 個別の resolution policy の中身</td><td>既定（FACT-01）で開始し、必要な subject から個別に定義する。</td></tr>
+<tr><td>constraint / process / binding の payload 詳細スキーマ</td><td>Envelope と kind 分類は §4 で確定済み。payload は実装時。</td></tr>
+<tr><td>Impact Preview unknownの詳細運用</td><td>unknownを0と扱わない。tighteningでも無条件安全扱いしない、まででFreeze。</td></tr>
+</tbody>
+</table>
+</section></div>
+</div></div>
+
+<div id="panel-core" class="tab-panel"><div class="panel-shell">
+  <div class="panel-title"><div><h2>中核モデル</h2><div class="panel-desc">実装とアーキテクチャ判断の中心。規範モデル、事実モデル、Phase 1をまとめて読む。</div></div></div>
+  <div class="quick-nav"><a href="#final-open">Normative Effect Model</a><a href="#fact">Fact Model</a><a href="#phase1">Phase 1</a></div>
+  <div class="section-stack"><section id="final-open">
+<h2>4. Normative Effect Model（確定）</h2>
+<div class="callout"><strong>FINAL-OPEN-01 裁定：v0.6 推奨案を採用。</strong>Phase 1 の Normative Space で表現できない具体例は検出されなかった。kind を増やす提案・減らす提案ともに受け付けない。</div>
+
+<h3>4-1. 確定モデル</h3>
+<pre><code>Common Envelope
+  id / version
+  authority
+  scope / applicability
+  origin / authorship
+  lifecycle
+  precedence / delegation
+
+Base kinds （この3つで固定）
+  constraint  : 許容状態・条件・Capability を制約
+  process     : Task / Gate / Review / Human choice 等の工程要求を規定
+  binding     : Template / Knowledge / Output Contract 等の Asset を規範的に束縛
+
+Modifier
+  exception   : 独立 kind ではなく、委譲された範囲で Base Rule の効果を修正する Grant
+
+Process action
+  require_human_decision : decision_point を独立 kind にせず、process の要求として表現</code></pre>
+
+<h3>4-2. 表現可能性の確認（裁定根拠）</h3>
+<table>
+<thead><tr><th>Phase 1 で必要な規範</th><th>帰属</th></tr></thead>
+<tbody>
+<tr><td>payment_data のとき Security Review 必須</td><td>process</td></tr>
+<tr><td>承認者は2名以上</td><td>constraint</td></tr>
+<tr><td>詳細設計は template v4 準拠</td><td>binding（Output Contract）</td></tr>
+<tr><td>この Phase で knowledge://x を必須</td><td>binding</td></tr>
+<tr><td><strong>enforced Rule の改廃は issuer_owner 承認</strong></td><td>constraint（Capability の制約）</td></tr>
+<tr><td><strong>Exemplar への Normative Binding 禁止</strong></td><td>constraint（Capability の制約）</td></tr>
+<tr><td>UNKNOWN 述語を許容するか</td><td>process（Gate 定義）</td></tr>
+<tr><td>SEC-014 をこの Change で免除</td><td>exception（modifier）</td></tr>
+<tr><td>移行方式を人間が選ぶ</td><td>process action（require_human_decision）</td></tr>
+</tbody>
+</table>
+<p class="small"><strong>constraint の定義に「Capability を制約」が含まれていることが要点。</strong>メタ規範（規範を変える権限に関する規範）が第4の kind を必要としないのはこの一語による。削らないこと。</p>
+
+<h3>4-3. モデルの2つの帰結（実装が従うこと）</h3>
+<div class="decision"><div class="head"><span class="id">NORM-01</span><span class="badge frozen">確定</span><span class="title">Precedence は Base Rule 上でのみ計算する</span></div>
+<p>exception は modifier であるため、precedence は常に base rule 上で計算し、その効果を委譲範囲内で修正する。<strong>exception 用の第2の precedence 格子を作らない。</strong>これにより Authority Conservation が単一の格子で閉じる。</p></div>
+
+<div class="decision"><div class="head"><span class="id">NORM-02</span><span class="badge frozen">確定</span><span class="title">選択肢の空間は Norm が宣言する</span></div>
+<p><code>require_human_decision</code> の選択肢空間は Norm 側が宣言し、Planning Decision はその中からしか選べない。したがって <strong>Planning Decision は構造的に規範を緩和できない。</strong></p>
+<p>これが I-26（Phase / Gate ID 集合の事後比較）を不採用にしてよい理由である。事後検査で捕まえるのではなく、選択肢空間を規範が持つことで緩和がそもそも表現できない。事後検査より強い保証であるため、I-26 の不採用は正しい。</p>
+<p><strong>あわせて次を保証する。</strong>AI は <code>require_human_decision</code> を作れない。作れるのは Governance だけである。AI が迷ったことは Norm を変えないため、決定要求は発生しない。Human Decision Requirement が material trade-off に限定されるのは運用規律ではなく、モデルの構造から出ている。</p></div>
+</section><section id="fact">
+<h2>5. Fact Model（確定）</h2>
+<div class="callout"><strong>FINAL-OPEN-02 裁定：Fact Claim + Current Fact View Resolver を採用。最小修正2点を加える。<span class="badge open">I-22r は廃止</span></strong></div>
+
+<h3>5-1. 確定モデル</h3>
+<pre><code>Fact Claim (immutable)
+  subject / value / producer / basis / evidence
+  source_revision / observed_at / validity
+
+Subject Registry
+  type / authorized producers / allowed basis / resolution policy
+
+Current Fact View
+  state: known | unknown | conflicted
+  selected_claim / supporting_claims
+
+原則
+  ・Fact Claim 同士を単純な basis 全順序で破壊的 supersede しない
+  ・unknown は型付き Fact value ではなく View の認識状態
+  ・resolution は source revision / producer / evidence / subject-specific policy を見る
+  ・AI の inferred claim が observed claim を「上書き」はしないが、conflict として残せる</code></pre>
+
+<h3>5-2. I-22r 廃止の根拠</h3>
+<p><strong>Fact Claim モデルで防げない具体的ケースを提示できなかったため、廃止する。</strong></p>
+<pre><code>subject: payment_data
+  authorized producers : [static-analyzer(observed), human(explicit)]
+  → LLM の inferred claim は admission 時点で拒否される
+  → I-22r が守っていた領域は Subject Registry がより厳密にカバーする
+
+subject: intent.security_sensitive
+  allowed basis : [explicit, inferred]
+  → inferred と explicit が共存しうるが、これは意図された設計
+  → 解決は resolution policy の責務</code></pre>
+<p>I-22r は<strong>全 subject に一律の basis 順序を課す</strong>ものであり、subject ごとに適切な順序が異なるという現実を表現できない。Subject Registry のほうが厳密かつ正確である。責務は Subject Registry / Resolver へ移る。</p>
+
+<h3>5-3. 最小修正2点（I-22r の意図の保存先）</h3>
+<div class="decision"><div class="head"><span class="id">FACT-01</span><span class="badge frozen">確定</span><span class="title">resolution policy の既定値</span></div>
+<pre><code>resolution policy 未指定時の既定：
+  同一 subject で basis 階層の異なる claim が競合する場合、
+  低 basis の claim は高 basis の claim を置換せず、conflicted とする。
+  subject 側で明示的に別 policy を宣言した場合はそれに従う。</code></pre>
+<p class="small">既定を定めないと、実装者が「最新優先」を素朴に選び、新しい inferred claim が古い observed claim を静かに上書きする。<strong>RECORD-001 が Fact 側で破れる唯一の経路がここ。</strong>既定値1つで塞ぐ。これは新 Invariant ではなく Subject Registry の既定値である。</p></div>
+
+<div class="decision"><div class="head"><span class="id">FACT-02</span><span class="badge frozen">確定</span><span class="title">conflicted の評価上の扱い</span></div>
+<pre><code>Current Fact View の state が conflicted の場合、
+Policy Evaluation は unknown と同様に「要件を課す側」へ倒す。</code></pre>
+<p class="small">v0.6 は conflicted を新設したが評価側の扱いが未定義だった。放置すると実装者は conflicted を false に潰し、条件付き規範がすり抜ける。PRINCIPLE-003 の違反経路になるため、選んだモデルの未定義箇所として1行で埋める。</p></div>
+</section><section id="phase1">
+<h2>6. Phase 1 Design Freeze 範囲</h2>
+<div class="grid">
+<div class="card"><h3>Bootstrap</h3><ul>
+<li>既存Governance Source → Snapshot → machine-readable Norm Draft。</li>
+<li>AI Draftは自動Enforced化しない。</li>
+<li>Team Playbookはversioned authoring package。独自Rule Engineを持たない。</li>
+<li>弱いattestationはdegradationとして記録する。</li>
+</ul></div>
+<div class="card"><h3>Runtime</h3><ul>
+<li>Change → State Snapshot → Compile → Plan → Task → Attempt → Artifact / Evidence → Gate。</li>
+<li>Planning DecisionはNormative Stateと別入力。</li>
+<li>required Knowledgeは決定的Materialization、advisoryはExecution側。</li>
+<li>Egressを最低1本（XLSX updateを優先）通す。</li>
+<li>人間外部編集を禁止しない。</li>
+</ul></div>
+</div>
+<h3>Phase 1で成功と呼ぶ条件 <span class="badge frozen">GO 判定済み</span></h3>
+<ol>
+<li>同じChange State Snapshotから同じPlan digestを再生成できる。</li>
+<li>なぜそのTask / Gateが必要になったかをNorm / Fact / DecisionへTraceできる。</li>
+<li>AIが権限外のRule / Fact / Gate / Artifact stateを書き換えられない。</li>
+<li>Teamの既存Artifact形式へ結果を戻せる。</li>
+<li>証明できないことはUNKNOWN / unresolvedとして残り、PASSを偽装しない。</li>
+</ol>
+</section></div>
+</div></div>
+
+<div id="panel-ops" class="tab-panel"><div class="panel-shell">
+  <div class="panel-title"><div><h2>運用・履歴</h2><div class="panel-desc">Freeze後の変更方法と、廃止した案・過去議論を確認する場所。</div></div></div>
+  <div class="quick-nav"><a href="#changeproc">変更手続き</a><a href="#change">廃止案</a><a href="#archive">履歴</a></div>
+  <div class="section-stack"><section id="changeproc">
+<h2>8. Freeze 後の変更手続き</h2>
+<div class="callout"><strong>本書は設計レビューの対象ではない。</strong>以後の変更は実装 Issue として起票し、実装上の必要が実証された場合にのみ本書へ反映する。</div>
+<table>
+<thead><tr><th>状況</th><th>手続き</th></tr></thead>
+<tbody>
+<tr><td>Deferred 項目を実装する必要が出た</td><td>実装 Issue として起票。設計 OPEN に戻さない。決まった内容を本書へ追記する</td></tr>
+<tr><td>実装中に §2 / §4 / §5 が守れないと判明した</td><td><strong>実際に失敗した実装ケースを添えて</strong>変更提案。理論上の懸念だけでは受け付けない</td></tr>
+<tr><td>「もっと綺麗にできる」案を思いついた</td><td>Phase 2 の検討材料として記録し、v1.x では扱わない</td></tr>
+<tr><td>新しい kind / Record / Contract / Invariant が欲しくなった</td><td>まず既存の payload / action / policy で表現できないことを示す。示せない限り追加しない</td></tr>
+</tbody>
+</table>
+
+<h3>8-1. Freeze の判断基準（再掲）</h3>
+<p>本 Freeze は「理論上これ以上改善できない設計」ではない。<strong>「Phase 1 を安全に開始するために十分で、設計思想を破っていない設計」</strong>である。改善余地の存在は Freeze を妨げる理由にならない。</p>
+</section><section id="change">
+<h2>7. 廃止した案</h2>
+<p class="small">再提案されたときに参照するため、最終裁定で廃止した案を記録する。</p>
+<table>
+<thead><tr><th>廃止対象</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td><strong>I-22r</strong>（basis 降格時は unknown にのみ遷移可）</td><td>Subject Registry / Resolver が上位互換。意図は FACT-01 の既定 policy へ移管</td></tr>
+<tr><td>全 subject 共通の basis 全順序</td><td>同上</td></tr>
+<tr><td><code>decision_point</code> を独立 kind とする案</td><td>process action として表現可能</td></tr>
+<tr><td><code>exception</code> を独立 Base kind とする案</td><td>modifier として表現可能</td></tr>
+<tr><td>I-26（Phase / Gate ID 集合の事後比較）</td><td>NORM-02 が構造的に代替。事後検査より強い</td></tr>
+<tr><td>Planning Decision を Normative View へすべて吸収する案</td><td>反例あり（規範を変えず Plan を変える決定が存在する）</td></tr>
+<tr><td>Task の裁量的粒度を Fact へ一般化する案</td><td>Planning と Reality の混同</td></tr>
+<tr><td>ARTIFACT-002 の supersede</td><td>不要。Observation Evidence で対応</td></tr>
+<tr><td>claimed_severity だけを未資格 Finding の Plan 注入信号にする案</td><td>spam / omission 両面の穴</td></tr>
+</tbody>
+</table>
+</section><section id="archive">
+<h2>9. 議論履歴の扱い</h2>
+<div class="callout">
+v0.1〜v0.5のCandidate / 対抗レビュー / 再反証は<strong>設計根拠の履歴</strong>として保存するが、現在の設計を読む入口にはしない。
+過去版は「なぜその判断になったか」を調べるときだけ開く。
+</div>
+<details>
+<summary>主な廃案・撤回</summary>
+<ul>
+<li>Planning DecisionをNormative Viewへすべて吸収する案：反例あり、撤回。</li>
+<li>Taskの裁量的粒度をFactへ一般化する案：PlanningとRealityの混同として撤回。</li>
+<li>ARTIFACT-002のsupersede：不要。補助的なObservation Evidenceで対応。</li>
+<li>I-26をPhase/Gate ID集合比較だけでAuthority境界として使う案：不完全な事後検査として不採用。</li>
+<li><code>claimed_severity</code>だけを未資格FindingのPlan注入信号にする案：spam / omission両面の穴があるため不採用。</li>
+</ul>
+</details>
+</section></div>
+</div></div>
+</main>
+
+<footer><div class="wrap">日本ハーネス 設計判断SSOT v1.0 — 再構成版<br><span class="small">情報は維持し、構成と導線だけを整理。</span></div></footer>
+
+<script type="module">
+
+const NAMES={1:'L1 概観',2:'L2 主要フロー',3:'L3 責務',4:'L4 完全'};
+const wraps=[...document.querySelectorAll('.design-panel .mmd:not(.mmd-exp)')];
+const expWraps=[...document.querySelectorAll('.design-panel .mmd-exp')];
+const btns=[...document.querySelectorAll('.mmd-ctrl button')];
+const viewBtns=[...document.querySelectorAll('.view-ctrl button')];
+let mermaid=null, ready=false, currentLevel=2, currentView='diagram';
+
+function setNames(n){document.querySelectorAll('.lvname').forEach(e=>e.textContent=NAMES[n]);}
+
+// 1枚だけをテキスト表示へ落とす。他の図は巻き込まない。
+function degrade(wrap, note){
+  if(wrap.dataset.done) return;
+  const node=wrap.querySelector('.mermaid');
+  if(node){
+    const pre=document.createElement('pre');
+    pre.textContent=node.textContent.trim();
+    node.replaceWith(pre);
+  }
+  if(note && !wrap.querySelector('.warn')){
+    const w=document.createElement('p');
+    w.className='small warn'; w.style.color='#991b1b'; w.style.margin='8px 0 0';
+    w.textContent='この図は描画できなかったため定義を表示しています。'+note;
+    wrap.appendChild(w);
+  }
+  wrap.dataset.done='1';
+}
+
+async function render(wrap){
+  if(wrap.dataset.done) return;
+  if(!ready){ degrade(wrap,'（mermaid を読み込めませんでした）'); return; }
+  const node=wrap.querySelector('.mermaid');
+  if(!node) return;
+  try{
+    await mermaid.run({nodes:[node], suppressErrors:false});
+    wrap.dataset.done='1';
+  }catch(e){
+    console.error('mermaid render failed', e);
+    degrade(wrap,'（構文エラー）');
+  }
+}
+
+function syncDisplay(){
+  btns.forEach(b=>b.classList.toggle('on', b.dataset.level===String(currentLevel)));
+  viewBtns.forEach(b=>b.classList.toggle('on', b.dataset.view===currentView));
+  setNames(currentLevel);
+  for(const w of wraps){
+    const show = currentView==='diagram' && w.dataset.levels.split(',').includes(String(currentLevel));
+    w.style.display = show ? 'block' : 'none';
+  }
+  for(const w of expWraps){
+    const show = currentView==='explain' && w.dataset.levels.split(',').includes(String(currentLevel));
+    w.style.display = show ? 'block' : 'none';
+  }
+}
+
+async function setLevel(n){
+  currentLevel = n;
+  syncDisplay();
+  const target = currentView==='diagram' ? wraps : expWraps;
+  for(const w of target){
+    const show=w.dataset.levels.split(',').includes(String(n));
+    if(show) await render(w);
+  }
+}
+
+async function setView(v){
+  currentView = v;
+  syncDisplay();
+  await setLevel(currentLevel);
+}
+
+btns.forEach(b=>b.addEventListener('click',()=>setLevel(Number(b.dataset.level))));
+viewBtns.forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+wraps.forEach(w=>w.style.display='none');
+expWraps.forEach(w=>w.style.display='none');
+setNames(2);
+
+try{
+  const m=await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid=m.default;
+  mermaid.initialize({startOnLoad:false, securityLevel:'loose', theme:'base',
+    flowchart:{curve:'basis', padding:12, htmlLabels:true},
+    themeVariables:{fontFamily:'"Noto Sans JP",-apple-system,system-ui,sans-serif', fontSize:'13px',
+      primaryColor:'#eef2f7', primaryBorderColor:'#94a3b8', primaryTextColor:'#111827',
+      lineColor:'#64748b', secondaryColor:'#f8fafc', tertiaryColor:'#ffffff',
+      clusterBkg:'#f8fafc', clusterBorder:'#cbd5e1'}});
+  ready=true;
+}catch(e){ console.error('mermaid load failed', e); }
+
+syncDisplay();
+
+// Audience tabs for diagrams
+const audBtns=[...document.querySelectorAll('.aud-tabs button')];
+const audPanels=[...document.querySelectorAll('.diag-panel')];
+
+async function renderAudiencePanel(key){
+  const panel=document.querySelector('.diag-panel[data-audience="'+key+'"]');
+  if(!panel) return;
+  for(const w of panel.querySelectorAll('.aud-mmd')){
+    await render(w);
+  }
+}
+
+async function setAudience(key){
+  audBtns.forEach(b=>{
+    const on=b.dataset.audience===key;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  audPanels.forEach(p=>p.classList.toggle('active', p.dataset.audience===key));
+  if(key === 'design'){
+    await setLevel(currentLevel);
+  }else{
+    await renderAudiencePanel(key);
+  }
+}
+audBtns.forEach(b=>b.addEventListener('click',()=>setAudience(b.dataset.audience)));
+
+
+// 初期状態だけ設定し、描画は「図」タブを開いた時に行う。
+audPanels.forEach(p=>p.classList.toggle('active', p.dataset.audience==='newcomer'));
+audBtns.forEach(b=>{
+  const on=b.dataset.audience==='newcomer';
+  b.classList.toggle('on', on);
+  b.setAttribute('aria-selected', on ? 'true' : 'false');
+});
+
+window.ensureDiagramPanelRendered = async function(){
+  const active = audBtns.find(b=>b.classList.contains('on'))?.dataset.audience || 'newcomer';
+  if(active === 'design'){
+    await setLevel(currentLevel);
+  }else{
+    await setAudience(active);
+  }
+};
+
+
+</script>
+
+<script>
+const masterBtns=[...document.querySelectorAll('.master-tabs button')];
+const masterPanels=[...document.querySelectorAll('.tab-panel')];
+
+async function openMasterPanel(id){
+  masterBtns.forEach(b=>b.classList.toggle('on', b.dataset.panel===id));
+  masterPanels.forEach(p=>p.classList.toggle('active', p.id===id));
+  if(id==='panel-diagrams' && window.ensureDiagramPanelRendered){
+    await window.ensureDiagramPanelRendered();
+  }
+}
+
+masterBtns.forEach(b=>b.addEventListener('click',()=>openMasterPanel(b.dataset.panel)));
+
+document.querySelectorAll('[data-open]').forEach(btn=>btn.addEventListener('click',async()=>{
+  await openMasterPanel(btn.dataset.open);
+  const aud=btn.dataset.audienceTarget;
+  if(aud){
+    const target=[...document.querySelectorAll('.aud-tabs button')].find(b=>b.dataset.audience===aud);
+    if(target) target.click();
+  }
+  setTimeout(()=>document.querySelector('#diagrams')?.scrollIntoView({behavior:'smooth',block:'start'}),50);
+}));
+</script>
+
+<script>
+
+(() => {
+ const GLOSSARY={"AI-DE": "チームや会社の決まりを、実際の開発手順へ自動で落とし込める。今回やるべき作業、確認、通過条件を決め、AIの実行を統制する中核。", "SSOT": "何を正式な情報として扱うかを一つに決められる。会話や途中案が別の正本になることを防ぐ。", "Design Freeze": "実装に進むために、現時点で従う設計判断を固定できる。あとで変えられないという意味ではなく、変更には実装上の根拠が必要になる。", "Phase 1": "日本ハーネスの基本動作を最小構成で一通り確認できる。規範の読み込みから、作業計画、AI実行、確認、既存成果物への反映までを一本通す段階。", "Ecosystem": "AI-DEだけでなく、画面、知識、実行基盤、文書連携などをまとめて一つの仕組みとして扱える。", "Policy-Driven Development Runtime": "会社やチームの決まりを、実際の開発作業へ反映できる。AIに自由に判断させるのではなく、決まりに沿って進めるための中核。", "Conformance": "今回の開発が、適用される決まりや確認条件を守れているかを判断できる。日本ハーネスで最も重視する考え方。", "Authority": "誰が何を決めてよいかを明確にできる。AIや利用者が、本来持っていない権限でルールや状態を変えることを防ぐ。", "Authority Conservation": "与えられた以上の権限を使えないようにできる。AIが勝手に工程を省いたり、決まりを書き換えたりすることを防ぐ。", "Evidence": "「やった」「正しい」という自己申告ではなく、実際に確認できる根拠を残せる。試験結果やレビュー結果などを通過判定に使える。", "Assertion": "根拠のない「実施した」「問題ない」という主張を区別できる。これだけでは完了扱いにしない。", "Adapt, Don't Impose": "現場のExcelやWord、保存場所、チーム独自のやり方を無理に統一せず、そのまま活かしてAI開発へつなげられる。", "Governance": "会社やチームの決まりと、その決定権を管理できる。誰の決まりを、どこまで適用するかを明確にする。", "Norm": "会社やチームの決まりを、機械が読める形で扱える。必要な作業、確認、利用する様式、人間へ戻す判断などを開発計画へ反映できる。", "Normative Space": "複数の決まりがあるときに、どれが有効で、どこへ適用されるかを一つの考え方で整理できる。", "Common Envelope": "すべての決まりに共通する情報を一か所にまとめられる。誰の決まりか、どこへ適用するか、優先関係などを共通の方法で扱える。", "constraint": "やってよいこと、満たすべき条件、使える権限などを制限できる。", "process": "今回必要な作業、確認、レビュー、人間の判断など、開発の進め方を決められる。", "binding": "このチームではこの様式、この知識、この出力条件を使う、といった資産の必須利用を指定できる。", "exception": "通常の決まりを消さずに、許可された範囲だけ一時的に緩めたり変更したりできる。", "modifier": "元の決まりを残したまま、その効き方だけを限定的に変更できる。", "require_human_decision": "AIだけで決めてはいけない重要な選択だけを、人間へ戻せる。AIが迷うたびに人間へ聞く仕組みではない。", "Planning Decision": "決まりで許された選択肢の中から、今回どの方法を採るかを人間が決められる。会社やチームの決まり自体は変えない。", "Authority Decision": "人間の裁量が必要な正式判断を、機械で一意に決められる結果と分けて扱える。", "Change": "一つの開発目的を、途中で作業や画面が分かれても同じ変更として追跡できる。", "Change State Snapshot": "ある時点の開発状況を固定し、同じ状況なら同じ作業計画を再現できる。", "Development Compiler": "変更内容や決まりから、今回必要な作業、確認、通過条件を自動で組み立てられる。", "Development Plan": "今回の変更で何をするかを一覧化できる。必要な作業や確認を、決まりや事実に基づいて表せる。", "Compilation Record": "なぜその作業計画になったかを後から追える。どの入力から何が生成されたかを記録できる。", "Task": "AIや人に任せる一つの作業単位を、利用するAIの種類に依存せず定義できる。", "Attempt": "同じ作業を何度やり直しても、各試行を別々に記録できる。どのAIや実行条件で試したかを追跡できる。", "Execution Packet": "AIへ「何を見てよいか、何を書いてよいか、何を完成させるか」を明確に渡せる。作業範囲を外側から制限できる。", "Execution Runtime": "AIの実行経路を一か所にまとめられる。通常作業と相談用のAI利用を、共通の実行基盤で統制できる。", "Provider": "どのAIサービスや実行基盤を使うかを、作業計画の意味から切り離せる。後から別の実行先へ切り替えやすくなる。", "Worker": "決められた範囲の中で、実際の作業を実行させられる。", "Sandbox": "AIの作業が他のファイルや環境へ勝手に影響しないよう、実行範囲を閉じ込められる。", "Tool Guard": "AIが使える操作を外側から制限できる。指示文だけに頼らず、安全に道具を使わせられる。", "capability": "AIや利用者に許す操作だけを明示できる。読める、書ける、実行できる範囲を細かく分けられる。", "Fact": "現実やコードの状態を、評価や意見と分けて扱える。開発計画の根拠になる確かな情報を整理できる。", "Fact Claim": "事実の候補を上書きせず残せる。複数の情報が食い違っても、あとから比較して現在の状態を判断できる。", "Fact Producer": "どの仕組みや人が、どの種類の事実を登録してよいかを制限できる。", "Subject Registry": "事実の種類ごとに、型、登録してよい人や仕組み、解決方法を決められる。", "Current View Resolver": "複数の事実候補があるときに、今どれを使えるかを一貫したルールで決められる。", "Current Fact View": "現在の開発判断に使える事実を一つの見方にまとめられる。確定、未確認、競合を区別できる。", "known": "現在の判断に使える値が確定している状態。", "unknown": "今は確かな値を決められないことを、そのまま表せる。無理に「ない」「問題なし」と扱わない。", "conflicted": "有効な情報同士が食い違っていることを隠さず表せる。どちらかを勝手に採用しない。", "basis": "その事実を何によって得たかを区別できる。直接確認、推測、人間の明示などを同じ扱いにしない。", "observed": "実際に道具などで直接確認した情報として扱える。", "inferred": "AIや解析から推測した情報として扱える。直接確認した情報と同じ強さにはしない。", "explicit": "人間などが明示した情報として扱える。ただし、どの種類の事実でも常に最優先になるわけではない。", "resolution policy": "同じ種類の事実が複数あるときに、どれを現在の値として扱うかを種類ごとに決められる。", "Finding": "コードや成果物の問題点、改善点、レビュー結果を、事実とは分けて扱える。", "Finding View": "現在対応すべき指摘だけを、作業計画や確認処理から見える形にできる。", "lifecycle": "指摘や決まりが、作成、解消、廃止などのどの状態にあるかを管理できる。", "disposition": "指摘に対して、人間がどう扱うかを別に記録できる。指摘そのものが解消したかとは分ける。", "Risk Acceptance": "問題が残っていることを理解した上で進む判断を記録できる。決まりを緩める場合は正式な例外手続きが必要になる。", "Gate": "必要な試験、レビュー、承認、成果物が揃ったときだけ次へ進める。AIの自己申告だけで完了させない。", "Gate Result": "なぜ通ったか、なぜ通らなかったかを後から確認できる。", "Gate override": "通過条件を無視して先へ進む裏口を作らない、という禁止対象。", "Failure Report": "何が足りずに通れなかったかを残せる。失敗しただけで自動的に例外扱いにはしない。", "Policy Evaluation": "決まりと現在の事実から、何が必要かを機械的に判定できる。", "Artifact": "設計書、試験仕様書、コードなど、開発で作る成果物をまとめて扱える。", "Artifact Revision": "AIが作った版、人が直接修正した版などを別々に追跡できる。", "Ingress": "現場にある既存の文書や情報を、そのまま日本ハーネスへ取り込める。", "Egress": "AIが作った結果を、現場が使っているExcelやWordなどへ戻せる。", "Storage Connector": "Git、ファイルサーバー、文書管理システムなど、保存場所の違いを吸収できる。", "Document Codec": "Excel、Word、Markdownなど、文書形式の違いを吸収して読み書きできる。", "Knowledge": "設計、試験、レビューなどの再利用可能な知識を、チーム固有の決まりとは分けて使える。", "Template": "チームが使う成果物の形を指定できる。必要な場合だけ正式な決まりとして適用できる。", "Exemplar": "過去の良い成果物を、参考例としてAIへ見せられる。通常はそのまま必須ルールにはしない。", "Output Contract": "成果物が満たすべき内容や構造を決められる。完成したと言える条件を明確にできる。", "required Knowledge": "必ず使うべき知識を、検索結果に左右されず決定的に選べる。", "advisory Knowledge": "AIが必要に応じて追加知識を探し、作業の質を上げられる。ただし作業計画そのものは変えない。", "Advisory Session": "コード説明や相談など、正式な開発状態を変えないAI利用ができる。", "Audit": "後から、誰が何をしたかを確認できる。", "Provenance": "その情報や成果物が、どこから来たかを追える。", "Traceability": "作業、成果物、判断を、その根拠まで追跡できる。", "Precedence": "複数の決まりが競合したときに、どちらを優先するかを決められる。", "delegation": "上位の決定権を、どの範囲まで別の人やチームへ任せるかを表せる。", "scope": "その決まりが、どのチーム、案件、対象へ効くかを指定できる。", "applicability": "その決まりや知識が、今回の変更に当てはまるかを判断できる。", "origin": "その決まりが、どこから来たかを記録できる。決定権そのものとは分ける。", "authorship": "誰が文章や案を作ったかを記録できる。誰の権限で正式になったかとは分ける。", "kind": "決まりを、役割の違いで分類できる。v1.0では「制約」「工程」「資産の結び付け」の3種類を基本にする。", "payload": "各種類の決まりに固有の中身を、共通情報と分けて持てる。", "immutable": "過去の内容を書き換えず、新しい版として残せる。後から経緯を追える。", "digest": "内容が同じか違うかを機械的に確認できる短い識別値。", "degradation": "十分に確認できないことを隠さず、「保証できる範囲が狭い」と明示できる。", "attestation": "その情報がどこから来て、どの程度信頼できるかを記録できる。", "unresolved": "今は解決できていないことを、そのまま残せる。無理に正常扱いにしない。", "Deferred": "今は決めないが、忘れたわけではない項目として管理できる。Phase 1に不要なので意図的に後回しにする。", "Contract": "外部の利用者や別実装との互換性を守る必要が出た境界だけ、安定した約束として固定できる。", "Seam": "将来分離できるよう責務の境界だけ先に切れる。まだ厳密な契約として固定しなくてよい。", "Compatibility Obligation": "一方的に変えると他の利用者や仕組みを壊す状態を判定できる。ここから互換性維持の義務が発生する。", "Conformance Test": "決めた約束を実装が守れているかを自動確認できる。", "Projection": "正式な状態を直接触らせず、画面表示などに必要な形だけ読み取り用に見せられる。", "Command": "画面や利用者から「この操作をしてほしい」と要求できる。実際に状態を変えてよいかは中核側で確認する。", "Command Originator": "操作要求を出す側を区別できる。要求を出すことと、正式な状態を直接変える権限は別。", "material trade-off": "AIや機械だけで決めず、人間が責任を持って選ぶべき重要な選択を区別できる。", "UNKNOWN": "分からないことを「問題なし」や「存在しない」と決めつけず、そのまま要注意状態として扱える。"};
+ const terms=Object.keys(GLOSSARY).sort((a,b)=>b.length-a.length);
+ const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const rx=new RegExp('(?<![A-Za-z0-9_])(' + terms.map(esc).join('|') + ')(?![A-Za-z0-9_])','g');
+ const tip=document.createElement('div'); tip.id='term-tooltip'; tip.innerHTML='<div class="tt-term"></div><div class="tt-note"></div>'; document.body.appendChild(tip);
+ function show(el){ const t=el.dataset.term; tip.querySelector('.tt-term').textContent=t; tip.querySelector('.tt-note').textContent=GLOSSARY[t]||''; tip.style.display='block'; const r=el.getBoundingClientRect(); let l=r.left, top=r.bottom+8; tip.style.left='0px'; tip.style.top='0px'; const w=tip.offsetWidth,h=tip.offsetHeight,p=10; if(l+w>innerWidth-p)l=Math.max(p,innerWidth-w-p); if(top+h>innerHeight-p)top=Math.max(p,r.top-h-8); tip.style.left=l+'px';tip.style.top=top+'px'; }
+ function hide(){tip.style.display='none'}
+ function ok(n){const p=n.parentElement; return p && n.nodeValue && n.nodeValue.trim() && !p.closest('script,style,pre,code,svg,.mermaid,#glossary-list,#term-tooltip,.term-help');}
+ const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT), nodes=[]; while(w.nextNode()) if(ok(w.currentNode)) nodes.push(w.currentNode);
+ for(const n of nodes){const s=n.nodeValue; rx.lastIndex=0;if(!rx.test(s))continue;rx.lastIndex=0;const f=document.createDocumentFragment();let last=0;s.replace(rx,(m,t,o)=>{if(o>last)f.appendChild(document.createTextNode(s.slice(last,o)));const sp=document.createElement('span');sp.className='term-help';sp.dataset.term=t;sp.tabIndex=0;sp.title=GLOSSARY[t];sp.textContent=t;sp.addEventListener('mouseenter',()=>show(sp));sp.addEventListener('mouseleave',hide);sp.addEventListener('focus',()=>show(sp));sp.addEventListener('blur',hide);f.appendChild(sp);last=o+m.length;return m;});if(last<s.length)f.appendChild(document.createTextNode(s.slice(last)));n.replaceWith(f);}
+ const list=document.getElementById('glossary-list'), search=document.getElementById('glossary-search');
+ function render(q=''){if(!list)return;const z=q.trim().toLowerCase();list.innerHTML='';for(const t of [...Object.keys(GLOSSARY)].sort((a,b)=>a.localeCompare(b,'ja'))){const note=GLOSSARY[t];if(z && !(t.toLowerCase().includes(z)||note.toLowerCase().includes(z)))continue;const d=document.createElement('div');d.className='glossary-item';const b=document.createElement('b');b.textContent=t;const p=document.createElement('div');p.textContent=note;d.append(b,p);list.appendChild(d);}}
+ if(search)search.addEventListener('input',e=>render(e.target.value)); render(); addEventListener('scroll',hide,{passive:true});addEventListener('resize',hide);
+})();
+
+</script>
+</body>
+</html>

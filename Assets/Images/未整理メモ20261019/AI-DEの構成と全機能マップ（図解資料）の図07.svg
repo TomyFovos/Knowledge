@@ -1,0 +1,231 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1900 1510" aria-label="AI-DE 全機能マップ"><style>
+:root{
+  --bg:#08101e;--panel:#101a2d;--panel2:#14223a;--stroke:#314565;
+  --text:#edf4ff;--muted:#a9b8cf;
+  --blue:#67a3ff;--green:#65d99c;--orange:#f3b35e;
+  --purple:#b78cff;--red:#ff7d8e;--cyan:#66d7e5;--yellow:#f2d96d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI","Yu Gothic UI","Noto Sans JP",sans-serif;padding-bottom:24px}
+header{width:min(80vw,1700px);margin:0 auto;padding:24px 28px 14px;border-bottom:1px solid #22324f;background:linear-gradient(180deg,#111a2d,#08101e);border-radius:0 0 18px 18px}
+h1{font-size:28px;margin:0}
+.sub{margin-top:8px;color:var(--muted);line-height:1.7}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:wrap;width:min(80vw,1700px);margin:0 auto;padding:12px 18px;background:rgba(8,16,30,.96);border-bottom:1px solid #22324f}
+.tab{padding:9px 13px;border:1px solid #334766;border-radius:10px;background:#111b2f;color:#dce8ff;font-weight:700;cursor:pointer}
+.tab.active{background:#24508d;border-color:#74aaff}
+.view{display:none;width:min(80vw,1700px);margin:0 auto;padding:20px}.view.active{display:block}
+.card{background:var(--panel);border:1px solid #263955;border-radius:18px;padding:12px;box-shadow:0 12px 35px rgba(0,0,0,.18)}
+.scroll{overflow:auto}
+svg{width:100%;height:auto;min-width:980px}
+.title{fill:#f2f7ff;font-size:20px;font-weight:800}
+.txt{fill:#f2f7ff;font-size:17px;font-weight:800}
+.small{fill:#cfdaec;font-size:13.5px;font-weight:600}
+.tiny{fill:#a9b8cf;font-size:11.5px}
+.tag{fill:#c8d8f2;font-size:12px;font-weight:700}
+.box{fill:#121d31;stroke:#536a8f;stroke-width:2}
+.blue{fill:#13294d;stroke:#67a3ff;stroke-width:2.2}
+.green{fill:#122e25;stroke:#65d99c;stroke-width:2.2}
+.orange{fill:#332412;stroke:#f3b35e;stroke-width:2.2}
+.purple{fill:#281c3d;stroke:#b78cff;stroke-width:2.2}
+.red{fill:#351925;stroke:#ff7d8e;stroke-width:2.2}
+.cyan{fill:#11303a;stroke:#66d7e5;stroke-width:2.2}
+.yellow{fill:#332f14;stroke:#f2d96d;stroke-width:2.2}
+.dashed{stroke-dasharray:8 6}
+.line{stroke:#8ea9d9;stroke-width:2.2;fill:none}
+.note{margin-top:14px;padding:14px 16px;border-left:4px solid var(--blue);border-radius:9px;background:#10192c;color:#d9e4f7;line-height:1.75}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;color:var(--muted);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:50%}
+footer{width:min(80vw,1700px);margin:0 auto;padding:18px 24px 32px;color:var(--muted);font-size:12.5px}
+#svg-tip{
+  position:fixed;z-index:1000;display:none;max-width:360px;
+  padding:10px 12px;border:1px solid #516a94;border-radius:10px;
+  background:rgba(8,16,30,.97);color:#eef5ff;font-size:13px;line-height:1.55;
+  pointer-events:none;box-shadow:0 8px 26px rgba(0,0,0,.32);white-space:pre-line
+}
+.hint-bar{width:min(80vw,1700px);margin:14px auto 0;padding:10px 14px;border:1px dashed #5577aa;border-radius:12px;background:#0d1728;color:#d7e6ff;font-size:13px;line-height:1.7}
+.hint-key{display:inline-block;margin-right:12px;padding:2px 8px;border:1px solid #5f7fb3;border-radius:999px;color:#eef6ff;background:#14243f;font-size:12px;font-weight:700}
+.explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.explain-card{background:var(--panel2);border:1px solid #2f4567;border-radius:14px;padding:12px 14px}
+.explain-card h3{margin:0 0 8px;font-size:14px;color:#f0f6ff}
+.explain-card p{margin:0;color:#cfdcf1;font-size:13px;line-height:1.75}
+.explain-title{margin:16px 2px 8px;color:#eef5ff;font-size:15px;font-weight:800}
+svg .hoverable-node{cursor:help;stroke-dasharray:8 5}
+svg text.hoverable-label{cursor:help}
+svg line.help-underline{stroke:#dfeaff;stroke-width:1.5;stroke-dasharray:2 3;opacity:.9}
+
+svg rect.blue,svg rect.green,svg rect.orange,svg rect.purple,svg rect.red,
+svg rect.cyan,svg rect.yellow,svg rect.box{cursor:help}
+.status-pill{font-size:12px;color:var(--muted)}
+
+</style>
+<defs>
+  <marker id="af" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="f-core" viewBox="0 0 32 32"><circle cx="7" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="8" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="24" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 11M23 10l-5 11" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-doc" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8zM20 5v6h6M12 16h10M12 20h10" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-qa" viewBox="0 0 32 32"><path d="M12 10a5 5 0 1 1 7 5c-2 1-3 2-3 4M16 25h.01" stroke="#fff" stroke-width="2" fill="none"/><path d="M5 5h22v23H5z" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-gate" viewBox="0 0 32 32"><path d="M6 28V8h20v20M6 13h20M11 8V4h10v4" fill="none" stroke="#fff" stroke-width="2"/><path d="M11 20l3 3 7-8" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-task" viewBox="0 0 32 32"><circle cx="7" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="25" cy="7" r="3" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="25" r="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M10 8h12M9 10l5 12M23 10l-5 12" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-run" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#fff" stroke-width="2"/><path d="M13 11l8 5-8 5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-db" viewBox="0 0 32 32"><ellipse cx="16" cy="7" rx="10" ry="4" fill="none" stroke="#fff" stroke-width="2"/><path d="M6 7v9c0 2 4 4 10 4s10-2 10-4V7M6 16v9c0 2 4 4 10 4s10-2 10-4v-9" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-brain" viewBox="0 0 32 32"><path d="M12 27c-4 0-6-3-5-6-3-2-2-7 1-8-1-4 4-7 7-4 2-4 8-2 8 2 4 0 6 5 3 8 2 3-1 8-5 8" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 8v18M11 13c3 0 5 2 5 5M21 14c-3 0-5 2-5 5" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-knowledge" viewBox="0 0 32 32"><path d="M5 6h9c3 0 5 2 5 5v16c0-3-2-5-5-5H5zM27 6h-9c-3 0-5 2-5 5v16c0-3 2-5 5-5h9z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-spider" viewBox="0 0 32 32"><circle cx="16" cy="16" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="5" cy="5" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="27" cy="5" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="5" cy="27" r="2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="27" cy="27" r="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M8 8l5 5M24 8l-5 5M8 24l5-5M24 24l-5-5M16 3v9M16 20v9M3 16h9M20 16h9" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-link" viewBox="0 0 32 32"><path d="M12 20l-2 2a5 5 0 0 1-7-7l5-5a5 5 0 0 1 7 0M20 12l2-2a5 5 0 1 1 7 7l-5 5a5 5 0 0 1-7 0M11 21l10-10" stroke="#fff" stroke-width="2" fill="none"/></symbol>
+  <symbol id="f-test" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 23l2 2 5-5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="f-recover" viewBox="0 0 32 32"><path d="M7 10H3V6M4 10a12 12 0 1 1-1 10" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 9v8l5 3" stroke="#fff" stroke-width="2"/></symbol>
+</defs>
+
+<text x="45" y="55" class="title">AI-DE 全機能マップ</text>
+<text x="45" y="84" class="small">AI-DEの「開発を進める」「状態を残す」「知見を次へ生かす」「検証する」「外部資産と連携する」を一枚に集約</text>
+
+<!-- center -->
+<rect x="665" y="125" width="570" height="165" rx="22" class="blue"/>
+<circle cx="725" cy="180" r="32" fill="#1d4175"/><use href="#f-core" x="706" y="161" width="38" height="38"/>
+<text x="775" y="185" class="title">AI-DE</text>
+<text x="715" y="224" class="small">人間と合意した目的から、要件定義 → 設計 → 製造 → テスト → レビューをAI主体で進める開発ハーネス</text>
+<text x="715" y="255" class="tiny">North Star: Conformance / Evidence over Assertion / Adapt, Don’t Impose</text>
+
+<!-- Requirements -->
+<rect x="60" y="345" width="410" height="365" rx="18" class="cyan"/>
+<circle cx="112" cy="392" r="27" fill="#1f5761"/><use href="#f-qa" x="96" y="376" width="32" height="32"/>
+<text x="152" y="397" class="txt">要件定義・QA</text>
+<text x="100" y="442" class="small">• Requirement / Acceptance Criteria</text>
+<text x="100" y="474" class="small">• QA Ledger：質問・調査・回答履歴</text>
+<text x="100" y="506" class="small">• QA CompleteでRequirements Gateへ</text>
+<text x="100" y="538" class="small">• Rationale：なぜ必要かを保持</text>
+<text x="100" y="570" class="small">• mandatory / recommended の区別</text>
+<text x="100" y="614" class="small">Requirement Review</text>
+<text x="120" y="642" class="tiny">Stage 1: 決定的構造検証</text>
+<text x="120" y="665" class="tiny">Stage 2: 論理Review seam</text>
+<text x="120" y="688" class="tiny">Stage 3: AIによる意味Review</text>
+
+<!-- Governance -->
+<rect x="500" y="345" width="410" height="365" rx="18" class="purple"/>
+<circle cx="552" cy="392" r="27" fill="#4b2d70"/><use href="#f-gate" x="536" y="376" width="32" height="32"/>
+<text x="592" y="397" class="txt">Governance・Gate・権限</text>
+<text x="540" y="442" class="small">• Human Decision：会話ではなく構造化状態</text>
+<text x="540" y="474" class="small">• Gate = Evidence + Approval + Policy + Artifact</text>
+<text x="540" y="506" class="small">• Gate overrideなし</text>
+<text x="540" y="538" class="small">• Governance / Exception後に再評価</text>
+<text x="540" y="570" class="small">• Capability Profile</text>
+<text x="560" y="598" class="tiny">Strict / Standard / Open / Read-only / Original</text>
+<text x="540" y="630" class="small">• Authority Conservation</text>
+<text x="560" y="658" class="tiny">子Agent / Subagentは親の権限を超えない</text>
+<text x="540" y="686" class="small">• Runtime Invariant</text>
+
+<!-- Planning -->
+<rect x="940" y="345" width="410" height="365" rx="18" class="yellow"/>
+<circle cx="992" cy="392" r="27" fill="#60561c"/><use href="#f-task" x="976" y="376" width="32" height="32"/>
+<text x="1032" y="397" class="txt">計画・仕事の分解</text>
+<text x="980" y="442" class="small">• Snapshot → COMPILE → Plan</text>
+<text x="980" y="474" class="small">• COMPILEは決定的にPlanを生成</text>
+<text x="980" y="506" class="small">• Planning DecisionとNormative Stateを分離</text>
+<text x="980" y="538" class="small">• Work Item / Phase / Task Graph</text>
+<text x="980" y="570" class="small">• Task Dependencyで順序・並列を表現</text>
+<text x="980" y="602" class="small">• Task / Attemptを分離</text>
+<text x="980" y="634" class="small">• Provider / Model名をPlanへ漏らさない</text>
+<text x="980" y="676" class="tiny">新しい仕事はAI-DEを通して正式Task化</text>
+
+<!-- Runtime -->
+<rect x="1380" y="345" width="455" height="365" rx="18" class="orange"/>
+<circle cx="1432" cy="392" r="27" fill="#6b461c"/><use href="#f-run" x="1416" y="376" width="32" height="32"/>
+<text x="1472" y="397" class="txt">Execution Runtime</text>
+<text x="1420" y="442" class="small">• Execution Packet</text>
+<text x="1420" y="474" class="small">• trusted worker launcher</text>
+<text x="1420" y="506" class="small">• Worker / Tool Guard / Provider Adapter</text>
+<text x="1420" y="538" class="small">• Execution Workspace</text>
+<text x="1440" y="566" class="tiny">Repository / Worktree / Base Commit</text>
+<text x="1420" y="598" class="small">• Operation = Intent → Effect → Result → Evidence</text>
+<text x="1420" y="630" class="small">• Operation LogをAttempt単位で保持</text>
+<text x="1420" y="662" class="small">• indeterminateでEffect不明状態を表現</text>
+<text x="1420" y="694" class="tiny">State Store書込不能時は新規EffectをFail Closed</text>
+
+<!-- State store -->
+<rect x="60" y="755" width="410" height="405" rx="18" class="green"/>
+<circle cx="112" cy="802" r="27" fill="#214b3b"/><use href="#f-db" x="96" y="786" width="32" height="32"/>
+<text x="152" y="807" class="txt">State Store・Artifact・Evidence</text>
+<text x="100" y="852" class="small">• Runtime Stateの唯一のSSOT</text>
+<text x="100" y="884" class="small">• SQLite / PostgreSQL Backend</text>
+<text x="100" y="916" class="small">• Project UUID / 1 Project = 1 Active Host</text>
+<text x="100" y="948" class="small">• Relational Core + JSON Extension</text>
+<text x="100" y="980" class="small">• revision / expected_revision</text>
+<text x="100" y="1012" class="small">• Command Receipt / command_id</text>
+<text x="100" y="1044" class="small">• Transactional Outbox</text>
+<text x="100" y="1076" class="small">• Artifact + immutable Artifact Revision</text>
+<text x="100" y="1108" class="small">• Evidence metadata + Local Object Store</text>
+<text x="100" y="1140" class="tiny">大容量PayloadはDB BlobではなくDigest参照</text>
+
+<!-- Models -->
+<rect x="500" y="755" width="410" height="405" rx="18" class="red"/>
+<circle cx="552" cy="802" r="27" fill="#6d2936"/><use href="#f-brain" x="536" y="786" width="32" height="32"/>
+<text x="592" y="807" class="txt">AI Model・Provider管理</text>
+<text x="540" y="852" class="small">• AI_MODELS.yaml = Model設定SSOT</text>
+<text x="540" y="884" class="small">• 抽象tier → 具体Model解決</text>
+<text x="540" y="916" class="small">• allow_tier_fallback明示時のみfallback</text>
+<text x="540" y="948" class="small">• Provider Registry / Adapter</text>
+<text x="540" y="980" class="small">• Codex / Claude / Copilot / OpenCode等</text>
+<text x="540" y="1012" class="small">• Model Health / 利用不可Cache</text>
+<text x="540" y="1044" class="small">• Security Proxyを必ず通過</text>
+<text x="540" y="1076" class="small">• OpenCodexでProvider / Modelへ接続</text>
+<text x="540" y="1108" class="tiny">Cloud / Local LLMを同じAuthority規則で扱う</text>
+
+<!-- Knowledge feedback -->
+<rect x="940" y="755" width="410" height="405" rx="18" class="cyan"/>
+<circle cx="992" cy="802" r="27" fill="#1f5761"/><use href="#f-knowledge" x="976" y="786" width="32" height="32"/>
+<text x="1032" y="807" class="txt">開発知見・Feedback Loop</text>
+<text x="980" y="852" class="small">• Project Knowledgeを蓄積</text>
+<text x="980" y="884" class="small">• Requirement / Design / Human Decision</text>
+<text x="980" y="916" class="small">• Attempt / Operation / Evidence / Failure</text>
+<text x="980" y="948" class="small">• 過去の判断・結果を次の開発へ還流</text>
+<text x="980" y="980" class="small">• 同じ論点を繰り返し再考しない</text>
+<text x="980" y="1012" class="small">• STK / Document Assetから得た知識を活用</text>
+<text x="980" y="1054" class="small">次の Requirements / Design / Test / Review へ</text>
+<path d="M1010 1090c70 45 210 45 280 0" class="line" marker-end="url(#af)"/>
+<text x="980" y="1135" class="tiny">破線領域: 複数Project横断Learning / Reusable Knowledgeの詳細は今後設計</text>
+
+<!-- Trace graph -->
+<rect x="1380" y="755" width="455" height="405" rx="18" class="blue"/>
+<circle cx="1432" cy="802" r="27" fill="#1d4175"/><use href="#f-spider" x="1416" y="786" width="32" height="32"/>
+<text x="1472" y="807" class="txt">Feature Trace Graph / Spider View</text>
+<text x="1420" y="852" class="small">• Source / Document / Testの対応関係をGraph化</text>
+<text x="1420" y="884" class="small">• File粒度 / Function粒度を切替</text>
+<text x="1420" y="916" class="small">• Test → Feature / Component対応</text>
+<text x="1420" y="948" class="small">• README等へのLink</text>
+<text x="1420" y="980" class="small">• .spiderignoreで対象除外</text>
+<text x="1420" y="1012" class="small">• View切替</text>
+<text x="1420" y="1044" class="small">• 変更影響範囲の理解を支援</text>
+<text x="1420" y="1088" class="tiny">Knowledge / Test / Artifactの関係を可視化する既存機能系統</text>
+
+<!-- Integration bottom -->
+<rect x="60" y="1205" width="580" height="235" rx="18" class="cyan"/>
+<circle cx="112" cy="1252" r="27" fill="#1f5761"/><use href="#f-link" x="96" y="1236" width="32" height="32"/>
+<text x="152" y="1257" class="txt">外部知識・資産・課題管理との連携</text>
+<text x="100" y="1302" class="small">• STK：広くテスト候補を取得 → Test Design Agentが適用判断</text>
+<text x="100" y="1334" class="small">• Document Asset Port：Discover / Search / Read / Import / Write-back</text>
+<text x="100" y="1366" class="small">• Team Playbook / Template / Exemplar</text>
+<text x="100" y="1398" class="small">• Task Tracker Adapter：GitHub Issues → 将来Backlog等</text>
+
+<!-- Verification bottom -->
+<rect x="670" y="1205" width="580" height="235" rx="18" class="green"/>
+<circle cx="722" cy="1252" r="27" fill="#214b3b"/><use href="#f-test" x="706" y="1236" width="32" height="32"/>
+<text x="762" y="1257" class="txt">Platform Test・生成物検証</text>
+<text x="710" y="1302" class="small">• Platform Test：AI-DEそのものを検証</text>
+<text x="710" y="1334" class="small">• Feature Registry / Component Inventory / Generated Inventory</text>
+<text x="710" y="1366" class="small">• Deterministic Boundary / Fault Injection</text>
+<text x="710" y="1398" class="small">• Generated Artifact Test / provenance / stale / orphan / tamper</text>
+
+<!-- Recovery bottom -->
+<rect x="1280" y="1205" width="555" height="235" rx="18" class="orange dashed"/>
+<circle cx="1332" cy="1252" r="27" fill="#6b461c"/><use href="#f-recover" x="1316" y="1236" width="32" height="32"/>
+<text x="1372" y="1257" class="txt">Recovery・長時間自律実行</text>
+<text x="1320" y="1302" class="small">• Failure Report / Recovery Packet</text>
+<text x="1320" y="1334" class="small">• Effect後Crash → Operation indeterminate</text>
+<text x="1320" y="1366" class="small">• State Store復旧 / Backup設計</text>
+<text x="1320" y="1398" class="tiny">Durable Session / mid-Attempt Resume / 自動復旧範囲は詳細未決</text>
+
+<!-- subtle flow lines -->
+<path d="M950 290V330" class="line" marker-end="url(#af)"/>
+<path d="M450 710V745M705 710V745M1145 710V745M1600 710V745" class="line" marker-end="url(#af)"/>
+</svg>

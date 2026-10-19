@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 880"><style>
+:root{
+  --bg:#08101e;--panel:#101a2d;--panel2:#14223a;--stroke:#314565;
+  --text:#edf4ff;--muted:#a9b8cf;
+  --blue:#67a3ff;--green:#65d99c;--orange:#f3b35e;
+  --purple:#b78cff;--red:#ff7d8e;--cyan:#66d7e5;--yellow:#f2d96d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,"Segoe UI","Yu Gothic UI","Noto Sans JP",sans-serif;padding-bottom:24px}
+header{width:min(80vw,1700px);margin:0 auto;padding:24px 28px 14px;border-bottom:1px solid #22324f;background:linear-gradient(180deg,#111a2d,#08101e);border-radius:0 0 18px 18px}
+h1{font-size:28px;margin:0}
+.sub{margin-top:8px;color:var(--muted);line-height:1.7}
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:8px;flex-wrap:wrap;width:min(80vw,1700px);margin:0 auto;padding:12px 18px;background:rgba(8,16,30,.96);border-bottom:1px solid #22324f}
+.tab{padding:9px 13px;border:1px solid #334766;border-radius:10px;background:#111b2f;color:#dce8ff;font-weight:700;cursor:pointer}
+.tab.active{background:#24508d;border-color:#74aaff}
+.view{display:none;width:min(80vw,1700px);margin:0 auto;padding:20px}.view.active{display:block}
+.card{background:var(--panel);border:1px solid #263955;border-radius:18px;padding:12px;box-shadow:0 12px 35px rgba(0,0,0,.18)}
+.scroll{overflow:auto}
+svg{width:100%;height:auto;min-width:980px}
+.title{fill:#f2f7ff;font-size:20px;font-weight:800}
+.txt{fill:#f2f7ff;font-size:17px;font-weight:800}
+.small{fill:#cfdaec;font-size:13.5px;font-weight:600}
+.tiny{fill:#a9b8cf;font-size:11.5px}
+.tag{fill:#c8d8f2;font-size:12px;font-weight:700}
+.box{fill:#121d31;stroke:#536a8f;stroke-width:2}
+.blue{fill:#13294d;stroke:#67a3ff;stroke-width:2.2}
+.green{fill:#122e25;stroke:#65d99c;stroke-width:2.2}
+.orange{fill:#332412;stroke:#f3b35e;stroke-width:2.2}
+.purple{fill:#281c3d;stroke:#b78cff;stroke-width:2.2}
+.red{fill:#351925;stroke:#ff7d8e;stroke-width:2.2}
+.cyan{fill:#11303a;stroke:#66d7e5;stroke-width:2.2}
+.yellow{fill:#332f14;stroke:#f2d96d;stroke-width:2.2}
+.dashed{stroke-dasharray:8 6}
+.line{stroke:#8ea9d9;stroke-width:2.2;fill:none}
+.note{margin-top:14px;padding:14px 16px;border-left:4px solid var(--blue);border-radius:9px;background:#10192c;color:#d9e4f7;line-height:1.75}
+.legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;color:var(--muted);font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:50%}
+footer{width:min(80vw,1700px);margin:0 auto;padding:18px 24px 32px;color:var(--muted);font-size:12.5px}
+#svg-tip{
+  position:fixed;z-index:1000;display:none;max-width:360px;
+  padding:10px 12px;border:1px solid #516a94;border-radius:10px;
+  background:rgba(8,16,30,.97);color:#eef5ff;font-size:13px;line-height:1.55;
+  pointer-events:none;box-shadow:0 8px 26px rgba(0,0,0,.32);white-space:pre-line
+}
+.hint-bar{width:min(80vw,1700px);margin:14px auto 0;padding:10px 14px;border:1px dashed #5577aa;border-radius:12px;background:#0d1728;color:#d7e6ff;font-size:13px;line-height:1.7}
+.hint-key{display:inline-block;margin-right:12px;padding:2px 8px;border:1px solid #5f7fb3;border-radius:999px;color:#eef6ff;background:#14243f;font-size:12px;font-weight:700}
+.explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px}
+.explain-card{background:var(--panel2);border:1px solid #2f4567;border-radius:14px;padding:12px 14px}
+.explain-card h3{margin:0 0 8px;font-size:14px;color:#f0f6ff}
+.explain-card p{margin:0;color:#cfdcf1;font-size:13px;line-height:1.75}
+.explain-title{margin:16px 2px 8px;color:#eef5ff;font-size:15px;font-weight:800}
+svg .hoverable-node{cursor:help;stroke-dasharray:8 5}
+svg text.hoverable-label{cursor:help}
+svg line.help-underline{stroke:#dfeaff;stroke-width:1.5;stroke-dasharray:2 3;opacity:.9}
+
+svg rect.blue,svg rect.green,svg rect.orange,svg rect.purple,svg rect.red,
+svg rect.cyan,svg rect.yellow,svg rect.box{cursor:help}
+.status-pill{font-size:12px;color:var(--muted)}
+
+</style>
+<defs>
+  <marker id="a4" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8ea9d9"/></marker>
+  <symbol id="core4" viewBox="0 0 32 32"><rect x="8" y="8" width="16" height="16" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="test4" viewBox="0 0 32 32"><path d="M11 4h10M13 4v7l-7 13a2 2 0 0 0 2 3h16a2 2 0 0 0 2-3l-7-13V4" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 23l2 2 5-5" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="docs4" viewBox="0 0 32 32"><path d="M8 5h12l5 5v17H8z" fill="none" stroke="#fff" stroke-width="2"/><path d="M20 5v6h6M12 16h10M12 20h10" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="ticket4" viewBox="0 0 32 32"><path d="M5 10a3 3 0 0 0 0 6v6h22v-6a3 3 0 0 0 0-6V4H5z" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+  <symbol id="storage4" viewBox="0 0 32 32"><path d="M5 8h22v18H5zM9 13h14M9 18h14M9 23h8" fill="none" stroke="#fff" stroke-width="2"/></symbol>
+</defs>
+<text x="40" y="52" class="title">知識・資産・外部システム連携</text>
+
+<rect x="555" y="85" width="390" height="170" rx="18" class="blue"/>
+<circle cx="608" cy="131" r="27" fill="#1d4175"/><use href="#core4" x="592" y="115" width="32" height="32"/>
+<text x="648" y="136" class="txt">AI-DE Core</text>
+<text x="595" y="178" class="small">Port / Adapter境界を通して外部基盤を利用</text>
+<text x="595" y="207" class="tiny">取得した情報そのものはAuthorityではない</text>
+
+<rect x="65" y="335" width="365" height="255" rx="18" class="cyan"/>
+<circle cx="115" cy="382" r="27" fill="#1f5761"/><use href="#test4" x="99" y="366" width="32" height="32"/>
+<text x="155" y="387" class="txt">Software-Test-Knowledge</text>
+<text x="105" y="430" class="small">何をテストするかの候補</text>
+<text x="105" y="466" class="small">• 汎用テスト候補</text>
+<text x="105" y="498" class="small">• Pattern / Practice / Relation</text>
+<text x="105" y="530" class="tiny">mandatory / recommended / unneeded はAI-DE側</text>
+
+<rect x="495" y="335" width="510" height="340" rx="18" class="cyan"/>
+<circle cx="545" cy="382" r="27" fill="#1f5761"/><use href="#docs4" x="529" y="366" width="32" height="32"/>
+<text x="585" y="387" class="txt">過去ドキュメント活用基盤</text>
+<text x="535" y="430" class="small">Document Asset Port</text>
+<text x="535" y="466" class="small">• Discover / Search / Resolve / Read</text>
+<text x="535" y="498" class="small">• Import / Write-back</text>
+<text x="535" y="545" class="tiny">Team Playbook = When / Required</text>
+<text x="535" y="570" class="tiny">Template = How to format</text>
+<text x="535" y="595" class="tiny">Exemplar = Examples</text>
+<text x="535" y="630" class="tiny">Egress = Storage Connector × Document Codec</text>
+
+<rect x="1065" y="335" width="365" height="255" rx="18" class="yellow"/>
+<circle cx="1115" cy="382" r="27" fill="#60561c"/><use href="#ticket4" x="1099" y="366" width="32" height="32"/>
+<text x="1155" y="387" class="txt">Task Tracker Adapter</text>
+<text x="1105" y="430" class="small">Work Source</text>
+<text x="1105" y="466" class="small">• GitHub Issues</text>
+<text x="1105" y="498" class="small">• Backlog</text>
+<text x="1105" y="530" class="tiny">AI-DE内部ではWork Itemとして抽象化</text>
+
+<path d="M650 255C525 300 385 305 255 335M750 255V335M850 255C980 300 1115 300 1240 335" class="line" marker-end="url(#a4)"/>
+
+<rect x="80" y="735" width="1340" height="95" rx="16" class="green"/>
+<circle cx="130" cy="782" r="26" fill="#214b3b"/><use href="#storage4" x="114" y="766" width="32" height="32"/>
+<text x="170" y="787" class="txt">保存先 / Repository / Document出力</text>
+<text x="170" y="817" class="small">Git Repository / NAS / SharePoint / Filesystem / Excel / Word / PDF / その他</text>
+<path d="M750 675V735" class="line" marker-end="url(#a4)"/>
+</svg>

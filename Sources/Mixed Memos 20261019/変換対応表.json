@@ -1,0 +1,174 @@
+{
+  "archive": "未整理メモの原本.zip",
+  "documents": [
+    {
+      "original": "Originals/メモ/AI-DE_エージェントハーネス構成と設計思想.md",
+      "sha256": "6fa579ea18802c1bf9d20db7f05ef2eacc888a30ba5c7c5f36daf8cc403caf73",
+      "title": "AI-DEのエージェントハーネス構成と設計思想（提供資料）",
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI-DEのエージェントハーネス構成と設計思想（提供資料）.md"
+    },
+    {
+      "original": "Originals/メモ/ai_de_book_restructured.html",
+      "sha256": "1bb8644be301249c9f0d3d25cb87a723a6e338ac58a2cbbf0ccf9883ba04df12",
+      "title": "AI開発の自動化に至る設計思想（書籍風版）",
+      "svg": [],
+      "unmatched_text_fragments": [],
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI開発の自動化に至る設計思想（書籍風版）.md"
+    },
+    {
+      "original": "Originals/メモ/aide_state_store_design_decisions_2026-08-27.md",
+      "sha256": "5b70c3b5a47306a356c8adaef032e3c5265c82f89126e74cbe68a5b0a8c625e7",
+      "title": "AI-DE State Storeの設計決定事項（2026年8月27日）",
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI-DE State Storeの設計決定事項（2026年8月27日）.md"
+    },
+    {
+      "original": "Originals/メモ/AI時代の価値とマネタイズに関するメモ.md",
+      "sha256": "dd2975ba40423922675f6a65f5ee002c2042e6aa69e59e8e54761dcb537be428",
+      "title": "AI時代の価値とマネタイズに関するメモ（提供資料）",
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI時代の価値とマネタイズに関するメモ（提供資料）.md"
+    },
+    {
+      "original": "Originals/メモ/document_asset_design_handoff_2026-08-27.md",
+      "sha256": "23cf0ef3cb9f1f2f4d5e18d16e92e72f8ba32ed6924ea2755f6bf0b0b3e4b6c7",
+      "title": "ドキュメント資産設計の引き継ぎ条件（2026年8月27日）",
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/ドキュメント資産設計の引き継ぎ条件（2026年8月27日）.md"
+    },
+    {
+      "original": "Originals/メモ/nihon_harness_design_ssot_v1_0_freeze_onboarding_v5_tabs.html",
+      "sha256": "107ff09cce963da2ed2c86b4f9fed46f02b419a4c87bc1b206baa0be80a14d5b",
+      "title": "日本ハーネスの設計判断SSOT（v5版）",
+      "svg": [],
+      "unmatched_text_fragments": [],
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/日本ハーネスの設計判断SSOT（v5版）.md"
+    },
+    {
+      "original": "Originals/メモ/nihon_harness_design_ssot_v1_0_freeze_onboarding_v8_restructured_fixed.html",
+      "sha256": "4547f4e8b3f9ac70443f4b66cbe840518da2c9e05d120e5e7200b485cac24218",
+      "title": "日本ハーネスの設計判断SSOT（v8再構成版）",
+      "svg": [],
+      "unmatched_text_fragments": [],
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/日本ハーネスの設計判断SSOT（v8再構成版）.md"
+    },
+    {
+      "original": "Originals/メモ/preview (1).html",
+      "sha256": "92ca48ed543a8fea4825cddb4268dfca437852c773517ebd07d74f4362e5dd37",
+      "title": "AI-DEの構成と全機能マップ（図解資料）",
+      "svg": [
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図01.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図02.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図03.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図04.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図05.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図06.svg",
+        "Assets/Images/未整理メモ20261019/AI-DEの構成と全機能マップ（図解資料）の図07.svg"
+      ],
+      "unmatched_text_fragments": [],
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI-DEの構成と全機能マップ（図解資料）.md"
+    },
+    {
+      "original": "Originals/メモ/設計思想.html",
+      "sha256": "269c87e0ce2832fd6dd089335c38528208f2943dea0b62c33258dc8fbb7ea5b3",
+      "title": "AI開発の自動化に至る設計思想（原稿版）",
+      "svg": [],
+      "unmatched_text_fragments": [],
+      "markdown": "Sources/Mixed Memos 20261019/Markdown/AI開発の自動化に至る設計思想（原稿版）.md"
+    }
+  ],
+  "images": [
+    {
+      "original": "Originals/メモ/icon/AI-DE.png",
+      "asset": "Assets/Images/未整理メモ20261019/AI-DEのアイコン.png",
+      "sha256": "e8adc1b74c7cd12dddbd856cc6d81a73d673fe65d5754c436b0c5acf1fe0d771"
+    },
+    {
+      "original": "Originals/メモ/icon/AI-Security-Policy.png",
+      "asset": "Assets/Images/未整理メモ20261019/AI Security Policyのアイコン.png",
+      "sha256": "1ab507bbe7b88996e56e404275214972d8fe316c352aa477dbed0cba0a739597"
+    },
+    {
+      "original": "Originals/メモ/icon/Arthur.png",
+      "asset": "Assets/Images/未整理メモ20261019/Arthurのアイコン.png",
+      "sha256": "c09c0f0a7133756a46873c0e37117c09a96e31c0b65c1694191d4bf5574cee72"
+    },
+    {
+      "original": "Originals/メモ/icon/DevLore.png",
+      "asset": "Assets/Images/未整理メモ20261019/DevLoreのアイコン.png",
+      "sha256": "d605d8823ee77ecaf3ce5cd94149d5a3fb36ec28f1acbe0d8b8a59c222386728"
+    },
+    {
+      "original": "Originals/メモ/icon/InputGuardian.png",
+      "asset": "Assets/Images/未整理メモ20261019/InputGuardianのアイコン.png",
+      "sha256": "ad1593840df3ec28f3c69ceb12dbe890ae958dc98f063eead20e1fa8be287783"
+    },
+    {
+      "original": "Originals/メモ/icon/issue21_p27248_human_review.png",
+      "asset": "Assets/Images/未整理メモ20261019/ドル円の低値更新候補チャート.png",
+      "sha256": "f2aaf16f0a58d7dea861581306ddb1185c5e6c141c921c1424d63e7f63f962b0"
+    },
+    {
+      "original": "Originals/メモ/icon/JapanHerness.png",
+      "asset": "Assets/Images/未整理メモ20261019/日本ハーネスのアイコン.png",
+      "sha256": "bee544f18e75f6d78d550a778c23a4ef5ad10c2d1a5bc4ace2c9cf01e838c982"
+    },
+    {
+      "original": "Originals/メモ/icon/LLM Security Proxy.png",
+      "asset": "Assets/Images/未整理メモ20261019/LLM Security Proxyのアイコン.png",
+      "sha256": "1e00e0f58b3a367d107807147ce3d0498e7a416140227c7fddf797fb7d0fef3d"
+    },
+    {
+      "original": "Originals/メモ/icon/MeetingAssistant.png",
+      "asset": "Assets/Images/未整理メモ20261019/MeetingAssistantのアイコン.png",
+      "sha256": "49fea6416252c1f94cb2d2f845c08f136b2ba69f11bb142a2248b8bcd10a705d"
+    },
+    {
+      "original": "Originals/メモ/icon/Software-Test-Knowledge.png",
+      "asset": "Assets/Images/未整理メモ20261019/Software Test Knowledgeのアイコン.png",
+      "sha256": "7af015fc0797bd5516df5dc4072b748c6b70ba7ebc7521238888f88d9a736d3d"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/AI-DE_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/AI-DEのイメージ図.png",
+      "sha256": "bf864ac1e7b304b2f662f3bbad2206704c7fbedabae75fe7895df28cda8607b2"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/Arthur_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/Arthurのイメージ図.png",
+      "sha256": "63b024ba421e8f53e24ba650bf96c2ed3262521c0b7bbfe4a4923259fe5ccfc0"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/ASP_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/AI Security Policyのイメージ図.png",
+      "sha256": "1397ef421e478637edcb7ec6ddceafad08878583d0be5a56768e75f18dad0a7c"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/DevLore_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/DevLoreのイメージ図.png",
+      "sha256": "2535b130618db24771966ea7011805fc70ff8070efbf34f64c52d589258322c7"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/InputGuardian_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/InputGuardianのイメージ図.png",
+      "sha256": "73d8f1fe44868a6b579ed6f095183181466dcc9796a86540e522f657997b71f4"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/Japan-Herness_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/日本ハーネスのイメージ図.png",
+      "sha256": "b08cc1033bd90ac5b06fcfed04bd1aa433a0480e51a1e408c13cf99145c0ed15"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/LSP_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/LLM Security Proxyのイメージ図.png",
+      "sha256": "146a281a259d53998804c81e4305df9bbc037f41a765cdfb6e5dbc41020909b8"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/MeetingAssistant_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/MeetingAssistantのイメージ図.png",
+      "sha256": "bd4b67efe71111dd2d9f258dd1ea7e35a09339d3b6050679bcfe006b41a712ec"
+    },
+    {
+      "original": "Originals/メモ/イメージ図/STK_M.png",
+      "asset": "Assets/Images/未整理メモ20261019/Software Test Knowledgeのイメージ図.png",
+      "sha256": "88f219f0458a2151e674a94f2231349f6ad15bf0cbc2e41f4da1777d248d4f61"
+    }
+  ]
+}
