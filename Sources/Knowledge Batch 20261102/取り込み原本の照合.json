@@ -1,0 +1,98 @@
+[
+  {
+    "File": "TokenEconomizer-Knowledge-20261102.md",
+    "Bytes": 17751,
+    "Sha256": "2BE783E4FE185DFC26729DA87ACFAAE2251935D18D8D8D7B844498806293310F",
+    "ArchivedFile": "TokenEconomizerによるエージェント費用削減の元資料.md",
+    "NoteTitle": "TokenEconomizerによるセッション学習と費用削減",
+    "Category": "費用・経験"
+  },
+  {
+    "File": "RawRAG-vs-AgenticMemory-Knowledge-20261102.md",
+    "Bytes": 18116,
+    "Sha256": "B36DD4A84BD1FB89C01125AB9C8A9DC87B5BD68F243FC3FA2E1CE4FA531CD5B1",
+    "ArchivedFile": "Raw-RAGとエージェント型メモリ比較の元資料.md",
+    "NoteTitle": "Raw-RAGを基準に長期会話メモリを評価する",
+    "Category": "記憶・検索"
+  },
+  {
+    "File": "Supermemory-Knowledge-20261102.md",
+    "Bytes": 15429,
+    "Sha256": "A501509E637C33A489502E7C9B805683E4EE52AC29EAAFF1E433D8270AB460E1",
+    "ArchivedFile": "Supermemoryの記憶管理とセルフホストの元資料.md",
+    "NoteTitle": "Supermemoryによる事実中心の記憶管理",
+    "Category": "記憶・検索"
+  },
+  {
+    "File": "Anvaya-Knowledge-20261102.md",
+    "Bytes": 12407,
+    "Sha256": "21DDA68758DDD12D1D5CB9512A97B6FC5AAB99900F2369624E0EBBE7293BDD6B",
+    "ArchivedFile": "AnvayaのHarnessとMindの元資料.md",
+    "NoteTitle": "Anvayaのローカル記憶とContext圧縮",
+    "Category": "記憶・検索"
+  },
+  {
+    "File": "ParallelDecisionsAPI-Knowledge-20261102.md",
+    "Bytes": 12176,
+    "Sha256": "2ABAE7A501154FB0AEF61C6CCF206EC256F160CF7E578D2BAA7C5635667F532A",
+    "ArchivedFile": "Parallel Decisions APIの型付き判断とWeb根拠の元資料.md",
+    "NoteTitle": "Parallel Decisions APIによるWeb根拠付きの型付き判断",
+    "Category": "検索・判断"
+  },
+  {
+    "File": "agent-desktop-Knowledge-20261102.md",
+    "Bytes": 17717,
+    "Sha256": "D4B152C4940D46FC079C16D6448EFB3974B269C1AFD322EA2432114B1EC60511",
+    "ArchivedFile": "agent-desktopの構造ベースUI操作の元資料.md",
+    "NoteTitle": "agent-desktopによる構造ベースのUI操作とテスト支援",
+    "Category": "操作・テスト"
+  },
+  {
+    "File": "CI-Speedup-Knowledge-20261031.md",
+    "Bytes": 11118,
+    "Sha256": "DFB54F08B32E1E451D6CF74BCE7B93BADC6C781D6A60510DE6B8C7694AB59D10",
+    "ArchivedFile": "エージェント時代のCI高速化の元資料.md",
+    "NoteTitle": "エージェント時代のCI高速化と検証範囲の管理",
+    "Category": "開発基盤"
+  },
+  {
+    "File": "AI-Principle-Code-Knowledge-20261031.md",
+    "Bytes": 10355,
+    "Sha256": "43B922D2843260388DF9205BD1CB17FFD33CE6115ABC1E99CA10C3FD49EE0200",
+    "ArchivedFile": "生成AIの知財・透明性プリンシプル・コードの元資料.md",
+    "NoteTitle": "生成AIの知財・透明性プリンシプル・コードの調査記録",
+    "Category": "制度・透明性"
+  },
+  {
+    "File": "BabelArena-Knowledge-20261102.md",
+    "Bytes": 12601,
+    "Sha256": "D747C2BF32715C83946E8BAEB023E34C1F3DEA283D71C726153CC6DE8BF9899D",
+    "ArchivedFile": "BabelArenaの多言語エージェント評価の元資料.md",
+    "NoteTitle": "BabelArenaによる多言語エージェント評価",
+    "Category": "多言語評価"
+  },
+  {
+    "File": "RustXNG-Knowledge-20261102.md",
+    "Bytes": 8791,
+    "Sha256": "01238E2DD98AE884CF846E7968FCAB564C089F292159F989CFC605AB8FAE8CD5",
+    "ArchivedFile": "RustXNGのメタ検索と社内検索の元資料.md",
+    "NoteTitle": "RustXNGによるメタ検索と組織内検索",
+    "Category": "検索基盤"
+  },
+  {
+    "File": "WebIQ-WorkIQ-Knowledge-20261102.md",
+    "Bytes": 13947,
+    "Sha256": "0E940DD1427D015F2189688FA31AF4D5C4304F66E572DC9BA3C6FA7263E000BB",
+    "ArchivedFile": "Microsoft Web IQとWork IQの接続検討の元資料.md",
+    "NoteTitle": "Microsoft Web IQとWork IQの役割と接続条件",
+    "Category": "Web・業務情報"
+  },
+  {
+    "File": "Multi-Harness-RL-Knowledge-20261102.md",
+    "Bytes": 12477,
+    "Sha256": "1DFEB67353E56EFFE72622B7C6456F89D8343A406E67176EB0F51F4939CDE263",
+    "ArchivedFile": "マルチハーネスRLと経験データの元資料.md",
+    "NoteTitle": "マルチハーネスRLによるモデル学習と経験データ",
+    "Category": "モデル学習"
+  }
+]
