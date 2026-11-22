@@ -47,6 +47,7 @@ Status: Idea
 
 ## 関連
 
+- [[LLM推論のGPUメモリ帯域と並列処理]]：必要なVRAMと、単独・並列時の処理速度を考える。
 - [[Local LLM|ローカルで動かす大規模言語モデル]]
 - [[GPU Computing|GPUコンピューティング]]
 

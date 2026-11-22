@@ -1,0 +1,2 @@
+# Preserve the supplied Markdown source byte for byte, including line endings.
+*元資料.md -text
