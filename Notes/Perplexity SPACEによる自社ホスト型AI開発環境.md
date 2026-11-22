@@ -155,6 +155,7 @@ Perplexity Computerの法人向けSSOや管理・保証がSPACE OSSに付属す�
 
 ## 関連
 
+- [[AWS Nitro Sandboxesによるワークロードの隔離]]：AWS環境でのポッド・タスク単位の隔離を扱う調査記録。
 - [[Docker Sandboxesで開発速度と権限設定を両立する]]
 - [[AI実行ガバナンスと人間の監督]]
 - [[企業向け完全ローカルAIアシスタント]]
